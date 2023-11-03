@@ -3,8 +3,6 @@
 
 The firmware will upload 11 datapoints to the application. They are stored in the following order:
 
-x: Compound - Sensor
-
 0: CO2 PPM - PASCO2
 1: PPM 1.0 - SEN 
 2: PPM 2.5 - SEN
