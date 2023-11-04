@@ -97,14 +97,17 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
   co2PPM = 0;
   do {
     errorPtr = co2Sensor.getCO2(co2PPM);
-    Serial.print("Error reading CO2 w/ error code:");
-    Serial.println(errorPtr);
+    if (errorPtr != 0) {
+      Serial.print("Error reading CO2 w/ error code:");
+      Serial.println(errorPtr);
+    }
+
     delay(1000);
   } while (co2PPM == 0);
   return co2PPM;
 }
 
-void read_all_sensors(float16 *ret_array, char* AQISource, uint16_t array_size) {
+void read_all_sensors(float16 *ret_array, uint16_t array_size) {
   // Reads all sensors and outputs into array
   /*
   0: CO2 PPM - PASCO2
@@ -135,7 +138,7 @@ void read_all_sensors(float16 *ret_array, char* AQISource, uint16_t array_size) 
   ret_array[9] = NGReading;
   // Serial.print("NG ppm: ");
   // Serial.println(ret_array[10]);
-  ret_array[10] = get_composite_AQI(AQISource, ret_array[2], ret_array[4], COReading);
+  ret_array[10] = get_composite_AQI(ret_array[2], ret_array[4], COReading);
 }
 
 void setup_GPIO() {

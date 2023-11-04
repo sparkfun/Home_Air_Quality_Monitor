@@ -17,19 +17,8 @@
 #include <float16.h>
 
 
-typedef enum {
-  CO2,
-  PRESSURE,
-  PPM1,
-  PPM25,
-  PPM40,
-  PPM10,
-  HUMIDITY,
-  TEMP,
-  VOC,
-  CO,
-  NG
-} sensor_map;
+String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidity", "Temperature",
+  "VOCs", "CO", "NG", "AQI"};
 // Defined Values
 #define RAW_DATA_ARRAY_SIZE 11
 #define ONE_DAY_MS 86400000

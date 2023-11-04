@@ -9,7 +9,6 @@
 #include <SensirionI2CSen5x.h>
 #include <float16.h>
 #include "AQI.h"
-// #include "my_BLE_Server.h"
 
 #define I2C_FREQ_HZ 100000
 #define I2C_SDA_PIN 17
@@ -24,7 +23,7 @@
 #define COPin A1
 
   void setup_GPIO(void);
-  void read_all_sensors(float16 *ret_array, char* AQISource, uint16_t array_size);
+  void read_all_sensors(float16 *ret_array, uint16_t array_size);
 
 #endif
 

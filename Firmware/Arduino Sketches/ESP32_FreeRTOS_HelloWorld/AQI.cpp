@@ -136,20 +136,20 @@ uint16_t get_CO_AQI(float16 CO) {
   return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow).toDouble();
 }
 
-uint16_t get_composite_AQI(char* source, float16 ppm25, float16 ppm10, float16 CO) {
-  uint16_t AQI25, AQI10, AQICO;
+float16 get_composite_AQI(float16 ppm25, float16 ppm10, float16 CO) {
+  float16 AQI25, AQI10, AQICO;
   AQI25 = get_ppm_25_AQI(ppm25);
   AQI10 = get_ppm_10_AQI(ppm10);
   AQICO = get_CO_AQI(CO);
 
   if (AQI25 > AQI10 && AQI25 > AQICO) {
-    source = "25";
+    Serial.println("AQI Source: PPM 2.5");
     return AQI25;
   } else if (AQI10 > AQI25 && AQI10 > AQICO) {
-    source = "10";
+    Serial.println("AQI Source: PPM 10.0");
     return AQI10;
   } else {
-    source = "CO";
+    Serial.println("AQI Source: CO");
     return AQICO;
   }
 }
