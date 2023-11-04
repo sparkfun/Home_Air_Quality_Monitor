@@ -10,6 +10,7 @@
 // Global Variables
 unsigned long epochTime;
 float16 rawDataArray[RAW_DATA_ARRAY_SIZE];
+char AQISource[2];
 ESP32Time rtc(0);  // create an instance with a specifed offset in seconds
 // Task handle definitions
 TaskHandle_t sensor_read_task_handle;
@@ -134,7 +135,7 @@ void sensor_read_task(void *pvParameter) {
     Serial.print("Sensor Read from core ");
     Serial.println(xPortGetCoreID());
     xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
-    read_all_sensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+    read_all_sensors(&rawDataArray[0], &AQISource[0], RAW_DATA_ARRAY_SIZE);
     xSemaphoreGive(rawDataMutex);  // Release mutex
     for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++)
       Serial.println(rawDataArray[i]);

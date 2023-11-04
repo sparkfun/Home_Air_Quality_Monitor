@@ -31,7 +31,7 @@ typedef enum {
   NG
 } sensor_map;
 // Defined Values
-#define RAW_DATA_ARRAY_SIZE 10
+#define RAW_DATA_ARRAY_SIZE 11
 #define ONE_DAY_MS 86400000
 // Pin defns
 #define LED_PIN_0 A3
