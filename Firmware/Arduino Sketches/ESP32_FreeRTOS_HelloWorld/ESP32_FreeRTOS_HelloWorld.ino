@@ -26,6 +26,7 @@ void setupPreferences() {
 }
 
 class MyCallbacks : public BLECharacteristicCallbacks {
+
   void onWrite(BLECharacteristic *pCharacteristic) {
     std::string value = pCharacteristic->getValue();
 
@@ -34,9 +35,30 @@ class MyCallbacks : public BLECharacteristicCallbacks {
       Serial.print("New value: ");
       for (int i = 0; i < value.length(); i++)
         Serial.print(value[i]);
-
       Serial.println();
       Serial.println("*********");
+      // Example : TIME=1699143542
+      // Epoch time is guaranteed to be 10 digits
+      std::string BLEMessageType = value.substr(0, 5);
+      if (BLEMessageType == "TIME=") {
+        rtc.setTime(stoi(value.substr(5, 10)));
+        Serial.print("Current epoch time: ");
+        Serial.print(rtc.getDateTime());
+      } else if (BLEMessageType == "TGMT=") {
+        // Given +/- GMT offset
+        // Ex: -06 = MST | +13 = Tonga | +9.5 = Adelaide
+        float GMTOffset = stof(value.substr(5, value.length() - 5));
+        long epoch_prev = rtc.getEpoch();
+        // Change RTC offset
+        rtc.setTime(epoch_prev + (3600 * GMTOffset));
+
+      } else if (BLEMessageType == "READ!") {
+        // String currDateAndTime = rtc.getDateTime();
+        std::string myString = "This is new!";
+        pCharacteristic->setValue((uint8_t *)&myString, 11);
+        pCharacteristic->notify();
+        Serial.println("Updated value...");
+      }
     }
   }
 };
@@ -47,7 +69,7 @@ void setupBLE() {
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
     CHARACTERISTIC_UUID,
-    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY );
 
   pCharacteristic->setCallbacks(new MyCallbacks());
   pCharacteristic->setValue("Hello World says Neil");
@@ -59,8 +81,6 @@ void setupBLE() {
   // pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   // pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
-  Serial.print("BLE from core ");
-  Serial.println(xPortGetCoreID());
 }
 
 
@@ -69,28 +89,27 @@ void loop() {}
 void setup() {
   Serial.begin(115200);
   Serial.write("Setting up...");
-  setup_GPIO();
-  setupPreferences();
-  setupBLE();
+  // setup_GPIO();
+  // setupPreferences();
   // setupTime();
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 
-  xTaskCreatePinnedToCore(sensor_read_task,         /*Function to call*/
-                          "Sensor Read Task",       /*Task name*/
-                          10000,                    /*Stack size*/
-                          NULL,                     /*Function parameters*/
-                          5,                        /*Priority*/
-                          &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
-                          ARDUINO_AUX_CORE);        /*Core ID*/
+  // xTaskCreatePinnedToCore(sensor_read_task,         /*Function to call*/
+  //                         "Sensor Read Task",       /*Task name*/
+  //                         10000,                    /*Stack size*/
+  //                         NULL,                     /*Function parameters*/
+  //                         5,                        /*Priority*/
+  //                         &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
+  //                         ARDUINO_AUX_CORE);        /*Core ID*/
 
-  xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
-                          "SPIFFS Storage Task",       /*Task name*/
-                          10000,                       /*Stack size*/
-                          NULL,                        /*Function parameters*/
-                          2,                           /*Priority*/
-                          &spiffs_storage_task_handle, /*ptr to global TaskHandle_t*/
-                          ARDUINO_AUX_CORE);           /*Core ID*/
+  // xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
+  //                         "SPIFFS Storage Task",       /*Task name*/
+  //                         10000,                       /*Stack size*/
+  //                         NULL,                        /*Function parameters*/
+  //                         2,                           /*Priority*/
+  //                         &spiffs_storage_task_handle, /*ptr to global TaskHandle_t*/
+  //                         ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(BLE_comm_task,            /*Function to call*/
                           "BLE Communication Task", /*Task name*/
@@ -125,7 +144,10 @@ void BLE_comm_task(void *pvParameter) {
   while (1) {
     Serial.print("BLE from core ");
     Serial.println(xPortGetCoreID());
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    Serial.print("Current epoch time: ");
+    Serial.println(rtc.getDateTime());
+
+    vTaskDelay(10000 / portTICK_RATE_MS);
   }
 }
 
