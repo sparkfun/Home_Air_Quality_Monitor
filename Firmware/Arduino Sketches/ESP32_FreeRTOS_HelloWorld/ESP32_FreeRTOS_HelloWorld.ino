@@ -10,7 +10,6 @@
 // Global Variables
 unsigned long epochTime;
 float16 rawDataArray[RAW_DATA_ARRAY_SIZE];
-ESP32Time rtc(0);  // create an instance with a specifed offset in seconds
 // Task handle definitions
 TaskHandle_t sensor_read_task_handle;
 TaskHandle_t spiffs_storage_task_handle, ble_comm_task_handle, time_sync_task_handle;
@@ -25,63 +24,8 @@ void setupPreferences() {
   // bool status = preferences.begin("my_app", false);
 }
 
-class MyCallbacks : public BLECharacteristicCallbacks {
 
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string value = pCharacteristic->getValue();
 
-    if (value.length() > 0) {
-      Serial.println("*********");
-      Serial.print("New value: ");
-      for (int i = 0; i < value.length(); i++)
-        Serial.print(value[i]);
-      Serial.println();
-      Serial.println("*********");
-      // Example : TIME=1699143542
-      // Epoch time is guaranteed to be 10 digits
-      std::string BLEMessageType = value.substr(0, 5);
-      if (BLEMessageType == "TIME=") {
-        rtc.setTime(stoi(value.substr(5, 10)));
-        Serial.print("Current epoch time: ");
-        Serial.print(rtc.getDateTime());
-      } else if (BLEMessageType == "TGMT=") {
-        // Given +/- GMT offset
-        // Ex: -06 = MST | +13 = Tonga | +9.5 = Adelaide
-        float GMTOffset = stof(value.substr(5, value.length() - 5));
-        long epoch_prev = rtc.getEpoch();
-        // Change RTC offset
-        rtc.setTime(epoch_prev + (3600 * GMTOffset));
-
-      } else if (BLEMessageType == "READ!") {
-        // String currDateAndTime = rtc.getDateTime();
-        std::string myString = "This is new!";
-        pCharacteristic->setValue((uint8_t *)&myString, 11);
-        pCharacteristic->notify();
-        Serial.println("Updated value...");
-      }
-    }
-  }
-};
-
-void setupBLE() {
-  BLEDevice::init("ESP32_Test");
-  BLEServer *pServer = BLEDevice::createServer();
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID,
-    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY );
-
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristic->setValue("Hello World says Neil");
-  pService->start();
-  // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  // pAdvertising->setScanResponse(true);
-  // pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  // pAdvertising->setMinPreferred(0x12);
-  BLEDevice::startAdvertising();
-}
 
 
 
@@ -138,6 +82,8 @@ void time_sync_task(void *pvParameter) {
     vTaskDelay(ONE_DAY_MS / portTICK_RATE_MS);
   }
 }
+
+
 
 void BLE_comm_task(void *pvParameter) {
   setupBLE();

@@ -10,12 +10,9 @@
 // File system / storage
 #include <Preferences.h>
 #include "spiffs_helper.h"
-#include "ESP32Time.h"
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
+#include "BLEServer.h"
+#include "Timekeeping.h"
 #include <float16.h>
-
 
 String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidity", "Temperature",
   "VOCs", "CO", "NG", "AQI"};
@@ -26,9 +23,9 @@ String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidit
 #define LED_PIN_0 A3
 #define LED_PIN_1 A1
 #define FORMAT_SPIFFS_IF_FAILED false
-// BLE Defns
-#define SERVICE_UUID "9194f647-3a6c-4cf2-a6d5-187cb05728cd"
-#define CHARACTERISTIC_UUID "588d30b0-33aa-4654-ab36-56dfa9974b13"
+
+
+extern ESP32Time rtc;
 
 
 #endif
