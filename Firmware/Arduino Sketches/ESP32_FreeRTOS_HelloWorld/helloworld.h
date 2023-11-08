@@ -19,6 +19,7 @@ String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidit
 // Defined Values
 #define RAW_DATA_ARRAY_SIZE 11
 #define ONE_DAY_MS 86400000
+#define ONE_DAY_SEC 86400
 // Pin defns
 #define LED_PIN_0 A3
 #define LED_PIN_1 A1
@@ -26,6 +27,7 @@ String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidit
 
 
 extern ESP32Time rtc;
+extern bool dateConfigured;
 
 
 #endif

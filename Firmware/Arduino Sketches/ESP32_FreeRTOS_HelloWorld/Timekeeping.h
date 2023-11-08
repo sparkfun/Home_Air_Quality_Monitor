@@ -4,5 +4,6 @@
 #include "ESP32Time.h"
 
 extern ESP32Time rtc;
+extern bool dateConfigured;
 
 #endif

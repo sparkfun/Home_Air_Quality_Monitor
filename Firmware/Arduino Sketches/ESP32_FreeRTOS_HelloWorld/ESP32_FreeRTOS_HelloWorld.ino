@@ -26,9 +26,6 @@ void setupPreferences() {
 
 
 
-
-
-
 void loop() {}
 void setup() {
   Serial.begin(115200);
@@ -46,14 +43,14 @@ void setup() {
   //                         5,                        /*Priority*/
   //                         &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
   //                         ARDUINO_AUX_CORE);        /*Core ID*/
-
-  // xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
-  //                         "SPIFFS Storage Task",       /*Task name*/
-  //                         10000,                       /*Stack size*/
-  //                         NULL,                        /*Function parameters*/
-  //                         2,                           /*Priority*/
-  //                         &spiffs_storage_task_handle, /*ptr to global TaskHandle_t*/
-  //                         ARDUINO_AUX_CORE);           /*Core ID*/
+  Serial.println("Starting spiffs task");
+  xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
+                          "SPIFFS Storage Task",       /*Task name*/
+                          10000,                       /*Stack size*/
+                          NULL,                        /*Function parameters*/
+                          2,                           /*Priority*/
+                          &spiffs_storage_task_handle, /*ptr to global TaskHandle_t*/
+                          ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(BLE_comm_task,            /*Function to call*/
                           "BLE Communication Task", /*Task name*/
@@ -112,28 +109,41 @@ void sensor_read_task(void *pvParameter) {
     vTaskDelay(5000 / portTICK_RATE_MS);
   }
 }
-
 void spiffs_storage_task(void *pvParameter) {
 
-  char *path = "/longtermtest1.csv";
+  char path[32] = { "temp:va:lf or:si:ze.csv" };
   char message[96];
-  long epochTimeLap = 0;
+  long epochLapTime = 0;
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount Failed");
   }
   while (1) {
-    xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
-    if (epochTimeLap >= ONE_DAY_MS) {
-      // Set new path and reopen file
-      path = "/newTest";
+    if (rtc.getEpoch() - epochLapTime >= ONE_DAY_SEC || epochLapTime == 0) {
+      epochLapTime = rtc.getEpoch();
+      // YYYY:MM:DD HH:MM:SS.csv
+      sprintf(path, "%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth()+1, rtc.getDay(),
+              rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      // path = str(rtc.getYear()) + ":" + str(rtc.getMonth()) + ":" + str(rtc.getDay()) + ":" + str(rtc.getHour()) + str(rtc.getMinute()) + ":" + str(rtc.getSecond() + ".csv");
+
+      while (!dateConfigured) {
+        Serial.println("Waiting for time config...");
+        vTaskDelay(15000 / portTICK_RATE_MS);
+      }
+      sprintf(path, "/%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth()+1, rtc.getDay(),
+              rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      Serial.print("Set path to: ");
+      Serial.println(path);
     }
+    
+    xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
     sprintf(message, "%u %f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f \n", rtc.getEpoch(), rawDataArray[0].toDouble(),
             rawDataArray[1].toDouble(), rawDataArray[2].toDouble(), rawDataArray[3].toDouble(),
             rawDataArray[4].toDouble(), rawDataArray[5].toDouble(), rawDataArray[6].toDouble(),
             rawDataArray[7].toDouble(), rawDataArray[8].toDouble(), rawDataArray[9].toDouble(),
             rawDataArray[10].toDouble());
     appendFile(SPIFFS, path, message);
-    readFile(SPIFFS, path);
+
+    // readFile(SPIFFS, path);
     xSemaphoreGive(rawDataMutex);  // Release mutex
     vTaskDelay(15000 / portTICK_RATE_MS);
   }

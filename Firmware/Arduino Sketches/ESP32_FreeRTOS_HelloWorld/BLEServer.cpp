@@ -5,7 +5,8 @@
 class MyCallbacks : public NimBLECharacteristicCallbacks {
   void onRead(NimBLECharacteristic* pCharacteristic){
     Serial.println("Read request serviced");
-    
+    pCharacteristic->setValue("HI Aziz!");
+
 
   }
 
@@ -13,6 +14,8 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
     std::string value = pCharacteristic->getValue();
 
     if (value.length() > 0) {
+      Serial.print("BLE from core ");
+      Serial.println(xPortGetCoreID());
       Serial.println("*********");
       Serial.print("New value: ");
       for (int i = 0; i < value.length(); i++)
@@ -31,13 +34,15 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // Ex: -06 = MST | +13 = Tonga | +9.5 = Adelaide
         float GMTOffset = stof(value.substr(5, value.length() - 5));
         long epoch_prev = rtc.getEpoch();
+        dateConfigured = true;
+
         // Change RTC offset
         rtc.setTime(epoch_prev + (3600 * GMTOffset));
 
       } else if (BLEMessageType == "READ!") {
         // String currDateAndTime = rtc.getDateTime();
-        std::string myString = "This is new!";
-        pCharacteristic->setValue((uint8_t *)&myString, 11);
+        // std::string myString = "This is new!";
+        pCharacteristic->setValue("HI Aziz!");
         pCharacteristic->notify();
         Serial.println("Updated value...");
       }
