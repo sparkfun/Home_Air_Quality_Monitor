@@ -3,8 +3,15 @@
 NimBLECharacteristic *pSensorCharacteristic;
 
 class MyCallbacks : public NimBLECharacteristicCallbacks {
+
+  void onConnect(NimBLECharacteristic *pCharacteristic){
+    Serial.println("Client connected...");
+    xEventGroupSetBits(BLEStateFG, BLE_FLAG_CLIENT_CONNECTED);
+  }
+
   void onSubscribe(NimBLECharacteristic *pCharacteristic){
     Serial.println("Client subscribed...");
+    xEventGroupSetBits(BLEStateFG, BLE_FLAG_CLIENT_SUBSCRIBED);
   }
 
   void onRead(NimBLECharacteristic *pCharacteristic) {
