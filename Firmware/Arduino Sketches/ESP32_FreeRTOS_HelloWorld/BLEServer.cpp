@@ -1,17 +1,23 @@
 #include "BLEServer.h"
 
-
+NimBLECharacteristic *pSensorCharacteristic;
 
 class MyCallbacks : public NimBLECharacteristicCallbacks {
-  void onRead(NimBLECharacteristic* pCharacteristic){
+  void onSubscribe(NimBLECharacteristic *pCharacteristic){
+    Serial.println("Client subscribed...");
+  }
+
+  void onRead(NimBLECharacteristic *pCharacteristic) {
     Serial.println("Read request serviced");
-    pCharacteristic->setValue("HI Aziz!");
+    xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE);
 
 
+    // std::string message = std::to_string(rtc.getSecond());
+    // pCharacteristic->setValue(BLEMessageBuffer);
   }
 
   void onWrite(NimBLECharacteristic *pCharacteristic) {
-    std::string value = pCharacteristic->getValue();
+    std::string value = pSensorCharacteristic->getValue();
 
     if (value.length() > 0) {
       Serial.print("BLE from core ");
@@ -42,9 +48,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "READ!") {
         // String currDateAndTime = rtc.getDateTime();
         // std::string myString = "This is new!";
-        pCharacteristic->setValue("HI Aziz!");
-        pCharacteristic->notify();
-        Serial.println("Updated value...");
+        // pCharacteristic->setValue("HI Aziz!");
+        // pCharacteristic->notify();
+        // Serial.println("Updated value...");
+        xEventGroupSetBits(appStateFG, APP_FLAG_TRANSMITTING);
       }
     }
   }
@@ -55,12 +62,12 @@ void setupBLE() {
   NimBLEDevice::init("NimBLE Test");
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);
-  NimBLECharacteristic *pCharacteristic = pService->createCharacteristic(
+  pSensorCharacteristic = pService->createCharacteristic(
     CHARACTERISTIC_UUID,
-    NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE);
+    NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
 
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristic->setValue("Hello World says Neil");
+  pSensorCharacteristic->setCallbacks(new MyCallbacks());
+  pSensorCharacteristic->setValue("Hello World says Neil");
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();

@@ -90,10 +90,10 @@ String getContentType(String filename) {
   return "text/plain";
 }
 
-bool exists(String path){
+bool exists(String path) {
   bool yes = false;
   File file = FILESYSTEM.open(path, "r");
-  if(!file.isDirectory()){
+  if (!file.isDirectory()) {
     yes = true;
   }
   file.close();
@@ -129,7 +129,8 @@ void handleFileUpload() {
     if (!filename.startsWith("/")) {
       filename = "/" + filename;
     }
-    DBG_OUTPUT_PORT.print("handleFileUpload Name: "); DBG_OUTPUT_PORT.println(filename);
+    DBG_OUTPUT_PORT.print("handleFileUpload Name: ");
+    DBG_OUTPUT_PORT.println(filename);
     fsUploadFile = FILESYSTEM.open(filename, "w");
     filename = String();
   } else if (upload.status == UPLOAD_FILE_WRITE) {
@@ -141,7 +142,8 @@ void handleFileUpload() {
     if (fsUploadFile) {
       fsUploadFile.close();
     }
-    DBG_OUTPUT_PORT.print("handleFileUpload Size: "); DBG_OUTPUT_PORT.println(upload.totalSize);
+    DBG_OUTPUT_PORT.print("handleFileUpload Size: ");
+    DBG_OUTPUT_PORT.println(upload.totalSize);
   }
 }
 
@@ -198,41 +200,43 @@ void handleFileList() {
   path = String();
 
   String output = "[";
-  if(root.isDirectory()){
-      File file = root.openNextFile();
-      while(file){
-          if (output != "[") {
-            output += ',';
-          }
-          output += "{\"type\":\"";
-          output += (file.isDirectory()) ? "dir" : "file";
-          output += "\",\"name\":\"";
-          output += String(file.path()).substring(1);
-          output += "\"}";
-          file = root.openNextFile();
+  if (root.isDirectory()) {
+    File file = root.openNextFile();
+    while (file) {
+      if (output != "[") {
+        output += ',';
       }
+      output += "{\"type\":\"";
+      output += (file.isDirectory()) ? "dir" : "file";
+      output += "\",\"name\":\"";
+      output += String(file.path()).substring(1);
+      output += "\"}";
+      file = root.openNextFile();
+    }
   }
   output += "]";
   server.send(200, "text/json", output);
 }
 
+
+
 void setup(void) {
   DBG_OUTPUT_PORT.begin(115200);
   DBG_OUTPUT_PORT.print("\n");
   DBG_OUTPUT_PORT.setDebugOutput(true);
-  if (FORMAT_FILESYSTEM) FILESYSTEM.format();
+
   FILESYSTEM.begin();
-  {
-      File root = FILESYSTEM.open("/");
-      File file = root.openNextFile();
-      while(file){
-          String fileName = file.name();
-          size_t fileSize = file.size();
-          DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
-          file = root.openNextFile();
-      }
-      DBG_OUTPUT_PORT.printf("\n");
+  Serial.println("Opening spiffs.");
+  File root = FILESYSTEM.open("/");
+  File file = root.openNextFile();
+  while (file) {
+    String fileName = file.name();
+    size_t fileSize = file.size();
+    DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
+    file = root.openNextFile();
   }
+  DBG_OUTPUT_PORT.printf("\n");
+
 
 
   //WIFI INIT
@@ -271,9 +275,11 @@ void setup(void) {
   server.on("/edit", HTTP_DELETE, handleFileDelete);
   //first callback is called after the request has ended with all parsed arguments
   //second callback handles file uploads at that location
-  server.on("/edit", HTTP_POST, []() {
-    server.send(200, "text/plain", "");
-  }, handleFileUpload);
+  server.on(
+    "/edit", HTTP_POST, []() {
+      server.send(200, "text/plain", "");
+    },
+    handleFileUpload);
 
   //called when the url is not defined here
   //use it to load content from FILESYSTEM
@@ -295,10 +301,9 @@ void setup(void) {
   });
   server.begin();
   DBG_OUTPUT_PORT.println("HTTP server started");
-
 }
 
 void loop(void) {
   server.handleClient();
-  delay(2);//allow the cpu to switch to other tasks
+  delay(2);  //allow the cpu to switch to other tasks
 }

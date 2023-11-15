@@ -10,9 +10,13 @@
 // Global Variables
 unsigned long epochTime;
 float16 rawDataArray[RAW_DATA_ARRAY_SIZE];
+char BLEMessageBuffer[CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH];
 // Task handle definitions
 TaskHandle_t sensor_read_task_handle;
 TaskHandle_t spiffs_storage_task_handle, ble_comm_task_handle, time_sync_task_handle;
+// Flag Group definitions
+EventGroupHandle_t appStateFG;
+EventGroupHandle_t BLEStateFG;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex;
 // Preferences object creation
@@ -33,6 +37,10 @@ void setup() {
   // setup_GPIO();
   // setupPreferences();
   // setupTime();
+  // Setup Flag Event Groups
+  appStateFG = xEventGroupCreate();
+  BLEStateFG = xEventGroupCreate();
+
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 
@@ -43,7 +51,6 @@ void setup() {
   //                         5,                        /*Priority*/
   //                         &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
   //                         ARDUINO_AUX_CORE);        /*Core ID*/
-  Serial.println("Starting spiffs task");
   xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
                           "SPIFFS Storage Task",       /*Task name*/
                           10000,                       /*Stack size*/
@@ -85,12 +92,17 @@ void time_sync_task(void *pvParameter) {
 void BLE_comm_task(void *pvParameter) {
   setupBLE();
   while (1) {
-    Serial.print("BLE from core ");
-    Serial.println(xPortGetCoreID());
-    Serial.print("Current epoch time: ");
-    Serial.println(rtc.getDateTime());
-
-    vTaskDelay(10000 / portTICK_RATE_MS);
+    while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+      xEventGroupSetBits(appStateFG, APP_FLAG_PUSH_BUFFER);
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 5000);
+      pSensorCharacteristic->setValue(BLEMessageBuffer);
+      // Notify
+      // TODO 
+      uint8_t message[1] = {1};
+      pSensorCharacteristic->notify(&message[0], 1, true);
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 5000);
+    }
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
@@ -110,7 +122,7 @@ void sensor_read_task(void *pvParameter) {
   }
 }
 void spiffs_storage_task(void *pvParameter) {
-
+  EventBits_t flagBits;
   char path[32] = { "temp:va:lf or:si:ze.csv" };
   char message[96];
   long epochLapTime = 0;
@@ -118,33 +130,43 @@ void spiffs_storage_task(void *pvParameter) {
     Serial.println("SPIFFS Mount Failed");
   }
   while (1) {
-    if (rtc.getEpoch() - epochLapTime >= ONE_DAY_SEC || epochLapTime == 0) {
-      epochLapTime = rtc.getEpoch();
-      // YYYY:MM:DD HH:MM:SS.csv
-      sprintf(path, "%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth()+1, rtc.getDay(),
-              rtc.getHour(), rtc.getMinute(), rtc.getSecond());
-      // path = str(rtc.getYear()) + ":" + str(rtc.getMonth()) + ":" + str(rtc.getDay()) + ":" + str(rtc.getHour()) + str(rtc.getMinute()) + ":" + str(rtc.getSecond() + ".csv");
-
+    if (xEventGroupGetBits(appStateFG) & APP_FLAG_SETUP) {
       while (!dateConfigured) {
         Serial.println("Waiting for time config...");
-        vTaskDelay(15000 / portTICK_RATE_MS);
+        vTaskDelay(5000 / portTICK_RATE_MS);
       }
-      sprintf(path, "/%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth()+1, rtc.getDay(),
+      sprintf(path, "/%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
               rtc.getHour(), rtc.getMinute(), rtc.getSecond());
-      Serial.print("Set path to: ");
-      Serial.println(path);
-    }
-    
-    xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
-    sprintf(message, "%u %f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f \n", rtc.getEpoch(), rawDataArray[0].toDouble(),
-            rawDataArray[1].toDouble(), rawDataArray[2].toDouble(), rawDataArray[3].toDouble(),
-            rawDataArray[4].toDouble(), rawDataArray[5].toDouble(), rawDataArray[6].toDouble(),
-            rawDataArray[7].toDouble(), rawDataArray[8].toDouble(), rawDataArray[9].toDouble(),
-            rawDataArray[10].toDouble());
-    appendFile(SPIFFS, path, message);
+      Serial.printf("Set path to: %s", path);
+      xEventGroupClearBits(appStateFG, APP_FLAG_SETUP);
+      xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING);
 
-    // readFile(SPIFFS, path);
-    xSemaphoreGive(rawDataMutex);  // Release mutex
-    vTaskDelay(15000 / portTICK_RATE_MS);
+    } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_RUNNING) {
+      // Update path daily for separation of logs
+      if (rtc.getEpoch() - epochLapTime >= ONE_DAY_SEC) {
+        epochLapTime = rtc.getEpoch();
+        sprintf(path, "%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
+                rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      }
+
+      // Write data to SPIFFS
+      xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
+      sprintf(message, "%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f \n", rtc.getEpoch(), rawDataArray[0].toDouble(),
+              rawDataArray[1].toDouble(), rawDataArray[2].toDouble(), rawDataArray[3].toDouble(),
+              rawDataArray[4].toDouble(), rawDataArray[5].toDouble(), rawDataArray[6].toDouble(),
+              rawDataArray[7].toDouble(), rawDataArray[8].toDouble(), rawDataArray[9].toDouble(),
+              rawDataArray[10].toDouble());
+      appendFile(SPIFFS, path, message);
+      xSemaphoreGive(rawDataMutex);  // Release mutex
+      vTaskDelay(15000 / portTICK_RATE_MS);
+    } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+      File file = SPIFFS.open(path);
+      while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+        file.readBytes(&BLEMessageBuffer[0], CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH);
+        xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
+        xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER, APP_FLAG_PUSH_BUFFER, false, 1000);
+        xEventGroupClearBits(appStateFG, APP_FLAG_PUSH_BUFFER);
+      }
+    }
   }
 }
