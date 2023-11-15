@@ -10,10 +10,13 @@
 // Global Variables
 unsigned long epochTime;
 float16 rawDataArray[RAW_DATA_ARRAY_SIZE];
-ESP32Time rtc(0);  // create an instance with a specifed offset in seconds
+char BLEMessageBuffer[CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH];
 // Task handle definitions
 TaskHandle_t sensor_read_task_handle;
 TaskHandle_t spiffs_storage_task_handle, ble_comm_task_handle, time_sync_task_handle;
+// Flag Group definitions
+EventGroupHandle_t appStateFG;
+EventGroupHandle_t BLEStateFG;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex;
 // Preferences object creation
@@ -25,54 +28,19 @@ void setupPreferences() {
   // bool status = preferences.begin("my_app", false);
 }
 
-class MyCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string value = pCharacteristic->getValue();
-
-    if (value.length() > 0) {
-      Serial.println("*********");
-      Serial.print("New value: ");
-      for (int i = 0; i < value.length(); i++)
-        Serial.print(value[i]);
-
-      Serial.println();
-      Serial.println("*********");
-    }
-  }
-};
-
-void setupBLE() {
-  BLEDevice::init("ESP32_Test");
-  BLEServer *pServer = BLEDevice::createServer();
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID,
-    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristic->setValue("Hello World says Neil");
-  pService->start();
-  // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  // pAdvertising->setScanResponse(true);
-  // pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  // pAdvertising->setMinPreferred(0x12);
-  BLEDevice::startAdvertising();
-  Serial.print("BLE from core ");
-  Serial.println(xPortGetCoreID());
-}
-
 
 
 void loop() {}
 void setup() {
   Serial.begin(115200);
   Serial.write("Setting up...");
-  setup_GPIO();
-  setupPreferences();
-  setupBLE();
+  // setup_GPIO();
+  // setupPreferences();
   // setupTime();
+  // Setup Flag Event Groups
+  appStateFG = xEventGroupCreate();
+  BLEStateFG = xEventGroupCreate();
+
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 
@@ -83,7 +51,6 @@ void setup() {
   //                         5,                        /*Priority*/
   //                         &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
   //                         ARDUINO_AUX_CORE);        /*Core ID*/
-
   xTaskCreatePinnedToCore(spiffs_storage_task,         /*Function to call*/
                           "SPIFFS Storage Task",       /*Task name*/
                           10000,                       /*Stack size*/
@@ -120,12 +87,22 @@ void time_sync_task(void *pvParameter) {
   }
 }
 
+
+
 void BLE_comm_task(void *pvParameter) {
   setupBLE();
   while (1) {
-    Serial.print("BLE from core ");
-    Serial.println(xPortGetCoreID());
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+      xEventGroupSetBits(appStateFG, APP_FLAG_PUSH_BUFFER);
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 5000);
+      pSensorCharacteristic->setValue(BLEMessageBuffer);
+      // Notify
+      // TODO 
+      uint8_t message[1] = {1};
+      pSensorCharacteristic->notify(&message[0], 1, true);
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 5000);
+    }
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
@@ -136,35 +113,60 @@ void sensor_read_task(void *pvParameter) {
     xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
     read_all_sensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
     xSemaphoreGive(rawDataMutex);  // Release mutex
-    for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++)
-      Serial.println(rawDataArray[i]);
+    // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
+    //   Serial.print(rawDataArray[i]);
+    //   Serial.println(sensorMap[i]);
+    // }
 
-    vTaskDelay(3000 / portTICK_RATE_MS);
+    vTaskDelay(5000 / portTICK_RATE_MS);
   }
 }
-
 void spiffs_storage_task(void *pvParameter) {
-
-  char *path = "/test";
-  char message[40];
-  long epochTimeLap = 0;
+  EventBits_t flagBits;
+  char path[32] = { "temp:va:lf or:si:ze.csv" };
+  char message[96];
+  long epochLapTime = 0;
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount Failed");
   }
   while (1) {
-    xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
-    // epochTime = getTime();
-    // Serial.print("Epoch Time: ");
-    // Serial.println(epochTime);
-    Serial.printf("Appending to file: %s\r\n", path);
-    if (epochTimeLap >= ONE_DAY_MS) {
-      // Set new path and reopen file
-      path = "/newTest";
+    if (xEventGroupGetBits(appStateFG) & APP_FLAG_SETUP) {
+      while (!dateConfigured) {
+        Serial.println("Waiting for time config...");
+        vTaskDelay(5000 / portTICK_RATE_MS);
+      }
+      sprintf(path, "/%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
+              rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      Serial.printf("Set path to: %s", path);
+      xEventGroupClearBits(appStateFG, APP_FLAG_SETUP);
+      xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING);
+
+    } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_RUNNING) {
+      // Update path daily for separation of logs
+      if (rtc.getEpoch() - epochLapTime >= ONE_DAY_SEC) {
+        epochLapTime = rtc.getEpoch();
+        sprintf(path, "%d:%d:%d:%d:%d:%d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
+                rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      }
+
+      // Write data to SPIFFS
+      xSemaphoreTake(rawDataMutex, portMAX_DELAY);  // Acquire mutex
+      sprintf(message, "%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f \n", rtc.getEpoch(), rawDataArray[0].toDouble(),
+              rawDataArray[1].toDouble(), rawDataArray[2].toDouble(), rawDataArray[3].toDouble(),
+              rawDataArray[4].toDouble(), rawDataArray[5].toDouble(), rawDataArray[6].toDouble(),
+              rawDataArray[7].toDouble(), rawDataArray[8].toDouble(), rawDataArray[9].toDouble(),
+              rawDataArray[10].toDouble());
+      appendFile(SPIFFS, path, message);
+      xSemaphoreGive(rawDataMutex);  // Release mutex
+      vTaskDelay(15000 / portTICK_RATE_MS);
+    } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+      File file = SPIFFS.open(path);
+      while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+        file.readBytes(&BLEMessageBuffer[0], CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH);
+        xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
+        xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER, APP_FLAG_PUSH_BUFFER, false, 1000);
+        xEventGroupClearBits(appStateFG, APP_FLAG_PUSH_BUFFER);
+      }
     }
-    sprintf(message, "test: %u\n", rtc.getEpoch());
-    appendFile(SPIFFS, path, message);
-    readFile(SPIFFS, path);
-    xSemaphoreGive(rawDataMutex);  // Release mutex
-    vTaskDelay(5000 / portTICK_RATE_MS);
   }
 }
