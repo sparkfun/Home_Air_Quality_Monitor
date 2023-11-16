@@ -81,7 +81,10 @@ void time_sync_task(void *pvParameter) {
 
   */
   while (1) {
-
+    while(xEventGroupGetBits(BLEStateFG) & BLE_FLAG_CLIENT_CONNECTED){
+      // Ask for current time update
+      vTaskDelay(ONE_HOUR_MS / portTICK_RATE_MS);
+    }
 
     vTaskDelay(ONE_DAY_MS / portTICK_RATE_MS);
   }
@@ -97,7 +100,6 @@ void BLE_comm_task(void *pvParameter) {
       xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 5000);
       pSensorCharacteristic->setValue(BLEMessageBuffer);
       // Notify
-      // TODO 
       uint8_t message[1] = {1};
       pSensorCharacteristic->notify(&message[0], 1, true);
       xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 5000);

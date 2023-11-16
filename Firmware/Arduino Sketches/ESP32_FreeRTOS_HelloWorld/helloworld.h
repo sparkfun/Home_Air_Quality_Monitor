@@ -23,6 +23,8 @@ String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0", "Humidit
 #define RAW_DATA_ARRAY_SIZE 11
 #define ONE_DAY_MS 86400000
 #define ONE_DAY_SEC 86400
+#define ONE_HOUR_SEC 3600
+#define ONE_HOUR_MS ONE_HOUR_SEC * 1000
 // Pin defns
 #define LED_PIN_0 A3
 #define LED_PIN_1 A1
