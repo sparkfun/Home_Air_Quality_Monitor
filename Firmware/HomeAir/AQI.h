@@ -5,7 +5,7 @@
 #include <float16.h>
 
 
-float16 get_composite_AQI(float16 ppm25, float16 ppm10, float16);
+float get_composite_AQI(float ppm25, float ppm10, float);
 
 
 

@@ -1,12 +1,24 @@
 #include "AQI.h"
 
-uint16_t get_ppm_25_AQI(float16 ppm25) {
+/*
+  
+  File containing functions to convert raw sensor readings into an AQI.
+  Individual AQI values can be calculated for each of the measurements, but a
+  composite value can be pulled from get_composite_AQI()
+
+  Calculation parameters found from:
+  https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf
+
+*/
+
+
+uint16_t get_ppm_25_AQI(float ppm25) {
   /*
     Returns the AQI corresponding to given ppm25 concentration
   */
 
-  float16 indexHigh, indexLow;
-  float16 breakpointHigh, breakpointLow;
+  float indexHigh, indexLow;
+  float breakpointHigh, breakpointLow;
 
   if (ppm25 > 0 && ppm25 < 12.0) {
     indexHigh = 50;
@@ -44,13 +56,13 @@ uint16_t get_ppm_25_AQI(float16 ppm25) {
     breakpointHigh = 500;
     breakpointLow = 350.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm25 - breakpointLow) + indexLow).toDouble();
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm25 - breakpointLow) + indexLow);
 }
 
-uint16_t get_ppm_10_AQI(float16 ppm10) {
+uint16_t get_ppm_10_AQI(float ppm10) {
 
-  float16 indexHigh, indexLow;
-  float16 breakpointHigh, breakpointLow;
+  float indexHigh, indexLow;
+  float breakpointHigh, breakpointLow;
 
   if (ppm10 > 0 && ppm10 < 54) {
     indexHigh = 50;
@@ -88,14 +100,14 @@ uint16_t get_ppm_10_AQI(float16 ppm10) {
     breakpointHigh = 604;
     breakpointLow = 505;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm10 - breakpointLow) + indexLow).toDouble();
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm10 - breakpointLow) + indexLow);
 }
 
-uint16_t get_CO_AQI(float16 CO) {
+uint16_t get_CO_AQI(float CO) {
 
 
-  float16 indexHigh, indexLow;
-  float16 breakpointHigh, breakpointLow;
+  float indexHigh, indexLow;
+  float breakpointHigh, breakpointLow;
 
   if (CO > 0 && CO < 4.4) {
     indexHigh = 50;
@@ -133,11 +145,11 @@ uint16_t get_CO_AQI(float16 CO) {
     breakpointHigh = 50.4;
     breakpointLow = 40.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow).toDouble();
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow);
 }
 
-float16 get_composite_AQI(float16 ppm25, float16 ppm10, float16 CO) {
-  float16 AQI25, AQI10, AQICO;
+float get_composite_AQI(float ppm25, float ppm10, float CO) {
+  float AQI25, AQI10, AQICO;
   AQI25 = get_ppm_25_AQI(ppm25);
   AQI10 = get_ppm_10_AQI(ppm10);
   AQICO = get_CO_AQI(CO);

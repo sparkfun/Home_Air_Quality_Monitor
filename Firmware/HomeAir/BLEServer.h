@@ -2,8 +2,9 @@
 #define BLESERVER_h
 
 #define CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH 512
-
+// BLE Library
 #include <NimBLEDevice.h>
+// HomeAir files
 #include "Timekeeping.h"
 #include "os_flags.h"
 
@@ -13,6 +14,7 @@
 
 
 void setupBLE();
+void BLEServer_comm_task(void *);
 
 extern char BLEMessageBuffer[CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH];
 extern NimBLECharacteristic *pSensorCharacteristic;

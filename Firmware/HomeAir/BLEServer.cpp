@@ -59,11 +59,32 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // pCharacteristic->notify();
         // Serial.println("Updated value...");
         xEventGroupSetBits(appStateFG, APP_FLAG_TRANSMITTING);
+        xEventGroupClearBits(appStateFG, APP_FLAG_RUNNING);
       }
     }
   }
 };
 
+void BLEServer_comm_task(void *pvParameter) {
+  setupBLE();
+  while (1) {
+    while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
+      Serial.println("Inside BLE comm task");
+      xEventGroupSetBits(appStateFG, APP_FLAG_PUSH_BUFFER);
+      Serial.println("Waiting for buffer to be ready...");
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 5000);
+      Serial.println("Buffer ready...");
+      pSensorCharacteristic->setValue(BLEMessageBuffer);
+      // Notify
+      uint8_t message[1] = { 65 };
+      pSensorCharacteristic->notify(&message[0], 1, true);
+      Serial.println("Notification sent!");
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 60000);
+      Serial.println("Buffer read!");
+    }
+    vTaskDelay(1000 / portTICK_RATE_MS);
+  }
+}
 
 void setupBLE() {
   NimBLEDevice::init("NimBLE Test");
@@ -74,7 +95,7 @@ void setupBLE() {
     NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
-  pSensorCharacteristic->setValue("Hello World says Neil");
+  // pSensorCharacteristic->setValue("Hallo");
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
