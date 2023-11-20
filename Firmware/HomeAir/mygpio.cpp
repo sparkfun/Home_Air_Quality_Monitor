@@ -1,4 +1,4 @@
-#include "my_gpio.h"
+#include "mygpio.h"
 
 
 // Sensor object definitions
@@ -6,20 +6,27 @@ PASCO2Ino co2Sensor;
 int16_t co2PPM;
 Error_t co2Error;
 SensirionI2CSen5x sen5x;
+// Global Variables
+float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
-// void setup_i2c() {
-//   int i2c_master_port = 0;
-//   i2c_config_t conf = {
-//     .mode = I2C_MODE_MASTER,
-//     .sda_io_num = I2C_SDA_PIN,  // select SDA GPIO specific to your project
-//     .sda_pullup_en = GPIO_PULLUP_ENABLE,
-//     .scl_io_num = I2C_SCL_PIN,  // select SCL GPIO specific to your project
-//     .scl_pullup_en = GPIO_PULLUP_ENABLE,
-//     .master.clk_speed = I2C_FREQ_HZ,  // select frequency specific to your project
-//     .clk_flags = 0,                          // optional; you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here
-//   };
 
-// }
+void gpio_sensor_read_task(void *pvParameter) {
+  while (1) {
+    Serial.print("Sensor Read from core ");
+    Serial.println(xPortGetCoreID());
+    if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
+      // Acquire mutex
+      read_all_sensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+      xSemaphoreGive(rawDataMutex);  // Release mutex
+      // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
+      //   Serial.print(rawDataArray[i]);
+      //   Serial.println(sensorMap[i]);
+      // }
+    }
+
+    vTaskDelay(5000 / portTICK_RATE_MS);
+  }
+}
 
 void setupSENSensor() {
   Serial.println("SEN54: Setting up...");
@@ -63,28 +70,24 @@ void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
 }
 
 float readNGSensor() {
-  float reading = (3.3 * analogRead(NGPin)) / 4095;
+  float reading = (3.3 * analogRead(pin_NGInput)) / 4095;
   return 10.938 * exp(1.7742 * (reading * 3.3 / 4095));
 }
 
 float readCOSensor() {
-  float sensorVoltage = (3.3 * analogRead(COPin)) / 4095;
+  float sensorVoltage = (3.3 * analogRead(pin_COInput)) / 4095;
   return 3.027 * exp(1.0698 * sensorVoltage);
 }
 
-void readSENSensor(float16 *retArray, uint8_t arraySize) {
+void readSENSensor(float *retArray, uint8_t arraySize) {
   char errorMessage[256];
   uint16_t error;
-  float tempArray[arraySize];
+  float unusedValue = 0;
+  // float tempArray[arraySize];
 
   error = sen5x.readMeasuredValues(
-    tempArray[0], tempArray[1], tempArray[2],
-    tempArray[3], tempArray[4], tempArray[5], tempArray[6],
-    tempArray[7]);
-  // Copy tempArray for conversion to float16
-  for (int i = 0; i < arraySize; i++) {
-    retArray[i] = tempArray[i];
-  }
+    retArray[PPM_1_0], retArray[PPM_2_5], retArray[PPM_4_0],
+    retArray[PPM_10], retArray[HUMIDITY], retArray[TEMP], retArray[VOC], unusedValue);
 
   if (error) {
     Serial.print("Error trying to execute readMeasuredValues(): ");
@@ -102,12 +105,12 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
       Serial.println(errorPtr);
     }
 
-    delay(1000);
+    delay(500);
   } while (co2PPM == 0);
   return co2PPM;
 }
 
-void read_all_sensors(float16 *ret_array, uint16_t array_size) {
+void read_all_sensors(float *ret_array, uint16_t array_size) {
   // Reads all sensors and outputs into array
   /*
   0: CO2 PPM - PASCO2
@@ -120,31 +123,26 @@ void read_all_sensors(float16 *ret_array, uint16_t array_size) {
   7: VOCs - SEN
   8: CO - MQ7
   9: NG - MQ4
-  10: AQI
+  10: AQI - Composite
   */
   // CO2
-  float16 co2_ppm_return = readCO2PPM(co2Error, co2Sensor);
-  ret_array[0] = co2_ppm_return;
+  ret_array[CO2_PPM] = readCO2PPM(co2Error, co2Sensor);;
   // SEN
   // Uses ret_array[1] through ret_array[7]
-  readSENSensor(&ret_array[1], 7);
+  readSENSensor(ret_array, 7);
   // CO
-  float16 COReading = readCOSensor();
-  ret_array[8] = COReading;
+  ret_array[CO] = readCOSensor();;
   // Serial.print("CO ppm: ");
   // Serial.println(ret_array[9]);
   // NG
-  float16 NGReading = readNGSensor();
-  ret_array[9] = NGReading;
+  ret_array[NG] = readNGSensor();
   // Serial.print("NG ppm: ");
   // Serial.println(ret_array[10]);
-  ret_array[10] = get_composite_AQI(ret_array[2], ret_array[4], COReading);
+  ret_array[AQI] = get_composite_AQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
 }
 
-void setup_GPIO() {
+void setupGPIO() {
   // Setup I2C
-  // Wire.begin(); // For breadboard QT-PY ESP32
-  Serial.begin(115200);
   Serial.println("Setting up GPIO...");
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ_HZ);  // Used for Sparkfun Thing
   // Wire.setClock(I2C_FREQ_HZ);  // 400KHz
