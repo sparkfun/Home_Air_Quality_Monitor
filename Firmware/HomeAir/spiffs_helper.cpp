@@ -192,16 +192,24 @@ void spiffs_storage_task(void *pvParameter) {
                 rawDataArray[4], rawDataArray[5], rawDataArray[6],
                 rawDataArray[7], rawDataArray[8], rawDataArray[9],
                 rawDataArray[10]);
+        Serial.print("Wrote data to file: ");
+        Serial.println(message);
         appendFile(SPIFFS, path, message);
         xSemaphoreGive(rawDataMutex);  // Release mutex
         vTaskDelay(15000 / portTICK_RATE_MS);
       }
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
-      File file = SPIFFS.open(path);
       while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
-        file.readBytes(&BLEMessageBuffer[0], CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH);
-        xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
-        xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER, APP_FLAG_PUSH_BUFFER, false, 1000);
+        File file = SPIFFS.open(path);
+        while (file.available()) {
+          // file.readBytesUntil('\n', &BLEMessageBuffer[0], CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH);
+          file.readBytes(&BLEMessageBuffer[0], 55);
+          Serial.print("Read from file: ");
+          Serial.println(BLEMessageBuffer);
+          xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
+          xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER, APP_FLAG_PUSH_BUFFER, false, 15000);
+        }
+        file.openNextFile();
       }
     }
   }

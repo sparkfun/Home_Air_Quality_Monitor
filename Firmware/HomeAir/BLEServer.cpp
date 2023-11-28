@@ -70,15 +70,20 @@ void BLEServer_comm_task(void *pvParameter) {
   while (1) {
     while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
       Serial.println("Inside BLE comm task");
+      Serial.print("Current number of clients: ");
+      Serial.println(pSensorCharacteristic->getSubscribedCount());
       xEventGroupSetBits(appStateFG, APP_FLAG_PUSH_BUFFER);
       Serial.println("Waiting for buffer to be ready...");
-      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 5000);
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY, BLE_FLAG_BUFFER_READY, false, 60000);
       Serial.println("Buffer ready...");
       pSensorCharacteristic->setValue(BLEMessageBuffer);
+      Serial.print("Set value to: ");
+      Serial.println(BLEMessageBuffer);
       // Notify
       uint8_t message[1] = { 65 };
       pSensorCharacteristic->notify(&message[0], 1, true);
       Serial.println("Notification sent!");
+      Serial.println("Waiting for data to be read...");
       xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 60000);
       Serial.println("Buffer read!");
     }
@@ -91,8 +96,7 @@ void setupBLE() {
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);
   pSensorCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID,
-    NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
+    CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
   // pSensorCharacteristic->setValue("Hallo");

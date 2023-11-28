@@ -11,6 +11,8 @@ float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
 
 void gpio_sensor_read_task(void *pvParameter) {
+  // setupGPIO();
+
   while (1) {
     Serial.print("Sensor Read from core ");
     Serial.println(xPortGetCoreID());
