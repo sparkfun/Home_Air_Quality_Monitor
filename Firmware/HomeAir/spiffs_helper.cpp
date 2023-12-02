@@ -84,6 +84,30 @@ void appendFile(fs::FS &fs, const char *path, const char *message) {
   file.close();
 }
 
+void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
+  Serial.printf("Appending to file: %s\r\n", path);
+
+  File file = fs.open(path, FILE_APPEND);
+  if (!file) {
+    Serial.println("- failed to open file for appending");
+    return;
+  }
+  int i = 0;
+  while (true) {
+    if (message[i] != '\n') {
+      if (!file.print(message[i++]))
+        Serial.println("- append failed");
+    } else {
+      // Current char is \n
+      file.print(message[i]);
+      Serial.println("Message Appended");
+      break;
+    }
+  }
+
+  file.close();
+}
+
 void renameFile(fs::FS &fs, const char *path1, const char *path2) {
   Serial.printf("Renaming file %s to %s\r\n", path1, path2);
   if (fs.rename(path1, path2)) {
@@ -156,61 +180,113 @@ void testFileIO(fs::FS &fs, const char *path) {
   }
 }
 
+void deleteAllFiles(fs::FS &fs) {
+  // Used to delete ALL files
+  File root = fs.open("/");
+  File file = root.openNextFile();
+  while (file) {
+    if (fs.remove(file.path())) {
+      Serial.println("Removed file");
+    } else {
+      Serial.println("Failed to remove file");
+    }
+    file = root.openNextFile();
+  }
+  Serial.println("Deleted all files in directory.");
+}
+
+float reducePrecision(float var) {
+    // 37.66666 * 100 =3766.66
+    // 3766.66 + .5 =3767.16    for rounding off value
+    // then type cast to int so value is 3767
+    // then divided by 100 so the value converted into 37.67
+    float value = (int)(var * 100 + .5);
+    return (float)value / 100;
+}
+
+
 void spiffs_storage_task(void *pvParameter) {
-  char path[64];
-  char message[96];
+  char path[13] = {"/datalog.txt"};
+  // std::string message;
+  char message[512];
   long epochLapTime = 0;
+  File file, root;
+  int lineLength = 0;
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
   }
+  online.SPIFFS = true;
+  root = SPIFFS.open("/");
   while (1) {
+    // printCurrentAppFlagStatus();
     if (xEventGroupGetBits(appStateFG) & APP_FLAG_SETUP) {
       while (!dateConfigured) {
         Serial.println("Waiting for time config...");
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
-      sprintf(path, "/%04d-%02d-%02d %02d:%02d:%02d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
-              rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+      // sprintf(path, "/%04d-%02d-%02d %02d:%02d:%02d.txt", rtc.getYear(),
+      //         rtc.getMonth() + 1, rtc.getDay(), rtc.getHour(),
+      //         rtc.getMinute(), rtc.getSecond());
       Serial.printf("Set path to: %s", path);
+      SPIFFS.remove(path);
       xEventGroupClearBits(appStateFG, APP_FLAG_SETUP);
       xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING);
-
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_RUNNING) {
-      // Update path daily for separation of logs
-      if (rtc.getEpoch() - epochLapTime >= ONE_DAY_SEC) {
-        epochLapTime = rtc.getEpoch();
-        sprintf(path, "/%04d-%02d-%02d %02d:%02d:%02d.csv", rtc.getYear(), rtc.getMonth() + 1, rtc.getDay(),
-                rtc.getHour(), rtc.getMinute(), rtc.getSecond());
-      }
-
       // Write data to SPIFFS
       if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
         // Acquire mutex
-        sprintf(message, "%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f \n", rtc.getEpoch(), rawDataArray[0],
-                rawDataArray[1], rawDataArray[2], rawDataArray[3],
-                rawDataArray[4], rawDataArray[5], rawDataArray[6],
-                rawDataArray[7], rawDataArray[8], rawDataArray[9],
-                rawDataArray[10]);
-        Serial.print("Wrote data to file: ");
+        // message = std::to_string((float) rtc.getEpoch()) + "," +
+        //           std::to_string(reducePrecision(rawDataArray[0])) + "," +
+        //           std::to_string(rawDataArray[1]) + "," +
+        //           std::to_string(rawDataArray[2]) + "," +
+        //           std::to_string(rawDataArray[3]) + "," +
+        //           std::to_string(rawDataArray[4]) + "," +
+        //           std::to_string(rawDataArray[5]) + "," +
+        //           std::to_string(rawDataArray[6]) + "," +
+        //           std::to_string(rawDataArray[7]) + "," +
+        //           std::to_string(rawDataArray[8]) + "," +
+        //           std::to_string(rawDataArray[9]) + "," +
+        //           std::to_string(rawDataArray[10]) + "\n";
+        sprintf(message,
+                "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
+                (double) rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
+                rawDataArray[2], rawDataArray[3], rawDataArray[4],
+                rawDataArray[5], rawDataArray[6], rawDataArray[7],
+                rawDataArray[8], rawDataArray[9], rawDataArray[10]);
+        Serial.print("Appending to file: ");
+        // Serial.println(message.c_str());
         Serial.println(message);
-        appendFile(SPIFFS, path, message);
-        xSemaphoreGive(rawDataMutex);  // Release mutex
-        vTaskDelay(15000 / portTICK_RATE_MS);
+        // appendLineToFile(SPIFFS, path, message.c_str());
+        appendLineToFile(SPIFFS, path, message);
+
+        xSemaphoreGive(rawDataMutex); // Release mutex
+        vTaskDelay(5000 / portTICK_RATE_MS);
       }
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
-      while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
-        File file = SPIFFS.open(path);
-        while (file.available()) {
-          // file.readBytesUntil('\n', &BLEMessageBuffer[0], CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH);
-          file.readBytes(&BLEMessageBuffer[0], 55);
-          Serial.print("Read from file: ");
-          Serial.println(BLEMessageBuffer);
-          xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
-          xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER, APP_FLAG_PUSH_BUFFER, false, 15000);
-        }
-        file.openNextFile();
+      file = SPIFFS.open(path);
+      while (file.available()) {
+        lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[0], BLE_BUFFER_LENGTH);
+        BLEMessageBuffer[lineLength] = 0; //Bam
+        // Read single log from storage
+        // file.readBytes(&BLEMessageBuffer[0], 55);
+        Serial.print("Read string from storage: ");
+        Serial.println(BLEMessageBuffer);
+        // Notify BLE comm task of complete buffer
+        xEventGroupSetBits(BLEStateFG, BLE_FLAG_BUFFER_READY);
+        xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER,
+                            APP_FLAG_PUSH_BUFFER, false, ONE_MIN_MS);
       }
+      Serial.println("Finished reading file!");
+      deleteFile(SPIFFS, path);
+      xEventGroupClearBits(appStateFG, APP_FLAG_TRANSMITTING); // Clear current app state
+      Serial.print("Cleared transmitting flag");
+      xEventGroupSetBits(appStateFG, APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING to send end of message
+      Serial.print("set done transmitting flag");
+      xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set READ_COMPLETE to advance BLE comm task
+      Serial.println("set read complete flag");
+      xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING); // set RUNNING to return to normal operation
+      Serial.println("Set app running flag");
     }
   }
 }
