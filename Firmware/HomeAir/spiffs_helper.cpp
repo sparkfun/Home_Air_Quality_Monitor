@@ -266,6 +266,7 @@ void spiffs_storage_task(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
       file = SPIFFS.open(path);
       while (file.available()) {
+        xEventGroupSetBits(BLEStateFG, BLE_FLAG_FILE_EXISTS);
         lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[0], BLE_BUFFER_LENGTH);
         BLEMessageBuffer[lineLength] = 0; //Bam
         // Read single log from storage
@@ -277,16 +278,21 @@ void spiffs_storage_task(void *pvParameter) {
         xEventGroupWaitBits(appStateFG, APP_FLAG_PUSH_BUFFER,
                             APP_FLAG_PUSH_BUFFER, false, ONE_MIN_MS);
       }
+      file.close();
       Serial.println("Finished reading file!");
       deleteFile(SPIFFS, path);
+      // Wait for buffer to be read before notifying EOF
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 600000); 
       xEventGroupClearBits(appStateFG, APP_FLAG_TRANSMITTING); // Clear current app state
-      Serial.print("Cleared transmitting flag");
+      Serial.println("Cleared transmitting flag");
       xEventGroupSetBits(appStateFG, APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING to send end of message
-      Serial.print("set done transmitting flag");
-      xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set READ_COMPLETE to advance BLE comm task
-      Serial.println("set read complete flag");
+      Serial.println("set DONE_TRANSMITTING flag");
+      // xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set READ_COMPLETE to advance BLE comm task
+      // Serial.println("set read complete flag");
       xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING); // set RUNNING to return to normal operation
-      Serial.println("Set app running flag");
+      Serial.println("Set app RUNNING flag");
+      xEventGroupSetBits(BLEStateFG, BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
+      Serial.println("Set FILE_DONE");
     }
   }
 }

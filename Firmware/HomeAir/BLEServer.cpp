@@ -68,10 +68,17 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
 void BLEServer_comm_task(void *pvParameter) {
   setupBLE();
+  EventBits_t BLEStatus;
   while (1) { 
     while (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
       // Serial.print("Current number of clients: ");
       // Serial.println(pSensorCharacteristic->getSubscribedCount());
+      BLEStatus = xEventGroupWaitBits(BLEStateFG, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
+                          BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
+      if (BLEStatus & BLE_FLAG_FILE_DONE){
+        break;
+      }
+      // Else: File exists and buffer will be written to and read out
       Serial.print("Waiting for buffer to be ready...");
       xEventGroupWaitBits(BLEStateFG, BLE_FLAG_BUFFER_READY,
                           BLE_FLAG_BUFFER_READY, false, 60000);

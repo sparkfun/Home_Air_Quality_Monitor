@@ -19,6 +19,8 @@
 #define BLE_FLAG_READ_COMPLETE (1 << 5)
 #define BLE_FLAG_CLIENT_CONNECTED (1 << 6)
 #define BLE_FLAG_CLIENT_SUBSCRIBED (1 << 7)
+#define BLE_FLAG_FILE_EXISTS (1 << 8)
+#define BLE_FLAG_FILE_DONE (1 << 9)
 
 extern EventGroupHandle_t appStateFG;
 extern EventGroupHandle_t BLEStateFG;
