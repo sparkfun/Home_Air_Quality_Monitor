@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/settings/settings.dart';
 import 'package:readair/stats/aqi.dart';
+import 'package:readair/stats/humid.dart';
 import 'package:readair/stats/stats.dart';
+import 'package:readair/stats/temp.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -37,8 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => StatsPage()),
+                          MaterialPageRoute(builder: (context) => StatsPage()),
                         );
                       },
                       icon: Icon(Icons.graphic_eq)),
@@ -82,11 +83,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 5),
                         Text('medium', style: TextStyle(fontSize: 10)),
-                        // IconButton(onPressed: () {                        Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => AQIPage()),
-                        // );}, icon: Icon(Icons.more))
+                        IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AQIPage()),
+                              );
+                            },
+                            icon: Icon(Icons.more))
                       ],
                     ),
                   ),
@@ -96,9 +101,15 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 10),
             Card(
               child: ListTile(
-                title: Text('68°F', style: TextStyle(fontSize: 20)),
-                trailing: Icon(Icons.wb_sunny, size: 40),
-              ),
+                  title: Text('68°F', style: TextStyle(fontSize: 20)),
+                  trailing: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TempPage()),
+                        );
+                      },
+                      icon: Icon(Icons.more))),
             ),
             SizedBox(height: 10),
             Row(
@@ -117,6 +128,32 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HumidPage()),
+                  );
+                },
+                child: Text('Humidity'),
+              ),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HumidPage()),
+                  );
+                },
+                child: Text('CO'),
+              ),
             ),
           ],
         ),

@@ -1,4 +1,8 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'dart:math';
 
 class AQIPage extends StatefulWidget {
   // const AQIPage({super.key, required this.title});
@@ -10,52 +14,401 @@ class AQIPage extends StatefulWidget {
 }
 
 class _AQIPageState extends State<AQIPage> {
+  final Random _random = Random();
+  List<FlSpot> generateRandomData() {
+    return List.generate(
+        10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
+  }
+
+  Color? AQIColor(int value) {
+    if (value <= 50) {
+      return Color.fromARGB(255, 48, 133, 56);
+    } else if (value > 50 && value <= 100) {
+      return Color.fromARGB(255, 229, 193, 13);
+    } else if (value > 101 && value <= 150) {
+      return Color.fromARGB(255, 229, 114, 13);
+    } else if (value > 151 && value <= 250) {
+      return Color.fromARGB(255, 217, 19, 4);
+    } else {
+      return Color.fromARGB(255, 121, 0, 0);
+    }
+  }
+
+  int AQIcurrentValue = 230;
+  int AQIhour = 80;
+  int AQImax = 300;
+  int AQImin = 70;
+
+  String AQImessage(int value) {
+    if (value <= 50) {
+      return "Good";
+    } else if (value > 50 && value <= 100) {
+      return "Moderate";
+    } else if (value > 101 && value <= 150) {
+      return "Moderately Unhealthy";
+    } else if (value > 151 && value <= 250) {
+      return "Unhealthy";
+    } else {
+      return "Dangerous";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<FlSpot> data = generateRandomData();
     return Scaffold(
-      appBar: AppBar( 
+      appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("AQI"),
+        title: Text("Air Quality Index"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-          Padding(
-                padding: const EdgeInsets.all(8.0),
+            const SizedBox(height: 10), //Spacing between the "boxes"
+
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Card(
+                //IF STATEMENT! Change color with Quality of Air
+                color: AQIColor(AQIcurrentValue),
                 child: ListTile(
-                  title: Text('AQI: 82',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  subtitle: Text('The Air Quality is Normal'),
-                  trailing: Container(
-                    width: 80,
-                    height: 60,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: LinearProgressIndicator(
-                            value: 0.6, // Example value
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.orange),
-                            backgroundColor: Colors.grey[300],
-                          ),
+                  title: Center(
+                      child: Text('AQI', style: TextStyle(fontSize: 25))),
+                  subtitle: Center(
+                      child: Text('$AQIcurrentValue',
+                          style: TextStyle(fontSize: 60))),
+                  textColor: Colors.white70,
+
+                  //trailing: Icon(Icons.wb_sunny, size: 40),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(2.0),
+              child: ListTile(
+                title: Center(
+                    child: Text('The AQI is ${AQImessage(AQIcurrentValue)}',
+                        style: TextStyle(fontSize: 25))),
+
+                //trailing: Icon(Icons.wb_sunny, size: 40),
+              ),
+            ),
+
+            //SizedBox(height: 10), //spacing beween the "boxes"
+            const Divider(
+              thickness: 3,
+              indent: 20,
+              endIndent: 20,
+            ),
+            // add more stuff here!!
+            //const SizedBox(height: 2), //Spacing between the "boxes"
+            const Padding(
+              padding: EdgeInsets.all(6.0),
+              child: ListTile(
+                title: Center(
+                    child:
+                        Text('24 Hour Span', style: TextStyle(fontSize: 30))),
+
+                //trailing: Icon(Icons.wb_sunny, size: 40),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 300,
+                child: LineChart(
+                  LineChartData(
+                    gridData: FlGridData(show: false),
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            if (value % 10 == 0)
+                              return Text('${value.toInt()}');
+                            return Text('');
+                          },
+                          reservedSize: 40,
                         ),
-                        SizedBox(width: 5),
-                        Text('medium', style: TextStyle(fontSize: 10)),
-                      ],
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            return Text('${value.toInt()}');
+                          },
+                          reservedSize: 20,
+                        ),
+                      ),
                     ),
+                    borderData: FlBorderData(show: true),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: data,
+                        isCurved: true,
+                        dotData: FlDotData(show: false),
+                        belowBarData: BarAreaData(show: false),
+                        color: Colors.blue,
+                        barWidth: 3,
+                      ),
+                    ],
                   ),
                 ),
               ),
+            ),
+
+            const Divider(
+              thickness: 3,
+              indent: 20,
+              endIndent: 20,
+            ),
+
+            const Padding(
+              padding: EdgeInsets.all(2.0),
+              child: ListTile(
+                title: Center(
+                    child: Text('Average Over Past 24hrs',
+                        style: TextStyle(fontSize: 25))),
+              ),
+            ),
+
+            const SizedBox(height: 10), //Spacing between the "boxes"
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Card(
+                //IF STATEMENT! Change color with Quality of Air
+                color: AQIColor(AQIhour),
+                child: ListTile(
+                  title: Center(
+                      child: Text('AQI', style: TextStyle(fontSize: 20))),
+                  subtitle: Center(
+                      child: Text('$AQIhour', style: TextStyle(fontSize: 50))),
+                  textColor: Colors.white70,
+
+                  //trailing: Icon(Icons.wb_sunny, size: 40),
+                ),
+              ),
+            ),
+
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Maximum',
+                    style: TextStyle(fontSize: 25, color: Colors.black),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Minimum', style: TextStyle(fontSize: 25)),
+                ),
+              ],
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: AQIColor(AQImax),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('AQI',
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.white70)),
+                          Text('$AQImax',
+                              style: TextStyle(
+                                  fontSize: 50, color: Colors.white70))
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: AQIColor(AQImin),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('AQI',
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.white70)),
+                          Text('$AQImin',
+                              style: TextStyle(
+                                  fontSize: 50, color: Colors.white70))
+                        ],
+                      )),
+                ),
+              ],
+            ),
+
+            const Divider(
+              thickness: 3,
+              indent: 20,
+              endIndent: 20,
+            ),
+
+            const Padding(
+              padding: EdgeInsets.all(6.0),
+              child: ListTile(
+                title: Center(
+                    child: Text('Air Quality Index',
+                        style: TextStyle(fontSize: 35))),
+
+                //trailing: Icon(Icons.wb_sunny, size: 40),
+              ),
+            ),
+
+            //const SizedBox(height: 3), //Spacing between the "boxes"
+            const Card(
+              //IF STATEMENT! Change color with Quality of Air
+              color: Color.fromARGB(255, 48, 133, 56),
+              child: // ListTile(
+                  //title:
+                  Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Good',
+                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                          textAlign: TextAlign.left),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('0-50',
+                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+              ),
+            ),
+
+            //const SizedBox(height: 3), //Spacing between the "boxes"
+            const Card(
+              //IF STATEMENT! Change color with Quality of Air
+              color: Color.fromARGB(255, 229, 193, 13),
+              child: // ListTile(
+                  //title:
+                  Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Moderate',
+                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                          textAlign: TextAlign.left),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('51-100',
+                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+              ),
+            ),
+
+            //const SizedBox(height: 3), //Spacing between the "boxes"
+            const Card(
+              //IF STATEMENT! Change color with Quality of Air
+              color: Color.fromARGB(255, 229, 114, 13),
+              child: // ListTile(
+                  //title:
+                  Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Moderately Unhealthy',
+                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                          textAlign: TextAlign.left),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('101-150',
+                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+              ),
+            ),
+
+            //const SizedBox(height: 3), //Spacing between the "boxes"
+            const Card(
+              //IF STATEMENT! Change color with Quality of Air
+              color: Color.fromARGB(255, 217, 19, 4),
+              child: // ListTile(
+                  //title:
+                  Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Unhealthy',
+                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                          textAlign: TextAlign.left),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('151-250',
+                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+              ),
+            ),
+
+            //const SizedBox(height: 3), //Spacing between the "boxes"
+            const Card(
+              //IF STATEMENT! Change color with Quality of Air
+              color: Color.fromARGB(255, 121, 0, 0),
+              child: // ListTile(
+                  //title:
+                  Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Dangerous',
+                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                          textAlign: TextAlign.left),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('251-500',
+                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
-
 }
