@@ -109,7 +109,9 @@ void BLEServer_comm_task(void *pvParameter) {
 }
 
 void setupBLE() {
-  NimBLEDevice::init("NimBLE Test");
+  // NimBLEDevice::init("NimBLE Test");
+  NimBLEDevice::init("ThingPlusTest");
+
   NimBLEDevice::setMTU(500); // Set max MTU size to 500 - much less than the 512 fundamental limit
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);

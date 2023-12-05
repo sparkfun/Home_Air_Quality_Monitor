@@ -196,14 +196,13 @@ void deleteAllFiles(fs::FS &fs) {
 }
 
 float reducePrecision(float var) {
-    // 37.66666 * 100 =3766.66
-    // 3766.66 + .5 =3767.16    for rounding off value
-    // then type cast to int so value is 3767
-    // then divided by 100 so the value converted into 37.67
-    float value = (int)(var * 100 + .5);
-    return (float)value / 100;
+  // 37.66666 * 100 =3766.66
+  // 3766.66 + .5 =3767.16    for rounding off value
+  // then type cast to int so value is 3767
+  // then divided by 100 so the value converted into 37.67
+  float value = (int)(var * 100 + .5);
+  return (float)value / 100;
 }
-
 
 void spiffs_storage_task(void *pvParameter) {
   char path[13] = {"/datalog.txt"};
@@ -229,7 +228,7 @@ void spiffs_storage_task(void *pvParameter) {
       //         rtc.getMonth() + 1, rtc.getDay(), rtc.getHour(),
       //         rtc.getMinute(), rtc.getSecond());
       Serial.printf("Set path to: %s", path);
-      SPIFFS.remove(path);
+      // SPIFFS.remove(path); // Don't cull on boot
       xEventGroupClearBits(appStateFG, APP_FLAG_SETUP);
       xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING);
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_RUNNING) {
@@ -250,7 +249,7 @@ void spiffs_storage_task(void *pvParameter) {
         //           std::to_string(rawDataArray[10]) + "\n";
         sprintf(message,
                 "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
-                (double) rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
+                (double)rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
                 rawDataArray[2], rawDataArray[3], rawDataArray[4],
                 rawDataArray[5], rawDataArray[6], rawDataArray[7],
                 rawDataArray[8], rawDataArray[9], rawDataArray[10]);
@@ -267,8 +266,9 @@ void spiffs_storage_task(void *pvParameter) {
       file = SPIFFS.open(path);
       while (file.available()) {
         xEventGroupSetBits(BLEStateFG, BLE_FLAG_FILE_EXISTS);
-        lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[0], BLE_BUFFER_LENGTH);
-        BLEMessageBuffer[lineLength] = 0; //Bam
+        lineLength =
+            file.readBytesUntil('\n', &BLEMessageBuffer[0], BLE_BUFFER_LENGTH);
+        BLEMessageBuffer[lineLength] = 0; // Bam
         // Read single log from storage
         // file.readBytes(&BLEMessageBuffer[0], 55);
         Serial.print("Read string from storage: ");
@@ -282,16 +282,25 @@ void spiffs_storage_task(void *pvParameter) {
       Serial.println("Finished reading file!");
       deleteFile(SPIFFS, path);
       // Wait for buffer to be read before notifying EOF
-      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE, BLE_FLAG_READ_COMPLETE, false, 600000); 
-      xEventGroupClearBits(appStateFG, APP_FLAG_TRANSMITTING); // Clear current app state
+      xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE,
+                          BLE_FLAG_READ_COMPLETE, false, 600000);
+      xEventGroupClearBits(appStateFG,
+                           APP_FLAG_TRANSMITTING); // Clear current app state
       Serial.println("Cleared transmitting flag");
-      xEventGroupSetBits(appStateFG, APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING to send end of message
+      xEventGroupSetBits(appStateFG,
+                         APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING
+                                                      // to send end of message
       Serial.println("set DONE_TRANSMITTING flag");
-      // xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set READ_COMPLETE to advance BLE comm task
-      // Serial.println("set read complete flag");
-      xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING); // set RUNNING to return to normal operation
+      // xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set
+      // READ_COMPLETE to advance BLE comm task Serial.println("set read
+      // complete flag");
+      xEventGroupSetBits(
+          appStateFG,
+          APP_FLAG_RUNNING); // set RUNNING to return to normal operation
       Serial.println("Set app RUNNING flag");
-      xEventGroupSetBits(BLEStateFG, BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
+      xEventGroupSetBits(
+          BLEStateFG,
+          BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
     }
   }

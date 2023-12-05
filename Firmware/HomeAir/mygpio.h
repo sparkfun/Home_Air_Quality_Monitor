@@ -48,8 +48,8 @@ const uint8_t PERIODIC_MEAS_INTERVAL_IN_SECONDS = 10;
 const uint16_t PRESSURE_REFERENCE = 1000;
 const uint8_t RAW_DATA_ARRAY_SIZE = 11;
 // Standard GPIO Pin definitions
-const uint8_t pin_NGInput = A0;
-const uint8_t pin_COInput = A1;
+const uint8_t pin_NGInput = 38;
+const uint8_t pin_COInput = 39;
 
 void setupGPIO(void);
 void read_all_sensors(float *ret_array, uint16_t array_size);

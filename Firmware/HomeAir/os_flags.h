@@ -28,5 +28,4 @@ extern EventGroupHandle_t BLEStateFG;
 void printCurrentBLEFlagStatus(void);
 void printCurrentAppFlagStatus(void);
 
-
 #endif
