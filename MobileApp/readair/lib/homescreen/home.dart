@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:readair/BLE/ble_setup.dart';
+import 'package:readair/data/packet.dart';
 import 'package:readair/settings/settings.dart';
 import 'package:readair/stats/aqi.dart';
 import 'package:readair/stats/stats.dart';
@@ -14,7 +15,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  double? temp;
+  double? aqi;
+  double? co2;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLatestData();
+  }
+
+  Future<void> _fetchLatestData() async {
+    DataPacket? latestPacket = await DatabaseService.instance.getLastPacket();
+    if (latestPacket != null) {
+      setState(() {
+        temp = latestPacket.temp;
+        aqi = latestPacket.aqi;
+        co2 = latestPacket.co2;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => StatsPage()),
+                          MaterialPageRoute(builder: (context) => StatsPage()),
                         );
                       },
                       icon: Icon(Icons.graphic_eq)),
@@ -64,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text('AQI: 82',
+                  title: Text('AQI: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   subtitle: Text('The Air Quality is Normal'),
@@ -96,7 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 10),
             Card(
               child: ListTile(
-                title: Text('68°F', style: TextStyle(fontSize: 20)),
+                title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°F',
+                    style: TextStyle(fontSize: 20)),
                 trailing: Icon(Icons.wb_sunny, size: 40),
               ),
             ),
@@ -110,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Column(
                         children: [
                           Icon(Icons.cloud),
-                          Text('CO2 720 PPM'),
+                          Text('CO2 ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
                         ],
                       ),
                     ),
@@ -120,6 +140,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _fetchLatestData, // Refreshes and updates the data
+        child: Icon(Icons.refresh),
+        tooltip: 'Refresh Data',
       ),
     );
   }

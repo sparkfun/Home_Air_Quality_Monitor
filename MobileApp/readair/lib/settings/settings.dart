@@ -34,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
               _settingTile(context, Icons.bluetooth, "Connect",
                   "WiFi and Bluetooth Connectivity"),
               SizedBox(height: 20),
-              _settingTile(context, Icons.share, "Export", "Export data"),
+              _settingTile(context, Icons.share, "Data", "Clear data, Export data"),
             ],
           ),
         ),
@@ -63,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
             MaterialPageRoute(builder: (context) => CustomizePage()),
           );
         }
-        if (title == "Export") {
+        if (title == "Data") {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ExportPage()),

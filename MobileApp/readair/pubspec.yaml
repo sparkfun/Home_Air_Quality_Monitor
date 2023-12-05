@@ -38,6 +38,10 @@ dependencies:
   flutter_blue_plus: ^1.17.5
   fl_chart: ^0.64.0
   get: ^4.6.6
+  sqflite: ^2.3.0
+  csv: ^5.1.1
+  path_provider: ^2.1.1
+  share_plus: ^7.2.1
 
 dev_dependencies:
   flutter_test:
