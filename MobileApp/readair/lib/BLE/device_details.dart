@@ -89,7 +89,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           _processDataPacket(receivedData);
 
           // Show a notification message
-          //_showNotification("Data received from ESP32");
+          _showNotification("Data received from ESP32");
         });
         setState(() {
           isSubscribed = true;
@@ -125,7 +125,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
         );
         print(data);
         DatabaseService.instance.insertOrUpdateDataPacket(packet);
-        //_showMessage("Packet received and saved.");
+        _showMessage("Packet received and saved.");
       } else {
         //_showMessage("Received data does not match expected format.");
       }
@@ -199,7 +199,8 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           String receivedData = String.fromCharCodes(value);
           _latestReceivedPacket = receivedData;
           _processDataPacket(receivedData);
-          //_showNotification("Data received from ESP32");
+          
+          _showNotification("Data received from ESP32");
 
           _receiveAndReadData();
         });
@@ -352,7 +353,7 @@ Future<void> _autoReadOnDataReceive() async {
           String receivedData = String.fromCharCodes(value);
           _latestReceivedPacket = receivedData;
           _processDataPacket(receivedData);
-          //_showNotification("Data received from ESP32");
+          _showNotification("Data received from ESP32");
         });
 
         setState(() {
@@ -517,20 +518,20 @@ Future<void> _autoReadOnDataReceive() async {
                 child: Text('Disconnect'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: _addRandomPacket,
-                child: Text('Add Random Packet'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: _readLatestPacket,
-                child: Text('Read Latest Packet'),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: _addRandomPacket,
+            //     child: Text('Add Random Packet'),
+            //   ),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: _readLatestPacket,
+            //     child: Text('Read Latest Packet'),
+            //   ),
+            // ),
           ],
         ),
       ),

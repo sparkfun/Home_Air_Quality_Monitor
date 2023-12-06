@@ -81,63 +81,78 @@ class _MyHomePageState extends State<MyHomePage> {
               endIndent: 20,
             ),
             SizedBox(height: 10),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text('AQI: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  subtitle: Text('The Air Quality is Normal'),
-                  trailing: Container(
-                    width: 80,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: LinearProgressIndicator(
-                            value: 0.6, // Example value
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.orange),
-                            backgroundColor: Colors.grey[300],
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AQIPage()),
+                );
+              },
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text('AQI: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    subtitle: Text('The Air Quality is Normal'),
+                    trailing: Container(
+                      width: 80,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: LinearProgressIndicator(
+                              value: 0.6, // Example value
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.orange),
+                              backgroundColor: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 5),
-                        Text('medium', style: TextStyle(fontSize: 10)),
-                        IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AQIPage()),
-                              );
-                            },
-                            icon: Icon(Icons.more))
-                      ],
+                          SizedBox(width: 5),
+                          Text('medium', style: TextStyle(fontSize: 10)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
             SizedBox(height: 10),
-            Card(
-              child: ListTile(
-                title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°F',
-                    style: TextStyle(fontSize: 20)),
-                trailing: Icon(Icons.wb_sunny, size: 40),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TempPage()),
+                );
+              },
+              child: Card(
+                child: ListTile(
+                  title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°F',
+                      style: TextStyle(fontSize: 20)),
+                  trailing: Icon(Icons.wb_sunny, size: 40),
+                ),
               ),
             ),
             SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        children: [
-                          Icon(Icons.cloud),
-                          Text('CO2 ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
-                        ],
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.cloud),
+                            Text('CO2 ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
+                          ],
+                        ),
                       ),
                     ),
                   ),
