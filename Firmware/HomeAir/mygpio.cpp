@@ -138,13 +138,11 @@ void read_all_sensors(float *ret_array, uint16_t array_size) {
   */
   // CO2
   ret_array[CO2_PPM] = readCO2PPM(co2Error, co2Sensor);
-  ;
   // SEN
   // Uses ret_array[1] through ret_array[7]
   readSENSensor(ret_array, 7);
   // CO
   ret_array[CO] = readCOSensor();
-  ;
   // Serial.print("CO ppm: ");
   // Serial.println(ret_array[9]);
   // NG

@@ -61,6 +61,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "DEL!!") {
         // Manually cull the entire root directory
         deleteAllFiles(SPIFFS);
+      } else if (BLEMessageType == "UPDAT"){
+        if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
+        // Acquire mutex
+        read_all_sensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+        xSemaphoreGive(rawDataMutex); // Release mutex
+        }
       }
     }
   }

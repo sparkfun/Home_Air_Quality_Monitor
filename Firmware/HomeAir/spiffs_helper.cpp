@@ -205,12 +205,14 @@ float reducePrecision(float var) {
 }
 
 void spiffs_storage_task(void *pvParameter) {
-  char path[13] = {"/datalog.txt"};
+  char path[13] = { "/datalog.txt" };
   // std::string message;
   char message[512];
   long epochLapTime = 0;
   File file, root;
   int lineLength = 0;
+  int numPackets = 4;
+  int insertPoint = 0;
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
@@ -228,13 +230,16 @@ void spiffs_storage_task(void *pvParameter) {
       //         rtc.getMonth() + 1, rtc.getDay(), rtc.getHour(),
       //         rtc.getMinute(), rtc.getSecond());
       Serial.printf("Set path to: %s", path);
-      // SPIFFS.remove(path); // Don't cull on boot
+      SPIFFS.remove(path); // Don't cull on boot
       xEventGroupClearBits(appStateFG, APP_FLAG_SETUP);
       xEventGroupSetBits(appStateFG, APP_FLAG_RUNNING);
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_RUNNING) {
       // Write data to SPIFFS
       if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
         // Acquire mutex
+        // Function body
+        xSemaphoreGive(rawDataMutex);  // Release mutex
+
         // message = std::to_string((float) rtc.getEpoch()) + "," +
         //           std::to_string(reducePrecision(rawDataArray[0])) + "," +
         //           std::to_string(rawDataArray[1]) + "," +
@@ -259,16 +264,24 @@ void spiffs_storage_task(void *pvParameter) {
         // appendLineToFile(SPIFFS, path, message.c_str());
         appendLineToFile(SPIFFS, path, message);
 
-        xSemaphoreGive(rawDataMutex); // Release mutex
+
+        xSemaphoreGive(rawDataMutex);  // Release mutex
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
     } else if (xEventGroupGetBits(appStateFG) & APP_FLAG_TRANSMITTING) {
       file = SPIFFS.open(path);
       while (file.available()) {
         xEventGroupSetBits(BLEStateFG, BLE_FLAG_FILE_EXISTS);
-        lineLength =
-            file.readBytesUntil('\n', &BLEMessageBuffer[0], BLE_BUFFER_LENGTH);
-        BLEMessageBuffer[lineLength] = 0; // Bam
+        for(int i =0; i<numPackets; i++)
+        {
+          lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[insertPoint], BLE_BUFFER_LENGTH);
+          if (lineLength < 2) {break;}
+          insertPoint += lineLength;
+          BLEMessageBuffer[insertPoint++] = '\n';
+          
+        }
+        BLEMessageBuffer[insertPoint] = 0;  // Bam
+        insertPoint = 0; 
         // Read single log from storage
         // file.readBytes(&BLEMessageBuffer[0], 55);
         Serial.print("Read string from storage: ");
@@ -285,22 +298,22 @@ void spiffs_storage_task(void *pvParameter) {
       xEventGroupWaitBits(BLEStateFG, BLE_FLAG_READ_COMPLETE,
                           BLE_FLAG_READ_COMPLETE, false, 600000);
       xEventGroupClearBits(appStateFG,
-                           APP_FLAG_TRANSMITTING); // Clear current app state
+                           APP_FLAG_TRANSMITTING);  // Clear current app state
       Serial.println("Cleared transmitting flag");
       xEventGroupSetBits(appStateFG,
-                         APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING
-                                                      // to send end of message
+                         APP_FLAG_DONE_TRANSMITTING);  // set DONE_TRANSMITTING
+                                                       // to send end of message
       Serial.println("set DONE_TRANSMITTING flag");
       // xEventGroupSetBits(BLEStateFG, BLE_FLAG_READ_COMPLETE); // Set
       // READ_COMPLETE to advance BLE comm task Serial.println("set read
       // complete flag");
       xEventGroupSetBits(
-          appStateFG,
-          APP_FLAG_RUNNING); // set RUNNING to return to normal operation
+        appStateFG,
+        APP_FLAG_RUNNING);  // set RUNNING to return to normal operation
       Serial.println("Set app RUNNING flag");
       xEventGroupSetBits(
-          BLEStateFG,
-          BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
+        BLEStateFG,
+        BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
     }
   }

@@ -9,6 +9,7 @@
 #include "os_flags.h"
 #include "spiffs_helper.h"
 #include "settings.h"
+#include "mygpio.h"
 // Standard Library
 #include <stdint.h>
 
