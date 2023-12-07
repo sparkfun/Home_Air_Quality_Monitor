@@ -211,7 +211,7 @@ void spiffs_storage_task(void *pvParameter) {
   long epochLapTime = 0;
   File file, root;
   int lineLength = 0;
-  int numPackets = 4;
+  int numPackets = 6;
   int insertPoint = 0;
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
