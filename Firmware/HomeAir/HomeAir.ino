@@ -45,14 +45,14 @@ void setup() {
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 
-  // xTaskCreatePinnedToCore(
-  //   gpio_sensor_read_task,    /*Function to call*/
-  //   "Sensor Read Task",       /*Task name*/
-  //   10000,                    /*Stack size*/
-  //   NULL,                     /*Function parameters*/
-  //   5,                        /*Priority*/
-  //   &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
-  //   ARDUINO_AUX_CORE);        /*Core ID*/
+  xTaskCreatePinnedToCore(
+    gpio_sensor_read_task,    /*Function to call*/
+    "Sensor Read Task",       /*Task name*/
+    10000,                    /*Stack size*/
+    NULL,                     /*Function parameters*/
+    5,                        /*Priority*/
+    &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);        /*Core ID*/
 
   xTaskCreatePinnedToCore(
     spiffs_storage_task,         /*Function to call*/
@@ -81,14 +81,15 @@ void setup() {
     &time_sync_task_handle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);      /*Core ID*/
     
-  // xTaskCreatePinnedToCore(
-  //   time_sync_task,         /*Function to call*/
-  //   "Time Sync Task",       /*Task name*/
-  //   10000,                  /*Stack size*/
-  //   NULL,                   /*Function parameters*/
-  //   1,                      /*Priority*/
-  //   &time_sync_task_handle, /*ptr to global TaskHandle_t*/
-  //   ARDUINO_AUX_CORE);      /*Core ID*/
+  xTaskCreatePinnedToCore(
+    update_screen_task,         /*Function to call*/
+    "Epaper Update Task",       /*Task name*/
+    10000,                  /*Stack size*/
+    NULL,                   /*Function parameters*/
+    10,                      /*Priority*/
+    //SET LOW PRIORITY
+    &time_sync_task_handle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);      /*Core ID*/
 }
 // All loop functionality is completed with tasks defined in setup()
 void loop() {}

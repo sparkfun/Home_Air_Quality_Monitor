@@ -1,7 +1,11 @@
 #ifndef SCREEN_DRIVER_CPP
 #define SCREEN_DRIVER_CPP
 
+#include "mygpio.h"
+#include "epaper_driver.h"
 
-void screen_driver_screen_update_task(void *pvParameter);
+void epaper_setup();
+
+void update_screen_task(void *pvParameter);
 
 #endif
