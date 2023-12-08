@@ -87,7 +87,6 @@ void setup() {
     10000,                  /*Stack size*/
     NULL,                   /*Function parameters*/
     10,                      /*Priority*/
-    //SET LOW PRIORITY
     &time_sync_task_handle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);      /*Core ID*/
 }

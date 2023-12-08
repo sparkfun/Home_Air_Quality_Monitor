@@ -22,5 +22,8 @@ void update_screen_task(void *pvParameter){
       xSemaphoreGive(rawDataMutex);
       deviceScreen.flush();
       // vTaskDelay(60000 / portT:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::QJLQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ+QQQQQ^Q%Q$Q#Q#QQQQ!@ &J&&^%$|
+    }
+  }
+}
 
       

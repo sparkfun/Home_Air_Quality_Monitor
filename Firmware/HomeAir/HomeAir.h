@@ -11,6 +11,7 @@
 #include "mygpio.h"
 #include "os_flags.h"
 #include "spiffs_helper.h"
+#include "screen_driver.h"
 
 // ESP32 Built-ins
 #include "FS.h"
