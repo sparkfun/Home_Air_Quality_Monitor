@@ -20,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double? temp;
   double? aqi;
   double? co2;
+  double? humid;
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
         temp = latestPacket.temp;
         aqi = latestPacket.aqi;
         co2 = latestPacket.co2;
+        humid = latestPacket.humid;
       });
     }
   }
@@ -127,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Card(
                 child: ListTile(
-                  title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°F',
+                  title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°C',
                       style: TextStyle(fontSize: 20)),
                   trailing: Icon(Icons.wb_sunny, size: 40),
                 ),
@@ -160,30 +162,159 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HumidPage()),
-                  );
-                },
-                child: Text('Humidity'),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TempPage()),
+                );
+              },
+              child: Card(
+                child: ListTile(
+                  title: Text('${humid?.toStringAsFixed(1) ?? 'N/A'}% Humidity',
+                      style: TextStyle(fontSize: 20)),
+                  trailing: Icon(Icons.water_drop, size: 40),
+                ),
               ),
             ),
             SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HumidPage()),
-                  );
-                },
-                child: Text('CO'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 100,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('CO: ', style: TextStyle(fontSize: 18)),
+                          Icon(Icons.cloud_circle),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 100,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('VOC: ', style: TextStyle(fontSize: 18)),
+                          Icon(Icons.heat_pump_rounded),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 70,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('PPM 1.0', style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 70,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('PPM 2.5', style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 70,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('PPM 4.0', style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: 70,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AQIPage()),
+                      );
+                    },
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('PPM 10.0', style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
             ),
           ],
         ),

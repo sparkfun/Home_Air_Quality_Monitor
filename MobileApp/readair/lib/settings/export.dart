@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 import 'package:readair/data/packet.dart';
 import 'package:readair/BLE/device_details.dart';
 import 'dart:math';
@@ -16,8 +17,7 @@ class _ExportPageState extends State<ExportPage> {
   final Random _random = Random();
 
   Future<String> get _localPath async {
-    final directory =
-        await getExternalStorageDirectory(); 
+    final directory = await getExternalStorageDirectory();
     return directory!.path;
   }
 
@@ -31,6 +31,17 @@ class _ExportPageState extends State<ExportPage> {
 
     // Write the file
     return file.writeAsString(csv);
+  }
+
+  void viewLatestCsv() async {
+    final file = await _localFile;
+    OpenFile.open(file.path); // This will open the CSV with the default app
+  }
+
+  void downloadCsv() async {
+    final file = await _localFile;
+    // Optionally, move the file to a specific location or just notify the user
+    _showMessage("CSV file saved at ${file.path}");
   }
 
   void shareCsv() async {
@@ -69,10 +80,10 @@ class _ExportPageState extends State<ExportPage> {
   }
 
   void _exportDatabaseToCsv() async {
-      final data = await DatabaseService.instance.getAllPackets();
-      final filePath = await ExportService.exportDataToCsv(data);
-      Share.shareFiles([filePath], text: 'Here is my CSV file.');
-      _showMessage("Database exported and shared via CSV");
+    final data = await DatabaseService.instance.getAllPackets();
+    final filePath = await ExportService.exportDataToCsv(data);
+    Share.shareFiles([filePath], text: 'Here is my CSV file.');
+    _showMessage("Database exported and shared via CSV");
   }
 
   void _deleteData() async {
@@ -132,6 +143,17 @@ class _ExportPageState extends State<ExportPage> {
             ElevatedButton(
               onPressed: _exportDatabaseToCsv,
               child: Text('Export Database to CSV'),
+            ),
+            ElevatedButton(
+              onPressed: viewLatestCsv,
+              child: Text('View Latest CSV'),
+            ),
+            ElevatedButton(
+              onPressed: downloadCsv,
+              child: Text('Download CSV'),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+              ),
             ),
             ElevatedButton(
               onPressed: _exportDatabaseToCsv,

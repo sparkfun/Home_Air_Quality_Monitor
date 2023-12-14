@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class AQIPage extends StatefulWidget {
   // const AQIPage({super.key, required this.title});
 
@@ -15,6 +17,41 @@ class AQIPage extends StatefulWidget {
 
 class _AQIPageState extends State<AQIPage> {
   final Random _random = Random();
+
+  int? AQIcurrentValue;
+  int? AQImax;
+  int? AQImin;
+  List<FlSpot> aqiSpots = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAQIData();
+  }
+
+  Future<void> fetchAQIData() async {
+    // Fetch the latest AQI value
+    DataPacket? latestPacket = await DatabaseService.instance.getLastPacket();
+    if (latestPacket != null) {
+      setState(() {
+        AQIcurrentValue = latestPacket.aqi.toInt();
+      });
+    }
+
+    // Fetch the last 5 AQI measurements
+    List<DataPacket> lastFivePackets =
+        await DatabaseService.instance.getLastFivePackets();
+    aqiSpots = List.generate(
+      lastFivePackets.length,
+      (index) => FlSpot(index.toDouble(), lastFivePackets[index].aqi),
+    ).reversed.toList();
+
+    AQImax = lastFivePackets.map((packet) => packet.aqi.toInt()).reduce(max);
+    AQImin = lastFivePackets.map((packet) => packet.aqi.toInt()).reduce(min);
+
+    setState(() {});
+  }
+
   List<FlSpot> generateRandomData() {
     return List.generate(
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
@@ -34,18 +71,13 @@ class _AQIPageState extends State<AQIPage> {
     }
   }
 
-  int AQIcurrentValue = 230;
-  int AQIhour = 80;
-  int AQImax = 300;
-  int AQImin = 70;
-
   String AQImessage(int value) {
     if (value <= 50) {
       return "Good";
     } else if (value > 50 && value <= 100) {
       return "Moderate";
     } else if (value > 101 && value <= 150) {
-      return "Moderately Unhealthy";
+      return "Moderately Bad";
     } else if (value > 151 && value <= 250) {
       return "Unhealthy";
     } else {
@@ -73,7 +105,7 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(8.0),
               child: Card(
                 //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIcurrentValue),
+                color: AQIColor(AQIcurrentValue!),
                 child: ListTile(
                   title: Center(
                       child: Text('AQI', style: TextStyle(fontSize: 25))),
@@ -91,7 +123,7 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('The AQI is ${AQImessage(AQIcurrentValue)}',
+                    child: Text('The AQI is ${AQImessage(AQIcurrentValue!)}',
                         style: TextStyle(fontSize: 25))),
 
                 //trailing: Icon(Icons.wb_sunny, size: 40),
@@ -123,24 +155,41 @@ class _AQIPageState extends State<AQIPage> {
                 height: 300,
                 child: LineChart(
                   LineChartData(
-                    gridData: FlGridData(show: false),
+                    minY: 0, // Y-axis begins at 0
+                    maxY: 100, // Y-axis peaks at 100
+                    gridData: FlGridData(
+                      show: true,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: const Color(0xff37434d),
+                          strokeWidth: 1,
+                        );
+                      },
+                      drawVerticalLine: true,
+                      getDrawingVerticalLine: (value) {
+                        return FlLine(
+                          color: const Color(0xff37434d),
+                          strokeWidth: 1,
+                        );
+                      },
+                    ),
                     titlesData: FlTitlesData(
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            if (value % 10 == 0)
-                              return Text('${value.toInt()}');
-                            return Text('');
+                            return Text('${value.toInt()}');
                           },
                           reservedSize: 40,
+                          interval:
+                              20, // Optional: to display the side titles at given interval
                         ),
                       ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            return Text('${value.toInt()}');
+                            return Text('${(value.toInt() + 1)}');
                           },
                           reservedSize: 20,
                         ),
@@ -149,11 +198,11 @@ class _AQIPageState extends State<AQIPage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: aqiSpots, // Here we use the actual data
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                         barWidth: 3,
                       ),
                     ],
@@ -182,12 +231,13 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(8.0),
               child: Card(
                 //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIhour),
+                color: AQIColor(AQIcurrentValue!),
                 child: ListTile(
                   title: Center(
                       child: Text('AQI', style: TextStyle(fontSize: 20))),
                   subtitle: Center(
-                      child: Text('$AQIhour', style: TextStyle(fontSize: 50))),
+                      child: Text('$AQIcurrentValue',
+                          style: TextStyle(fontSize: 50))),
                   textColor: Colors.white70,
 
                   //trailing: Icon(Icons.wb_sunny, size: 40),
@@ -218,7 +268,7 @@ class _AQIPageState extends State<AQIPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImax),
+                      color: AQIColor(AQImax!),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -234,7 +284,7 @@ class _AQIPageState extends State<AQIPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImin),
+                      color: AQIColor(AQImin!),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -335,7 +385,7 @@ class _AQIPageState extends State<AQIPage> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Moderately Unhealthy',
+                      child: Text('Moderately Bad',
                           style: TextStyle(fontSize: 30, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
