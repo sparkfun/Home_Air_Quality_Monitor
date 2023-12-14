@@ -1,7 +1,7 @@
 #include "AQI.h"
 
 /*
-  
+
   File containing functions to convert raw sensor readings into an AQI.
   Individual AQI values can be calculated for each of the measurements, but a
   composite value can be pulled from get_composite_AQI()
@@ -10,7 +10,6 @@
   https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf
 
 */
-
 
 uint16_t get_ppm_25_AQI(float ppm25) {
   /*
@@ -56,7 +55,9 @@ uint16_t get_ppm_25_AQI(float ppm25) {
     breakpointHigh = 500;
     breakpointLow = 350.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm25 - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (ppm25 - breakpointLow) +
+          indexLow);
 }
 
 uint16_t get_ppm_10_AQI(float ppm10) {
@@ -100,11 +101,12 @@ uint16_t get_ppm_10_AQI(float ppm10) {
     breakpointHigh = 604;
     breakpointLow = 505;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm10 - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (ppm10 - breakpointLow) +
+          indexLow);
 }
 
 uint16_t get_CO_AQI(float CO) {
-
 
   float indexHigh, indexLow;
   float breakpointHigh, breakpointLow;
@@ -145,7 +147,9 @@ uint16_t get_CO_AQI(float CO) {
     breakpointHigh = 50.4;
     breakpointLow = 40.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (CO - breakpointLow) +
+          indexLow);
 }
 
 float get_composite_AQI(float ppm25, float ppm10, float CO) {
