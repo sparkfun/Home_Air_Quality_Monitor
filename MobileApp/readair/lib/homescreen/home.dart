@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/settings/settings.dart';
 import 'package:readair/stats/aqi.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:readair/stats/co.dart';
+import 'package:readair/stats/humid.dart';
+>>>>>>> Stashed changes
 import 'package:readair/stats/stats.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -118,6 +123,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
+<<<<<<< Updated upstream
+=======
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HumidPage()),
+                  );
+                },
+                child: Text('Humidity'),
+              ),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => COPage()),
+                  );
+                },
+                child: Text('CO'),
+              ),
+            ),
+>>>>>>> Stashed changes
           ],
         ),
       ),

@@ -1,39 +1,42 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: non_constant_identifier_names
 
-class AQIPage extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'dart:math';
+
+class COPage extends StatefulWidget {
   @override
-  State<AQIPage> createState() => _AQIPageState();
+  State<COPage> createState() => _COPageState();
 }
 
-class _AQIPageState extends State<AQIPage> {
-<<<<<<< Updated upstream
-=======
+class _COPageState extends State<COPage> {
   final Random _random = Random();
   List<FlSpot> generateRandomData() {
     return List.generate(
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
-  int AQIcurrentValue = 32;
-  int AQIhour = 50;
-  int AQImax = 70;
-  int AQImin = 21;
+  int currentValue = 23; //The Current Value
+  int averageOverTwoFourHour = 43; //Average over past 24 hours
+  int max = 67; //Maximum value over past 24 hours
+  int min = 22; //Minimum value over past 24 hours
 
-  Color? AQIColor(int value) {
-    if (value <= 50) {
+  Color? CoordinatedColor(int value) {
+    if (value <= 35) {
       return Color.fromARGB(255, 48, 133, 56);
-    } else if (value > 50 && value <= 100) {
+    } else if (value > 36 && value <= 100) {
       return Color.fromARGB(255, 229, 193, 13);
-    } else if (value > 101 && value <= 150) {
+    } else if (value > 101 && value <= 200) {
       return Color.fromARGB(255, 229, 114, 13);
-    } else if (value > 151 && value <= 250) {
+    } else if (value > 201 && value <= 400) {
       return Color.fromARGB(255, 217, 19, 4);
     } else {
       return Color.fromARGB(255, 121, 0, 0);
     }
   }
 
-  String AQImessage(int value) {
+  String message(int value) {
+    //Displays message below current value
     if (value <= 50) {
       return "Good";
     } else if (value > 50 && value <= 100) {
@@ -46,52 +49,29 @@ class _AQIPageState extends State<AQIPage> {
       return "Dangerous";
     }
   }
->>>>>>> Stashed changes
 
   @override
   Widget build(BuildContext context) {
+    List<FlSpot> data = generateRandomData();
     return Scaffold(
-      appBar: AppBar( 
+      appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("AQI"),
+        title: Text("Carbon Dioxide"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-<<<<<<< Updated upstream
-          Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text('AQI: 82',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  subtitle: Text('The Air Quality is Normal'),
-                  trailing: Container(
-                    width: 80,
-                    height: 60,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: LinearProgressIndicator(
-                            value: 0.6, // Example value
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.orange),
-                            backgroundColor: Colors.grey[300],
-                          ),
-=======
             const SizedBox(height: 10), //Spacing between the "boxes"
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Card(
-                color: AQIColor(AQIcurrentValue),
+                color: CoordinatedColor(currentValue),
                 child: ListTile(
                   title: Center(
-                      child: Text('AQI', style: TextStyle(fontSize: 25))),
-                  subtitle: Center(
-                      child: Text('$AQIcurrentValue',
+                      child: Text('$currentValue (ppm)',
                           style: TextStyle(fontSize: 60))),
                   textColor: Colors.white70,
                 ),
@@ -102,7 +82,8 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('The AQI is ${AQImessage(AQIcurrentValue)}',
+                    child: Text(
+                        'The Carbon Monoxide is ${message(currentValue)}',
                         style: TextStyle(fontSize: 25))),
               ),
             ),
@@ -139,17 +120,32 @@ class _AQIPageState extends State<AQIPage> {
                             return Text('');
                           },
                           reservedSize: 40,
->>>>>>> Stashed changes
                         ),
-                        SizedBox(width: 5),
-                        Text('medium', style: TextStyle(fontSize: 10)),
-                      ],
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            return Text('${value.toInt()}');
+                          },
+                          reservedSize: 20,
+                        ),
+                      ),
                     ),
+                    borderData: FlBorderData(show: true),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: data,
+                        isCurved: true,
+                        dotData: FlDotData(show: false),
+                        belowBarData: BarAreaData(show: false),
+                        color: Colors.blue,
+                        barWidth: 3,
+                      ),
+                    ],
                   ),
                 ),
               ),
-<<<<<<< Updated upstream
-=======
             ),
 
             const Divider(
@@ -167,16 +163,15 @@ class _AQIPageState extends State<AQIPage> {
               ),
             ),
 
-            const SizedBox(height: 10), //Spacing between the "boxes"
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Card(
-                color: AQIColor(AQIhour),
+                //IF STATEMENT! Change color with Quality of Air
+                color: CoordinatedColor(averageOverTwoFourHour),
                 child: ListTile(
                   title: Center(
-                      child: Text('AQI', style: TextStyle(fontSize: 20))),
-                  subtitle: Center(
-                      child: Text('$AQIhour', style: TextStyle(fontSize: 50))),
+                      child: Text('$averageOverTwoFourHour (ppm)',
+                          style: TextStyle(fontSize: 50))),
                   textColor: Colors.white70,
                 ),
               ),
@@ -205,32 +200,26 @@ class _AQIPageState extends State<AQIPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImax),
+                      color: CoordinatedColor(max),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('AQI',
+                          Text('$max (ppm)',
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.white70)),
-                          Text('$AQImax',
-                              style: const TextStyle(
-                                  fontSize: 50, color: Colors.white70))
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImin),
+                      color: CoordinatedColor(min),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('AQI',
+                          Text('$min (ppm)',
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.white70)),
-                          Text('$AQImin',
-                              style: const TextStyle(
-                                  fontSize: 50, color: Colors.white70))
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
@@ -247,8 +236,8 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(6.0),
               child: ListTile(
                 title: Center(
-                    child: Text('Air Quality Index',
-                        style: TextStyle(fontSize: 35))),
+                    child:
+                        Text('CO Index (ppm)', style: TextStyle(fontSize: 35))),
               ),
             ),
 
@@ -268,7 +257,7 @@ class _AQIPageState extends State<AQIPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('0-50',
+                    child: Text('0-35',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -292,7 +281,7 @@ class _AQIPageState extends State<AQIPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('51-100',
+                    child: Text('36-100',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -316,7 +305,7 @@ class _AQIPageState extends State<AQIPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('101-150',
+                    child: Text('101-200',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -340,7 +329,7 @@ class _AQIPageState extends State<AQIPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('151-250',
+                    child: Text('201-400',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -364,19 +353,16 @@ class _AQIPageState extends State<AQIPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('251-500',
+                    child: Text('400 & above',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
                 ],
               ),
             ),
->>>>>>> Stashed changes
           ],
         ),
       ),
     );
   }
-
-
 }
