@@ -4,8 +4,8 @@
 #include "mygpio.h"
 #include "epaper_driver.h"
 
-void epaper_setup();
+void screendriveEpaperSetup();
 
-void update_screen_task(void *pvParameter);
+void screendriverRunScreenTask(void *pvParameter);
 
 #endif

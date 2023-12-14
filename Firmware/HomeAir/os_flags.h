@@ -10,6 +10,7 @@
 #define APP_FLAG_IDLE (1 << 4)
 #define APP_FLAG_PUSH_BUFFER (1 << 5)
 #define APP_FLAG_DONE_TRANSMITTING (1 << 6)
+#define APP_FLAG_DOWNLOADING (1 << 7)
 
 #define BLE_FLAG_IDLE (1 << 0)
 #define BLE_FLAG_BUSY (1 << 1)
@@ -21,9 +22,10 @@
 #define BLE_FLAG_CLIENT_SUBSCRIBED (1 << 7)
 #define BLE_FLAG_FILE_EXISTS (1 << 8)
 #define BLE_FLAG_FILE_DONE (1 << 9)
+#define BLE_FLAG_WRITE_COMPLETE (1 << 10)
 
-extern EventGroupHandle_t appStateFG;
-extern EventGroupHandle_t BLEStateFG;
+extern EventGroupHandle_t appStateFlagGroup;
+extern EventGroupHandle_t BLEStateFlagGroup;
 
 void printCurrentBLEFlagStatus(void);
 void printCurrentAppFlagStatus(void);

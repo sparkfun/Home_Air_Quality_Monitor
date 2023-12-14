@@ -11,7 +11,7 @@
 
 */
 
-uint16_t get_ppm_25_AQI(float ppm25) {
+uint16_t getPPM25AQI(float ppm25) {
   /*
     Returns the AQI corresponding to given ppm25 concentration
   */
@@ -60,7 +60,7 @@ uint16_t get_ppm_25_AQI(float ppm25) {
           indexLow);
 }
 
-uint16_t get_ppm_10_AQI(float ppm10) {
+uint16_t getPPM10AQI(float ppm10) {
 
   float indexHigh, indexLow;
   float breakpointHigh, breakpointLow;
@@ -106,7 +106,7 @@ uint16_t get_ppm_10_AQI(float ppm10) {
           indexLow);
 }
 
-uint16_t get_CO_AQI(float CO) {
+uint16_t getCOAQI(float CO) {
 
   float indexHigh, indexLow;
   float breakpointHigh, breakpointLow;
@@ -152,11 +152,10 @@ uint16_t get_CO_AQI(float CO) {
           indexLow);
 }
 
-float get_composite_AQI(float ppm25, float ppm10, float CO) {
-  float AQI25, AQI10, AQICO;
-  AQI25 = get_ppm_25_AQI(ppm25);
-  AQI10 = get_ppm_10_AQI(ppm10);
-  AQICO = get_CO_AQI(CO);
+float aqiGetCompositeAQI(float ppm25, float ppm10, float CO) {
+  float AQI25 = getPPM25AQI(ppm25);
+  float AQI10 = getPPM10AQI(ppm10);
+  float AQICO = getCOAQI(CO);
 
   if (AQI25 > AQI10 && AQI25 > AQICO) {
     Serial.println("AQI Source: PPM 2.5");

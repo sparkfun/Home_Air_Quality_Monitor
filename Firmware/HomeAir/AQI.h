@@ -4,6 +4,6 @@
 #include <Arduino.h>
 #include <float16.h>
 
-float get_composite_AQI(float ppm25, float ppm10, float);
+float aqiGetCompositeAQI(float ppm25, float ppm10, float);
 
 #endif

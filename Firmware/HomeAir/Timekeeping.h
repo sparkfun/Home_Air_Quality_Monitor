@@ -18,6 +18,6 @@ extern bool timeConfigured;
 extern bool timeZoneConfigured;
 extern bool dateConfigured;
 
-void time_sync_task(void *pvParameter);
+void timekeepingSyncTask(void *pvParameter);
 
 #endif

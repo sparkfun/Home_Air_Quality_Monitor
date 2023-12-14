@@ -2,7 +2,7 @@
 #define BLESERVER_H
 
 // BLE Library
-#include <NimBLEDevice.h>
+#include <NimBLEDevice.h> // https://github.com/h2zero/NimBLE-Arduino
 // HomeAir files
 #include "SPIFFS.h"
 #include "Timekeeping.h"
@@ -18,8 +18,8 @@
 #define CHARACTERISTIC_UUID "588d30b0-33aa-4654-ab36-56dfa9974b13"
 const uint16_t BLE_BUFFER_LENGTH = 512;
 
-void setupBLE();
-void BLEServer_comm_task(void *);
+void BLEServerSetupBLE();
+void BLEServerCommunicationTask(void *);
 
 extern char BLEMessageBuffer[BLE_BUFFER_LENGTH];
 extern NimBLECharacteristic *pSensorCharacteristic;
