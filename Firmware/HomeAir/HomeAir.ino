@@ -6,11 +6,11 @@
   License: This code is public domain but you buy me a beer if you use this
   and we meet someday (Beerware license).
 
-  This is the firmware for the Sparkfun HomeAir air-quality monitoring system.
+  This is the firmware for the SparkFun HomeAir air-quality monitoring system.
 
-  The program uses BLE to interface with the accompanying mobile app and uses an
-  RTOS to manage communication, sensor reading, storage, and displaying live
-  info on the screen
+  The program uses BLE (Bluetooth Low-Energy) to interface with the accompanying
+  mobile app and uses an RTOS to manage communication, sensor reading, storage,
+  and displaying live info on the screen.
 */
 
 #include "HomeAir.h"
@@ -20,75 +20,76 @@ unsigned long epochTime;
 // float16 rawDataArray[RAW_DATA_ARRAY_SIZE];
 char BLEMessageBuffer[BLE_BUFFER_LENGTH];
 // Task handle definitions
-TaskHandle_t sensor_read_task_handle;
-TaskHandle_t spiffs_storage_task_handle, ble_comm_task_handle,
-  time_sync_task_handle;
+TaskHandle_t mygpioSensorReadTaskHandle;
+TaskHandle_t spiffsStorageTaskHandle, BLEServerCommunicationTaskHandle,
+    timekeepingSyncTaskHandle, screendriverRunScreenTaskHandle;
 // Flag Group definitions
-EventGroupHandle_t appStateFG;
-EventGroupHandle_t BLEStateFG;
+EventGroupHandle_t appStateFlagGroup;
+EventGroupHandle_t BLEStateFlagGroup;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex;
 // Preferences object creation
 Preferences preferences;
 
 void setup() {
+  Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
   Serial.write("Setting up...");
   // setupPreferences();
   // setupTime();
 
   // Setup Flag Event Groups
-  appStateFG = xEventGroupCreate();
-  BLEStateFG = xEventGroupCreate();
-  xEventGroupSetBits(appStateFG, APP_FLAG_SETUP);
+  appStateFlagGroup = xEventGroupCreate();
+  BLEStateFlagGroup = xEventGroupCreate();
+  xEventGroupSetBits(appStateFlagGroup, APP_FLAG_SETUP);
 
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 
   xTaskCreatePinnedToCore(
-    gpio_sensor_read_task,    /*Function to call*/
-    "Sensor Read Task",       /*Task name*/
-    10000,                    /*Stack size*/
-    NULL,                     /*Function parameters*/
-    5,                        /*Priority*/
-    &sensor_read_task_handle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);        /*Core ID*/
+      mygpioSensorReadTask,        /*Function to call*/
+      "Sensor Read Task",          /*Task name*/
+      10000,                       /*Stack size*/
+      NULL,                        /*Function parameters*/
+      5,                           /*Priority*/
+      &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    spiffs_storage_task,         /*Function to call*/
-    "SPIFFS Storage Task",       /*Task name*/
-    10000,                       /*Stack size*/
-    NULL,                        /*Function parameters*/
-    2,                           /*Priority*/
-    &spiffs_storage_task_handle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);           /*Core ID*/
+      spiffsStorageTask,        /*Function to call*/
+      "SPIFFS Storage Task",    /*Task name*/
+      10000,                    /*Stack size*/
+      NULL,                     /*Function parameters*/
+      2,                        /*Priority*/
+      &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);        /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    BLEServer_comm_task,      /*Function to call*/
-    "BLE Communication Task", /*Task name*/
-    10000,                    /*Stack size*/
-    NULL,                     /*Function parameters*/
-    1,                        /*Priority*/
-    &ble_comm_task_handle,    /*ptr to global TaskHandle_t*/
-    ARDUINO_PRIMARY_CORE);    /*Core ID*/
+      BLEServerCommunicationTask,        /*Function to call*/
+      "BLE Communication Task",          /*Task name*/
+      10000,                             /*Stack size*/
+      NULL,                              /*Function parameters*/
+      1,                                 /*Priority*/
+      &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_PRIMARY_CORE);             /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    time_sync_task,         /*Function to call*/
-    "Time Sync Task",       /*Task name*/
-    10000,                  /*Stack size*/
-    NULL,                   /*Function parameters*/
-    1,                      /*Priority*/
-    &time_sync_task_handle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);      /*Core ID*/
-    
+      timekeepingSyncTask,        /*Function to call*/
+      "Time Sync Task",           /*Task name*/
+      10000,                      /*Stack size*/
+      NULL,                       /*Function parameters*/
+      1,                          /*Priority*/
+      &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);          /*Core ID*/
+
   xTaskCreatePinnedToCore(
-    update_screen_task,         /*Function to call*/
-    "Epaper Update Task",       /*Task name*/
-    10000,                  /*Stack size*/
-    NULL,                   /*Function parameters*/
-    10,                      /*Priority*/
-    &time_sync_task_handle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);      /*Core ID*/
+      screendriverRunScreenTask,        /*Function to call*/
+      "Epaper Update Task",             /*Task name*/
+      10000,                            /*Stack size*/
+      NULL,                             /*Function parameters*/
+      10,                               /*Priority*/
+      &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);                /*Core ID*/
 }
 // All loop functionality is completed with tasks defined in setup()
 void loop() {}
@@ -97,4 +98,5 @@ void setupPreferences() {
   // Preferences is good for single KVP storage.
   // We want to use SPIFFS for large storage
   // bool status = preferences.begin("my_app", false);
+  // Currently not used, may be used for user customization options
 }

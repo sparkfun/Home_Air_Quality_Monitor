@@ -22,6 +22,6 @@ void deleteFile(fs::FS &fs, const char *path);
 void testFileIO(fs::FS &fs, const char *path);
 void deleteAllFiles(fs::FS &fs);
 
-void spiffs_storage_task(void *pvParameter);
+void spiffsStorageTask(void *pvParameter);
 
 #endif

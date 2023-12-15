@@ -2,14 +2,14 @@
 
 Screen_EPD_EXT3 deviceScreen(eScreen_EPD_EXT3_213, breadBoardBreakout);
 
-void epaper_setup() {
+void screendriveEpaperSetup() {
   // deviceScreen.begin();
   deviceScreen.begin();
   deviceScreen.clearScreen();
 }
 
-void update_screen_task(void *pvParameter){
-  epaper_setup();
+void screendriverRunScreenTask(void *pvParameter){
+  screendriveEpaperSetup();
   while(1) {
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       deviceScreen.clear();

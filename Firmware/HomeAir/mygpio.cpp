@@ -8,14 +8,14 @@ SensirionI2CSen5x sen5x;
 // Global Variables
 float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
-void gpio_sensor_read_task(void *pvParameter) {
+void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
   while (1) {
     Serial.print("Sensor Read from core ");
     Serial.println(xPortGetCoreID());
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       // Acquire mutex
-      read_all_sensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+      mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
       xSemaphoreGive(rawDataMutex); // Release mutex
       // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
       //   Serial.print(rawDataArray[i]);
@@ -121,7 +121,7 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
   return -1;
 }
 
-void read_all_sensors(float *ret_array, uint16_t array_size) {
+void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   // Reads all sensors and outputs into array
   /*
   0: CO2 PPM - PASCO2
@@ -150,7 +150,7 @@ void read_all_sensors(float *ret_array, uint16_t array_size) {
   // Serial.print("NG ppm: ");
   // Serial.println(ret_array[10]);
   ret_array[AQI] =
-      get_composite_AQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
+      aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
 }
 
 void setupGPIO() {

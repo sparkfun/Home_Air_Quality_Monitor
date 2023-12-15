@@ -52,8 +52,8 @@ const uint8_t pin_NGInput = 38;
 const uint8_t pin_COInput = 39;
 
 void setupGPIO(void);
-void read_all_sensors(float *ret_array, uint16_t array_size);
-void gpio_sensor_read_task(void *pvParameter);
+void mygpioReadAllSensors(float *ret_array, uint16_t array_size);
+void mygpioSensorReadTask(void *pvParameter);
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];
 extern SemaphoreHandle_t rawDataMutex;
