@@ -32,7 +32,8 @@ SemaphoreHandle_t rawDataMutex;
 Preferences preferences;
 
 void setup() {
-  Serial0.begin(115200);
+  Serial.setTxTimeoutMs(0);
+  Serial.begin(115200);
   Serial.write("Setting up...");
   // setupPreferences();
   // setupTime();
