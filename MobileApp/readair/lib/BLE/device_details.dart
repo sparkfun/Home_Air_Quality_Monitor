@@ -30,13 +30,26 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   bool isSubscribed = false;
   int _connectionStep = 0;
   BluetoothCharacteristic? writeCharacteristic;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _discoverServices();
+  //   _subscribeToDevice();
+
+  //   //_setupPeriodicReadCommand();
+  //   _latestReceivedPacket = '';
+  // }
+
   @override
   void initState() {
     super.initState();
-    _discoverServices();
-    _subscribeToDevice();
+    initializeConnection();
+  }
 
-    //_setupPeriodicReadCommand();
+  Future<void> initializeConnection() async {
+    await _discoverServices();
+    await _setupNotification();
+    await _initializeEsp32Connection();
     _latestReceivedPacket = '';
   }
 
@@ -68,17 +81,31 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     await _subscribeToDevice();
   }
 
-  Future<void> _discoverServices() async {
-    List<BluetoothService> services = await widget.device.discoverServices();
-    for (BluetoothService service in services) {
+  // Future<void> _discoverServices() async {
+  //   List<BluetoothService> services = await widget.device.discoverServices();
+  //   for (BluetoothService service in services) {
+  //     var characteristics = service.characteristics;
+  //     for (BluetoothCharacteristic characteristic in characteristics) {
+  //       if (characteristic.uuid ==
+  //           Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
+  //         writeCharacteristic = characteristic;
+  //         print("Write characteristic found");
+  //         // Once found, you can break out of the loop
+  //         return;
+  //       }
+  //     }
+  //   }
+  // }
+
+    Future<void> _discoverServices() async {
+    _services = await widget.device.discoverServices();
+    for (BluetoothService service in _services) {
       var characteristics = service.characteristics;
       for (BluetoothCharacteristic characteristic in characteristics) {
-        if (characteristic.uuid ==
-            Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
+        if (characteristic.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
           writeCharacteristic = characteristic;
           print("Write characteristic found");
-          // Once found, you can break out of the loop
-          return;
+          break;
         }
       }
     }
@@ -177,7 +204,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       },
     );
   }
-
+  
   Future<void> _customEsp32ConnectionSequence() async {
     await _initializeEsp32Connection();
     await Future.delayed(Duration(seconds: 3));
