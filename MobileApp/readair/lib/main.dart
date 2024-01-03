@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:readair/BLE/ble_setup.dart';
+import 'package:readair/BLE/ble_states.dart';
 import 'package:readair/data/packet.dart';
 import 'dart:io';
 
@@ -12,6 +14,15 @@ void main() {
   Get.put(BluetoothController());
   runApp(const MyApp());
 }
+
+// void main() {
+//   runApp(
+//     ChangeNotifierProvider(
+//       create: (context) => BluetoothConnectionProvider(),
+//       child: const MyApp(), // Your main app widget
+//     ),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

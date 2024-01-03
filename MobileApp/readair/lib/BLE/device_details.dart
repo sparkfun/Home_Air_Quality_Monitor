@@ -30,28 +30,25 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   bool isSubscribed = false;
   int _connectionStep = 0;
   BluetoothCharacteristic? writeCharacteristic;
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _discoverServices();
-  //   _subscribeToDevice();
-
-  //   //_setupPeriodicReadCommand();
-  //   _latestReceivedPacket = '';
-  // }
-
+  BluetoothCharacteristic? readCharacteristic;
   @override
   void initState() {
     super.initState();
-    initializeConnection();
+    _discoverServices();
   }
 
-  Future<void> initializeConnection() async {
-    await _discoverServices();
-    await _setupNotification();
-    await _initializeEsp32Connection();
-    _latestReceivedPacket = '';
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   initializeConnection();
+  // }
+
+  // Future<void> initializeConnection() async {
+  //   await _discoverServices();
+  //   await _setupNotification();
+  //   await _initializeEsp32Connection();
+  //   _latestReceivedPacket = '';
+  // }
 
   @override
   void dispose() {
@@ -97,15 +94,48 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   //   }
   // }
 
-    Future<void> _discoverServices() async {
+  void _rapidReadCommand() async {
+    _sendReadCommand();
+    await Future.delayed(Duration(seconds: 3));
+
+    const rapidReadInterval = Duration(milliseconds: 100); // Adjust this interval as needed for faster reading
+    _timer?.cancel(); 
+
+    _timer = Timer.periodic(rapidReadInterval, (Timer t) async {
+      await _readDataFromEsp32(); 
+    
+    });
+  }
+
+Future<void> _readDataFromEsp32() async {
+  if (writeCharacteristic != null) {
+    try {
+      var value = await writeCharacteristic!.read(); 
+      print("Data read successfully"); 
+    } catch (e) {
+      print("Error reading from ESP32: $e"); 
+    }
+  } else {
+    print("Read characteristic not found"); 
+  }
+}
+
+
+
+  Future<void> _discoverServices() async {
     _services = await widget.device.discoverServices();
     for (BluetoothService service in _services) {
       var characteristics = service.characteristics;
       for (BluetoothCharacteristic characteristic in characteristics) {
-        if (characteristic.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
+        if (characteristic.uuid ==
+            Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
           writeCharacteristic = characteristic;
           print("Write characteristic found");
           break;
+        }
+        if (characteristic.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
+          readCharacteristic = characteristic;
+          print("Read characteristic found");
         }
       }
     }
@@ -131,7 +161,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           _processDataPacket(receivedData);
 
           // Show a notification message
-          _showNotification("Data received from ESP32");
+          //_showNotification("Data received from ESP32");
         });
         setState(() {
           isSubscribed = true;
@@ -172,10 +202,10 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           print(packetData);
           DatabaseService.instance.insertOrUpdateDataPacket(packet);
         } else {
-          _showMessage("Received data does not match expected format.");
+          //_showMessage("Received data does not match expected format.");
         }
       } catch (e) {
-        _showMessage("Error processing packet: $e");
+        print("Error processing packet: $e");
       }
     }
   }
@@ -204,7 +234,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       },
     );
   }
-  
+
   Future<void> _customEsp32ConnectionSequence() async {
     await _initializeEsp32Connection();
     await Future.delayed(Duration(seconds: 3));
@@ -246,7 +276,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           _latestReceivedPacket = receivedData;
           _processDataPacket(receivedData);
 
-          _showNotification("Data received from ESP32");
+          //_showNotification("Data received from ESP32");
 
           _receiveAndReadData();
         });
@@ -298,7 +328,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
 
   Future<void> _autoReads() async {
     await _sendReadCommand();
-    //await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 3));
 
     _setupNotificationForImmediateRead();
   }
@@ -407,7 +437,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           String receivedData = String.fromCharCodes(value);
           _latestReceivedPacket = receivedData;
           _processDataPacket(receivedData);
-          _showNotification("Data received from ESP32");
+          //_showNotification("Data received from ESP32");
         });
 
         setState(() {
@@ -453,17 +483,16 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     return byteData.buffer.asUint8List();
   }
 
-Future<void> sendAssetFile() async {
-  try {
-    List<int> fileBytes = await loadBinFile();
-    Uint8List uint8list = Uint8List.fromList(fileBytes);
-    File tempFile = File.fromRawPath(uint8list);
-    await sendFileInChunks(tempFile);
-  } catch (e) {
-    _showMessage("Error loading asset file: $e");
+  Future<void> sendAssetFile() async {
+    try {
+      List<int> fileBytes = await loadBinFile();
+      Uint8List uint8list = Uint8List.fromList(fileBytes);
+      File tempFile = File.fromRawPath(uint8list);
+      await sendFileInChunks(tempFile);
+    } catch (e) {
+      _showMessage("Error loading asset file: $e");
+    }
   }
-}
-
 
   Future<void> pickAndSendFile() async {
     FilePickerResult? result = await FilePicker.platform
@@ -552,13 +581,13 @@ Future<void> sendAssetFile() async {
                 child: Text('Initialize ESP32 Connection'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: _customEsp32ConnectionSequence,
-                child: Text('Timed Read initialization'),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: _customEsp32ConnectionSequence,
+            //     child: Text('Timed Read initialization'),
+            //   ),
+            // ),
             // Padding(
             //   padding: const EdgeInsets.all(8.0),
             //   child: ElevatedButton(
@@ -585,7 +614,7 @@ Future<void> sendAssetFile() async {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: _autoReadOnDataReceive,
-                child: Text('Read on Data Receive'),
+                child: Text('Initialize then start reading'),
               ),
             ),
             Padding(
@@ -595,20 +624,27 @@ Future<void> sendAssetFile() async {
                 child: Text('Start Reading'),
               ),
             ),
+                        Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: _rapidReadCommand,
+                child: Text('Read Every 100 miliseconds'),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () {
                   _sendData("UPDAT");
                 },
-                child: Text('Update'),
+                child: Text('Send UPDAT'),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: sendAssetFile, // Change this
-                child: Text('Send Asset File'),
+                onPressed: sendAssetFile, 
+                child: Text('Send Bin'),
               ),
             ),
 
