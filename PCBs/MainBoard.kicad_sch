@@ -2669,66 +2669,6 @@
         )
       )
     )
-    (symbol "SparkFun-Capacitor:1.0uF_0402_16V_10%" (pin_numbers hide) (pin_names (offset 0.254)) (in_bom yes) (on_board yes)
-      (property "Reference" "C" (at 0.635 2.54 0)
-        (effects (font (size 1.27 1.27)) (justify left))
-      )
-      (property "Value" "1.0uF" (at 0.635 -2.54 0)
-        (effects (font (size 1.27 1.27)) (justify left))
-      )
-      (property "Footprint" "SparkFun-Capacitor:C_0402_1005Metric" (at 0 -11.43 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "Datasheet" "https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf" (at 0 -13.97 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "PROD_ID" "CAP-14969" (at -1.27 -16.51 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "Voltage" "16V" (at 0 -6.35 0)
-        (effects (font (size 1.27 1.27)))
-      )
-      (property "Tolerance" "10%" (at 0 -8.89 0)
-        (effects (font (size 1.27 1.27)))
-      )
-      (property "ki_keywords" "cap capacitor" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_description" "Unpolarized capacitor" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_fp_filters" "C_*" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (symbol "1.0uF_0402_16V_10%_0_1"
-        (polyline
-          (pts
-            (xy -2.032 -0.762)
-            (xy 2.032 -0.762)
-          )
-          (stroke (width 0.508) (type default))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy -2.032 0.762)
-            (xy 2.032 0.762)
-          )
-          (stroke (width 0.508) (type default))
-          (fill (type none))
-        )
-      )
-      (symbol "1.0uF_0402_16V_10%_1_1"
-        (pin passive line (at 0 3.81 270) (length 2.794)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "1" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at 0 -3.81 90) (length 2.794)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "2" (effects (font (size 1.27 1.27))))
-        )
-      )
-    )
     (symbol "SparkFun-Capacitor:1.0uF_0603_16V_10%" (pin_numbers hide) (pin_names (offset 0.254)) (in_bom yes) (on_board yes)
       (property "Reference" "C" (at 0.635 2.54 0)
         (effects (font (size 1.27 1.27)) (justify left))
@@ -6196,9 +6136,6 @@
   (junction (at 171.45 45.72) (diameter 0) (color 0 0 0 0)
     (uuid 10067e34-0fbc-49eb-8a41-ac1586f008f4)
   )
-  (junction (at 142.24 128.27) (diameter 0) (color 0 0 0 0)
-    (uuid 2920d5cd-156a-4263-b612-e834271f48c1)
-  )
   (junction (at 351.79 53.34) (diameter 0) (color 0 0 0 0)
     (uuid 2c9e33e4-b87b-4fb3-8407-5f50e5f8b9f7)
   )
@@ -6283,6 +6220,7 @@
   (no_connect (at 133.35 142.24) (uuid 506f92ca-d8eb-4875-885b-8d04797848cf))
   (no_connect (at 111.76 265.43) (uuid 6af297d4-ce8d-47fd-8c24-da50815b0f26))
   (no_connect (at 133.35 172.72) (uuid 70d1b3dc-38f6-4ae8-bc91-7562b2054f88))
+  (no_connect (at 80.01 78.74) (uuid 753d0f7c-dd3d-4b12-ad48-ab3f0b2ac761))
   (no_connect (at 133.35 165.1) (uuid 78fcf7cf-9c6c-4b6e-b116-49415a5b7fca))
   (no_connect (at 133.35 175.26) (uuid 817f2f6e-da05-4f33-ad4c-41d187bce54f))
   (no_connect (at 133.35 147.32) (uuid 8205947c-2c1c-47ba-bf63-b7dc94d6a0de))
@@ -6290,6 +6228,7 @@
   (no_connect (at 133.35 130.81) (uuid 99e43d18-1222-459a-b565-a6652531d4cd))
   (no_connect (at 111.76 270.51) (uuid 9bb88955-14a5-42e5-a0cd-1307e0c43664))
   (no_connect (at 133.35 162.56) (uuid 9d079a48-a98b-452d-9555-26676ccd68f1))
+  (no_connect (at 92.71 78.74) (uuid aaab26b1-1363-44aa-8dbb-5a8ad0bbac27))
   (no_connect (at 241.3 196.85) (uuid b57bc77e-8c9b-4bc7-ba2d-f82a50e55f6b))
   (no_connect (at 241.3 209.55) (uuid be98f8bc-6327-4937-8c39-47da5b6f13fd))
   (no_connect (at 133.35 180.34) (uuid ca5e4d23-717b-4925-ab20-c528d58eeadf))
@@ -6461,10 +6400,6 @@
     (stroke (width 0) (type default))
     (uuid 48ee2d0e-c670-48cc-a08f-664552318fa5)
   )
-  (wire (pts (xy 133.35 57.15) (xy 133.35 54.61))
-    (stroke (width 0) (type default))
-    (uuid 4f179f1f-cc29-4873-aa30-616ad0e0dc02)
-  )
   (wire (pts (xy 71.12 76.2) (xy 71.12 78.74))
     (stroke (width 0) (type default))
     (uuid 4f50d428-14e3-46e1-8904-022a02c5cb80)
@@ -6472,10 +6407,6 @@
   (wire (pts (xy 274.32 54.61) (xy 256.54 54.61))
     (stroke (width 0) (type default))
     (uuid 505f6651-6c8a-48b9-a78e-a048c661295a)
-  )
-  (wire (pts (xy 133.35 38.1) (xy 133.35 39.37))
-    (stroke (width 0) (type default))
-    (uuid 50cbe718-8c81-40aa-94aa-b819b48b171a)
   )
   (wire (pts (xy 345.44 208.28) (xy 346.71 208.28))
     (stroke (width 0) (type default))
@@ -6649,10 +6580,6 @@
     (stroke (width 0) (type default))
     (uuid 8a1905e6-2663-406c-82b4-43e935cdff41)
   )
-  (wire (pts (xy 142.24 128.27) (xy 143.51 128.27))
-    (stroke (width 0) (type default))
-    (uuid 8afa00ec-9ce2-423a-9977-aef3f6112dc3)
-  )
   (wire (pts (xy 392.43 73.66) (xy 392.43 74.93))
     (stroke (width 0) (type default))
     (uuid 8bc591e0-17a5-4313-82df-9a9e6aaabd62)
@@ -6713,7 +6640,7 @@
     (stroke (width 0) (type default))
     (uuid 9e61ca1e-065a-4245-b0ce-c1bb4e436962)
   )
-  (wire (pts (xy 133.35 128.27) (xy 142.24 128.27))
+  (wire (pts (xy 133.35 128.27) (xy 143.51 128.27))
     (stroke (width 0) (type default))
     (uuid a18befb2-4c1d-4415-a453-b1bb9249969e)
   )
@@ -6941,10 +6868,6 @@
     (stroke (width 0) (type default))
     (uuid e7769779-f89f-43b7-80e3-7f49d37ca9e1)
   )
-  (wire (pts (xy 142.24 119.38) (xy 142.24 128.27))
-    (stroke (width 0) (type default))
-    (uuid e9d9cabb-6d40-4483-8b30-328f630c8024)
-  )
   (wire (pts (xy 86.36 78.74) (xy 86.36 81.28))
     (stroke (width 0) (type default))
     (uuid ecaef187-1111-491f-87e0-d880133cf288)
@@ -6956,10 +6879,6 @@
   (wire (pts (xy 337.82 212.09) (xy 337.82 210.82))
     (stroke (width 0) (type default))
     (uuid ef144c37-9e85-4442-b971-f220fe824e09)
-  )
-  (wire (pts (xy 133.35 68.58) (xy 133.35 64.77))
-    (stroke (width 0) (type default))
-    (uuid f15bb467-2822-4eff-9d6e-e7ffb6768ab3)
   )
   (wire (pts (xy 290.83 44.45) (xy 290.83 45.72))
     (stroke (width 0) (type default))
@@ -7353,7 +7272,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 245.11 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00bae01e-5f35-4df5-8212-55c5bd9d8f48)
-    (property "Reference" "#PWR032" (at 245.11 72.39 0)
+    (property "Reference" "#PWR030" (at 245.11 72.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 245.11 69.85 0)
@@ -7369,7 +7288,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR032") (unit 1)
+          (reference "#PWR030") (unit 1)
         )
       )
       (project "co2"
@@ -7458,7 +7377,7 @@
   (symbol (lib_id "SparkFun-Jumper:SolderJumper_2_Bridged") (at 392.43 52.07 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0b9836c3-1782-412a-9631-b6528d8e43a6)
-    (property "Reference" "JP4" (at 390.398 52.07 0)
+    (property "Reference" "JP3" (at 390.398 52.07 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "~" (at 394.97 52.07 0)
@@ -7475,7 +7394,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "JP4") (unit 1)
+          (reference "JP3") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -7638,8 +7557,8 @@
     (property "PROD_ID" "SWCH-13896" (at 45.72 236.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 4cbf41d1-b386-4993-a1b7-a1d1be80bbaa))
-    (pin "2" (uuid 013c684f-7b6c-4695-a1e4-d2037374a1d0))
+    (pin "1" (uuid b26e5810-2740-495e-9f3b-dffca65b385f))
+    (pin "2" (uuid f531fa88-9f80-43cf-addd-088d486cf550))
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
@@ -7652,7 +7571,7 @@
   (symbol (lib_id "SparkFun-DiscreteSemi:D_Schottky_0.5A_40V_0.42V") (at 207.01 54.61 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 18ea9b37-a880-414e-ba49-c4d21dda7dda)
-    (property "Reference" "D2" (at 207.3275 43.18 0)
+    (property "Reference" "D1" (at 207.3275 43.18 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "0.5A" (at 207.3275 45.72 0)
@@ -7678,7 +7597,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "D2") (unit 1)
+          (reference "D1") (unit 1)
         )
       )
       (project "co2"
@@ -7692,7 +7611,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 233.68 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 20ca3e40-5d3f-41d4-8e87-fdcf10b31df1)
-    (property "Reference" "#PWR028" (at 233.68 72.39 0)
+    (property "Reference" "#PWR026" (at 233.68 72.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 233.68 69.85 0)
@@ -7708,7 +7627,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR028") (unit 1)
+          (reference "#PWR026") (unit 1)
         )
       )
       (project "co2"
@@ -7722,7 +7641,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 190.5 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 21a840b0-14f9-4994-884d-7914c0cf5aea)
-    (property "Reference" "#PWR026" (at 190.5 72.39 0)
+    (property "Reference" "#PWR024" (at 190.5 72.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 190.5 69.85 0)
@@ -7738,7 +7657,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR026") (unit 1)
+          (reference "#PWR024") (unit 1)
         )
       )
       (project "co2"
@@ -7913,7 +7832,7 @@
   (symbol (lib_id "SparkFun-Resistor:47k_0603") (at 224.79 59.69 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4088ebb0-56f7-4e63-8c0e-d956432ab032)
-    (property "Reference" "R6" (at 227.33 58.42 90)
+    (property "Reference" "R5" (at 227.33 58.42 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "47k" (at 227.33 60.96 90)
@@ -7933,7 +7852,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R6") (unit 1)
+          (reference "R5") (unit 1)
         )
       )
       (project "co2"
@@ -7972,7 +7891,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+5V") (at 243.84 133.35 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 43a66c6e-5b2b-4c62-b460-5d4be29e4332)
-    (property "Reference" "#PWR031" (at 243.84 137.16 0)
+    (property "Reference" "#PWR029" (at 243.84 137.16 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 243.84 128.27 0)
@@ -7988,7 +7907,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR031") (unit 1)
+          (reference "#PWR029") (unit 1)
         )
       )
     )
@@ -8200,7 +8119,7 @@
   (symbol (lib_id "SparkFun-Resistor:10k_0603") (at 266.7 143.51 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 504b97aa-1b80-4b89-a764-ea3c05204819)
-    (property "Reference" "R8" (at 269.24 142.24 90)
+    (property "Reference" "R7" (at 269.24 142.24 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10k" (at 269.24 144.78 90)
@@ -8220,7 +8139,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R8") (unit 1)
+          (reference "R7") (unit 1)
         )
       )
     )
@@ -8291,7 +8210,7 @@
   (symbol (lib_id "power:GND") (at 337.82 212.09 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 59951f16-ba7f-4232-bd51-792b818d84f0)
-    (property "Reference" "#PWR048" (at 337.82 218.44 0)
+    (property "Reference" "#PWR046" (at 337.82 218.44 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 337.82 217.17 0)
@@ -8307,7 +8226,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR048") (unit 1)
+          (reference "#PWR046") (unit 1)
         )
       )
     )
@@ -8316,7 +8235,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+5V") (at 345.44 199.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 59f64d17-5257-4772-a35d-857d39821159)
-    (property "Reference" "#PWR052" (at 345.44 203.2 0)
+    (property "Reference" "#PWR050" (at 345.44 203.2 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 345.44 194.31 0)
@@ -8332,7 +8251,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR052") (unit 1)
+          (reference "#PWR050") (unit 1)
         )
       )
     )
@@ -8366,7 +8285,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 224.79 74.93 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5c4e5927-5166-42ad-a3ce-24b581eda4ce)
-    (property "Reference" "#PWR027" (at 224.79 81.28 0)
+    (property "Reference" "#PWR025" (at 224.79 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 224.79 78.74 0)
@@ -8382,7 +8301,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR027") (unit 1)
+          (reference "#PWR025") (unit 1)
         )
       )
       (project "co2"
@@ -8396,7 +8315,7 @@
   (symbol (lib_id "power:GND") (at 133.35 113.03 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f429559-3208-48c7-ace1-f763bb784bd1)
-    (property "Reference" "#PWR020" (at 133.35 119.38 0)
+    (property "Reference" "#PWR018" (at 133.35 119.38 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 133.35 118.11 0)
@@ -8412,7 +8331,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR020") (unit 1)
+          (reference "#PWR018") (unit 1)
         )
       )
     )
@@ -8450,7 +8369,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 161.29 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6221a661-6663-429f-b20d-c0cd46a52015)
-    (property "Reference" "#PWR024" (at 161.29 69.85 0)
+    (property "Reference" "#PWR022" (at 161.29 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 161.29 67.31 0)
@@ -8466,7 +8385,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR024") (unit 1)
+          (reference "#PWR022") (unit 1)
         )
       )
       (project "co2"
@@ -8480,7 +8399,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 179.07 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 628da687-ba72-4307-afe3-ecef67d02605)
-    (property "Reference" "#PWR025" (at 179.07 46.99 0)
+    (property "Reference" "#PWR023" (at 179.07 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 179.07 38.1 0)
@@ -8496,7 +8415,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR025") (unit 1)
+          (reference "#PWR023") (unit 1)
         )
       )
     )
@@ -8505,7 +8424,7 @@
   (symbol (lib_id "SparkFun-Resistor:5.62k_0603") (at 224.79 69.85 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 677f9b42-6588-41aa-a47f-a9cc8ab7897f)
-    (property "Reference" "R7" (at 227.33 68.58 90)
+    (property "Reference" "R6" (at 227.33 68.58 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "5.62k" (at 227.33 71.12 90)
@@ -8525,7 +8444,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R7") (unit 1)
+          (reference "R6") (unit 1)
         )
       )
       (project "co2"
@@ -8539,7 +8458,7 @@
   (symbol (lib_id "power:GND") (at 290.83 72.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 697152bd-c014-430e-b3b7-daed42f11d21)
-    (property "Reference" "#PWR043" (at 290.83 78.74 0)
+    (property "Reference" "#PWR041" (at 290.83 78.74 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 290.83 77.47 0)
@@ -8555,7 +8474,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR043") (unit 1)
+          (reference "#PWR041") (unit 1)
         )
       )
     )
@@ -8564,7 +8483,7 @@
   (symbol (lib_id "power:GND") (at 266.7 148.59 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6aa85e8b-d52a-4cee-85c6-3b1d3e633bf3)
-    (property "Reference" "#PWR034" (at 266.7 154.94 0)
+    (property "Reference" "#PWR032" (at 266.7 154.94 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 266.7 153.67 0)
@@ -8580,7 +8499,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR034") (unit 1)
+          (reference "#PWR032") (unit 1)
         )
       )
     )
@@ -8589,7 +8508,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 351.79 52.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6c491258-d747-4d60-bcb4-8b5bc5f661fd)
-    (property "Reference" "#PWR053" (at 351.79 55.88 0)
+    (property "Reference" "#PWR051" (at 351.79 55.88 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 351.79 46.99 0)
@@ -8605,7 +8524,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR053") (unit 1)
+          (reference "#PWR051") (unit 1)
         )
       )
     )
@@ -8614,7 +8533,7 @@
   (symbol (lib_id "SparkFun-Resistor:2.2k_0603") (at 278.13 162.56 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6d4c5a72-98a0-4be9-b9c4-1f79adc99f38)
-    (property "Reference" "R9" (at 280.67 161.29 90)
+    (property "Reference" "R8" (at 280.67 161.29 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "2.2k" (at 280.67 163.83 90)
@@ -8634,7 +8553,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R9") (unit 1)
+          (reference "R8") (unit 1)
         )
       )
     )
@@ -8675,7 +8594,7 @@
   (symbol (lib_id "SparkFun-Resistor:2.2k_0603") (at 287.02 162.56 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6dd23b62-ccd6-4a46-8123-978c56090b60)
-    (property "Reference" "R10" (at 289.56 161.29 90)
+    (property "Reference" "R9" (at 289.56 161.29 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "2.2k" (at 289.56 163.83 90)
@@ -8695,7 +8614,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R10") (unit 1)
+          (reference "R9") (unit 1)
         )
       )
     )
@@ -8733,7 +8652,7 @@
   (symbol (lib_id "power:+3.3V") (at 392.43 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 72518fa8-7a33-4916-8a17-55e2d1eb9522)
-    (property "Reference" "#PWR057" (at 392.43 50.8 0)
+    (property "Reference" "#PWR055" (at 392.43 50.8 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 392.43 43.434 0)
@@ -8749,7 +8668,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR057") (unit 1)
+          (reference "#PWR055") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -8785,31 +8704,6 @@
     )
   )
 
-  (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 142.24 119.38 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid 762eda69-2f01-4887-b6ce-4e1d5548ef7a)
-    (property "Reference" "#PWR021" (at 142.24 123.19 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Value" "+3.3V" (at 142.24 114.3 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Footprint" "" (at 142.24 119.38 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "" (at 142.24 119.38 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid e32274de-f944-4ff5-878f-ac5f2411bc20))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR021") (unit 1)
-        )
-      )
-    )
-  )
-
   (symbol (lib_id "power:GND") (at 90.17 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7725d393-fc38-4f89-9d3a-15ae1c0971a1)
@@ -8835,40 +8729,6 @@
     )
   )
 
-  (symbol (lib_id "SparkFun-LED:LED_Red_0603") (at 133.35 60.96 90) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid 78910173-d067-4664-a979-dba02794c626)
-    (property "Reference" "D1" (at 137.16 61.2775 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "Red" (at 137.16 63.8175 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "SparkFun-LED:LED_0603_1608Metric" (at 139.7 60.96 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "https://docs.broadcom.com/docs/AV02-0551EN" (at 142.24 62.23 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "PROD_ID" "DIO-17976" (at 137.922 60.96 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid a95e8400-9b3a-48b7-9542-803efbf06dc5))
-    (pin "2" (uuid 7bf0b921-0233-4d52-8ef8-575566a75d1b))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "D1") (unit 1)
-        )
-      )
-      (project "SparkFun_Thing_Plus_ESP32-S3"
-        (path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
-          (reference "D5") (unit 1)
-        )
-      )
-    )
-  )
-
   (symbol (lib_id "SparkFun-Switch:SPST_Momentary_SMD_4.6x2.8mm_h2.5mm") (at 39.37 142.24 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7aaa8baf-cd25-4603-85da-e1d4eddac4ec)
@@ -8887,8 +8747,8 @@
     (property "PROD_ID" "SWCH-15606" (at 46.99 142.24 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid ace37251-036a-4298-9c7b-82e53b366661))
-    (pin "2" (uuid ba62eb8d-c30e-4f85-949a-14d8eed5d0c9))
+    (pin "1" (uuid 0e1c3a4b-6d45-4532-84da-89f0f436472e))
+    (pin "2" (uuid a7cfc48a-22d9-4b5d-9623-9d5a966e9da9))
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
@@ -8898,35 +8758,10 @@
     )
   )
 
-  (symbol (lib_id "SparkFun-PowerSymbol:+5V") (at 133.35 38.1 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid 7e020e00-749b-47d3-b76d-a0692a59633e)
-    (property "Reference" "#PWR018" (at 133.35 41.91 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Value" "+5V" (at 133.35 33.02 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Footprint" "" (at 133.35 38.1 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "" (at 133.35 38.1 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid 648b15d6-34dc-48fd-9234-cd722bc1d838))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR018") (unit 1)
-        )
-      )
-    )
-  )
-
   (symbol (lib_id "SparkFun-Resistor:10k_0603") (at 342.9 144.78 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 82b9ab9a-3708-445b-beb3-de50c4f02d74)
-    (property "Reference" "R12" (at 345.44 143.51 90)
+    (property "Reference" "R11" (at 345.44 143.51 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10k" (at 345.44 146.05 90)
@@ -8946,7 +8781,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R12") (unit 1)
+          (reference "R11") (unit 1)
         )
       )
     )
@@ -8955,7 +8790,7 @@
   (symbol (lib_id "power:GND") (at 392.43 74.93 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 82faa6c1-23b5-4158-9567-a2b3c8765317)
-    (property "Reference" "#PWR058" (at 392.43 81.28 0)
+    (property "Reference" "#PWR056" (at 392.43 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 392.43 78.74 0)
@@ -8971,7 +8806,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR058") (unit 1)
+          (reference "#PWR056") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -9048,7 +8883,7 @@
   (symbol (lib_id "power:GND") (at 293.37 175.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 87473260-efd6-45a0-83e9-3e03459c96e5)
-    (property "Reference" "#PWR044" (at 293.37 181.61 0)
+    (property "Reference" "#PWR042" (at 293.37 181.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 293.37 180.34 0)
@@ -9064,7 +8899,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR044") (unit 1)
+          (reference "#PWR042") (unit 1)
         )
       )
     )
@@ -9073,7 +8908,7 @@
   (symbol (lib_id "power:+12V") (at 279.4 199.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 88587de2-b9e3-446f-83ff-8f86c33a50ee)
-    (property "Reference" "#PWR040" (at 279.4 203.2 0)
+    (property "Reference" "#PWR038" (at 279.4 203.2 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+12V" (at 279.4 195.58 0)
@@ -9089,7 +8924,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR040") (unit 1)
+          (reference "#PWR038") (unit 1)
         )
       )
     )
@@ -9140,35 +8975,6 @@
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
           (reference "#PWR03") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "SparkFun-Resistor:10k_0603") (at 133.35 50.8 90) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid 8f444c7c-36eb-4cf9-a70c-ba9dc3214ef1)
-    (property "Reference" "R4" (at 135.89 49.53 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "10k" (at 135.89 52.07 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "SparkFun-Resistor:R_0603_1608Metric" (at 137.668 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "https://www.vishay.com/docs/20035/dcrcwe3.pdf" (at 140.97 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "PROD_ID" "RES-00824" (at 139.7 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid f40488ae-1370-45cf-9e14-ebfdab2973c2))
-    (pin "2" (uuid 3ec76f35-ddad-4ae8-8fa6-7535c82c7f1d))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R4") (unit 1)
         )
       )
     )
@@ -9283,7 +9089,7 @@
   (symbol (lib_id "SparkFun-Resistor:10k_0603") (at 392.43 60.96 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9c5dbf4d-6d05-471c-83b8-ff026403b490)
-    (property "Reference" "R13" (at 394.97 59.69 90)
+    (property "Reference" "R12" (at 394.97 59.69 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10k" (at 394.97 62.23 90)
@@ -9303,7 +9109,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R13") (unit 1)
+          (reference "R12") (unit 1)
         )
       )
     )
@@ -9393,7 +9199,7 @@
   (symbol (lib_id "SparkFun-LED:LED_Red_0603") (at 392.43 69.85 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9d842eb4-262e-44d2-a882-04d7c4d4f5a6)
-    (property "Reference" "D4" (at 396.24 70.1675 90)
+    (property "Reference" "D3" (at 396.24 70.1675 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "Red" (at 396.24 72.7075 90)
@@ -9413,7 +9219,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "D4") (unit 1)
+          (reference "D3") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -9467,7 +9273,7 @@
   (symbol (lib_id "SparkFun-LED:LED_Red_0603") (at 290.83 66.04 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a3901b7c-8109-4099-a4bf-754218021a46)
-    (property "Reference" "D3" (at 294.64 66.3575 90)
+    (property "Reference" "D2" (at 294.64 66.3575 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "Red" (at 294.64 68.8975 90)
@@ -9487,7 +9293,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "D3") (unit 1)
+          (reference "D2") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -9501,7 +9307,7 @@
   (symbol (lib_id "power:+12V") (at 290.83 44.45 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a6001ea1-a91e-476e-bcf6-d5df9c449f90)
-    (property "Reference" "#PWR042" (at 290.83 48.26 0)
+    (property "Reference" "#PWR040" (at 290.83 48.26 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+12V" (at 290.83 39.37 0)
@@ -9517,7 +9323,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR042") (unit 1)
+          (reference "#PWR040") (unit 1)
         )
       )
     )
@@ -9526,7 +9332,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 274.32 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a934db61-d1a5-4a62-883a-10ed4e6110f8)
-    (property "Reference" "#PWR037" (at 274.32 72.39 0)
+    (property "Reference" "#PWR035" (at 274.32 72.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 274.32 69.85 0)
@@ -9542,7 +9348,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR037") (unit 1)
+          (reference "#PWR035") (unit 1)
         )
       )
       (project "co2"
@@ -9592,7 +9398,7 @@
   (symbol (lib_id "power:+12V") (at 274.32 52.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aaba5e68-06d3-44c1-addd-4a17f44958ce)
-    (property "Reference" "#PWR036" (at 274.32 55.88 0)
+    (property "Reference" "#PWR034" (at 274.32 55.88 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+12V" (at 274.32 46.99 0)
@@ -9608,7 +9414,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR036") (unit 1)
+          (reference "#PWR034") (unit 1)
         )
       )
     )
@@ -9617,7 +9423,7 @@
   (symbol (lib_id "SparkFun-Jumper:SolderJumper_2_Bridged") (at 290.83 49.53 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b3628314-65bb-4ac5-bdd0-0d2183290b5f)
-    (property "Reference" "JP3" (at 288.798 49.53 0)
+    (property "Reference" "JP2" (at 288.798 49.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "~" (at 293.37 49.53 0)
@@ -9634,7 +9440,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "JP3") (unit 1)
+          (reference "JP2") (unit 1)
         )
       )
       (project "SparkFun_Thing_Plus_ESP32-S3"
@@ -9648,7 +9454,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 278.13 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b42d19de-8559-4a7a-a62b-cb72500f72a8)
-    (property "Reference" "#PWR039" (at 278.13 162.56 0)
+    (property "Reference" "#PWR037" (at 278.13 162.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 278.13 153.67 0)
@@ -9664,7 +9470,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR039") (unit 1)
+          (reference "#PWR037") (unit 1)
         )
       )
     )
@@ -9673,7 +9479,7 @@
   (symbol (lib_id "power:GND") (at 342.9 149.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b6e69200-7d4f-4266-b959-ad145ee76baf)
-    (property "Reference" "#PWR051" (at 342.9 156.21 0)
+    (property "Reference" "#PWR049" (at 342.9 156.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 342.9 154.94 0)
@@ -9689,38 +9495,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR051") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "SparkFun-Jumper:SolderJumper_2_Bridged") (at 133.35 43.18 90) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid bc8a9f30-be5d-4c00-9b96-1119b427de26)
-    (property "Reference" "JP2" (at 131.318 43.18 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Value" "~" (at 135.89 43.18 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Footprint" "SparkFun-Jumper:SMT-JUMPER_2_NC_TRACE_SILK" (at 137.922 43.434 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "~" (at 140.97 43.18 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid 3cf39201-0658-456a-947c-0b6ca786eecb))
-    (pin "2" (uuid 6b65f6d1-b48c-44cb-a1a5-83c1b3e117b2))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "JP2") (unit 1)
-        )
-      )
-      (project "SparkFun_Thing_Plus_ESP32-S3"
-        (path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
-          (reference "JP4") (unit 1)
+          (reference "#PWR049") (unit 1)
         )
       )
     )
@@ -9729,7 +9504,7 @@
   (symbol (lib_id "power:GND") (at 238.76 207.01 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bd844b80-97a5-4eab-857f-e31f3b14a2c7)
-    (property "Reference" "#PWR029" (at 238.76 213.36 0)
+    (property "Reference" "#PWR027" (at 238.76 213.36 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 238.76 212.09 0)
@@ -9745,7 +9520,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR029") (unit 1)
+          (reference "#PWR027") (unit 1)
         )
       )
     )
@@ -9754,7 +9529,7 @@
   (symbol (lib_id "power:GND") (at 149.86 264.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c26bb784-88bb-458e-a8ce-5aedb65bf67f)
-    (property "Reference" "#PWR023" (at 149.86 270.51 0)
+    (property "Reference" "#PWR021" (at 149.86 270.51 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 149.86 269.24 0)
@@ -9770,7 +9545,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR023") (unit 1)
+          (reference "#PWR021") (unit 1)
         )
       )
     )
@@ -9843,7 +9618,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 149.86 243.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c84c0cda-4966-4d4a-a2f5-8a3bee237506)
-    (property "Reference" "#PWR022" (at 149.86 247.65 0)
+    (property "Reference" "#PWR020" (at 149.86 247.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 149.86 238.76 0)
@@ -9859,7 +9634,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR022") (unit 1)
+          (reference "#PWR020") (unit 1)
         )
       )
     )
@@ -9933,7 +9708,7 @@
   (symbol (lib_id "power:GND") (at 339.09 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid cec3c072-6d12-4863-a4c3-ec7b8abce71f)
-    (property "Reference" "#PWR049" (at 339.09 71.12 0)
+    (property "Reference" "#PWR047" (at 339.09 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 339.09 69.85 0)
@@ -9949,7 +9724,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR049") (unit 1)
+          (reference "#PWR047") (unit 1)
         )
       )
     )
@@ -10031,7 +9806,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 295.91 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d2826055-f48d-4a78-8f82-44705581a7c9)
-    (property "Reference" "#PWR045" (at 295.91 166.37 0)
+    (property "Reference" "#PWR043" (at 295.91 166.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 295.91 157.48 0)
@@ -10047,7 +9822,42 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR045") (unit 1)
+          (reference "#PWR043") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "SparkFun-Capacitor:1.0uF_0603_16V_10%") (at 322.58 59.69 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid d48f6da8-7c94-4abb-9461-d35bcb52ca7c)
+    (property "Reference" "C10" (at 326.39 55.88 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "1.0uF" (at 326.39 58.42 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "SparkFun-Capacitor:C_0603_1608Metric" (at 322.58 71.12 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf" (at 322.58 73.66 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "PROD_ID" "CAP-13930" (at 321.31 76.2 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Voltage" "16V" (at 326.39 60.96 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Tolerance" "10%" (at 326.39 63.5 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (pin "1" (uuid 00816bad-5039-40d3-8720-33c34129e5ba))
+    (pin "2" (uuid 4f84502d-3e24-450e-9313-039abd51583a))
+    (instances
+      (project "MainBoard"
+        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
+          (reference "C10") (unit 1)
         )
       )
     )
@@ -10056,7 +9866,7 @@
   (symbol (lib_id "power:GND") (at 340.36 135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d5e1109a-5220-4c09-8cb2-9eb7a8b5ca3b)
-    (property "Reference" "#PWR050" (at 340.36 142.24 0)
+    (property "Reference" "#PWR048" (at 340.36 142.24 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 340.36 140.97 0)
@@ -10072,7 +9882,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR050") (unit 1)
+          (reference "#PWR048") (unit 1)
         )
       )
     )
@@ -10110,7 +9920,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:GND") (at 256.54 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid daa1ee75-568d-4c03-936a-df6f8d7533fd)
-    (property "Reference" "#PWR033" (at 256.54 72.39 0)
+    (property "Reference" "#PWR031" (at 256.54 72.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 256.54 69.85 0)
@@ -10126,7 +9936,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR033") (unit 1)
+          (reference "#PWR031") (unit 1)
         )
       )
       (project "co2"
@@ -10177,46 +9987,6 @@
     )
   )
 
-  (symbol (lib_id "SparkFun-Capacitor:1.0uF_0402_16V_10%") (at 322.58 59.69 180) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid e004ea52-f5c0-457a-8065-fdcaa9742f36)
-    (property "Reference" "C10" (at 317.5 55.88 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "1.0uF" (at 314.96 58.42 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "SparkFun-Capacitor:C_0402_1005Metric" (at 322.58 48.26 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf" (at 322.58 45.72 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "PROD_ID" "CAP-14969" (at 323.85 43.18 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Voltage" "16V" (at 316.23 60.96 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Tolerance" "10%" (at 316.23 63.5 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (pin "1" (uuid b5f017bc-182f-400b-8499-2c7b010690dc))
-    (pin "2" (uuid 9f955657-c7c2-4008-991e-76a70d657203))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "C10") (unit 1)
-        )
-      )
-      (project "SparkFun_Thing_Plus_ESP32-S3"
-        (path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
-          (reference "C10") (unit 1)
-        )
-      )
-    )
-  )
-
   (symbol (lib_id "SM06B-GHS-TB:SM06B-GHS-TB") (at 346.71 200.66 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e345edce-e958-48c2-824e-990b1142f0dc)
@@ -10250,7 +10020,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+5V") (at 370.84 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e355a0c2-6188-4d1a-a763-39710214eab0)
-    (property "Reference" "#PWR056" (at 370.84 138.43 0)
+    (property "Reference" "#PWR054" (at 370.84 138.43 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 370.84 129.54 0)
@@ -10266,7 +10036,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR056") (unit 1)
+          (reference "#PWR054") (unit 1)
         )
       )
     )
@@ -10275,7 +10045,7 @@
   (symbol (lib_id "SparkFun-Resistor:10k_0603") (at 290.83 57.15 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e50755cb-aa80-4d1d-a4bb-b386a7097b0b)
-    (property "Reference" "R11" (at 293.37 55.88 90)
+    (property "Reference" "R10" (at 293.37 55.88 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10k" (at 293.37 58.42 90)
@@ -10295,7 +10065,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R11") (unit 1)
+          (reference "R10") (unit 1)
         )
       )
     )
@@ -10304,7 +10074,7 @@
   (symbol (lib_id "power:GND") (at 351.79 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e6281e1f-5ce1-4f31-9ab5-ed48e8c83b1e)
-    (property "Reference" "#PWR054" (at 351.79 71.12 0)
+    (property "Reference" "#PWR052" (at 351.79 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 351.79 69.85 0)
@@ -10320,7 +10090,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR054") (unit 1)
+          (reference "#PWR052") (unit 1)
         )
       )
     )
@@ -10329,7 +10099,7 @@
   (symbol (lib_id "SparkFun-Resistor:100k_0603") (at 171.45 53.34 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e6e3e9ba-64c9-4fb1-8a3c-e71cae2831b4)
-    (property "Reference" "R5" (at 173.99 52.07 90)
+    (property "Reference" "R4" (at 173.99 52.07 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "100k" (at 173.99 54.61 90)
@@ -10349,7 +10119,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "R5") (unit 1)
+          (reference "R4") (unit 1)
         )
       )
       (project "co2"
@@ -10363,7 +10133,7 @@
   (symbol (lib_id "power:GND") (at 363.22 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ebe4d86d-86b7-4ee3-8772-365a1bc6309e)
-    (property "Reference" "#PWR055" (at 363.22 71.12 0)
+    (property "Reference" "#PWR053" (at 363.22 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 363.22 69.85 0)
@@ -10379,7 +10149,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR055") (unit 1)
+          (reference "#PWR053") (unit 1)
         )
       )
     )
@@ -10403,8 +10173,8 @@
     (property "PROD_ID" "SWCH-15606" (at 46.99 193.04 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 520655e2-82c0-4b03-a838-195506338e29))
-    (pin "2" (uuid a9a82320-c613-40a4-bdfc-845287da8230))
+    (pin "1" (uuid f65b89b5-4a14-4d87-aa95-3b8687ef4f88))
+    (pin "2" (uuid 25ac1455-7069-4e94-88b7-a57deeabc014))
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
@@ -10417,7 +10187,7 @@
   (symbol (lib_id "power:GND") (at 275.59 212.09 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ec01f774-d2c5-4af9-a709-b943106cb2a0)
-    (property "Reference" "#PWR038" (at 275.59 218.44 0)
+    (property "Reference" "#PWR036" (at 275.59 218.44 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 276.86 215.9 0)
@@ -10433,7 +10203,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR038") (unit 1)
+          (reference "#PWR036") (unit 1)
         )
       )
     )
@@ -10442,7 +10212,7 @@
   (symbol (lib_id "power:GND") (at 322.58 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ede14ba0-3db8-4a7f-bab4-b39444a4bdc9)
-    (property "Reference" "#PWR046" (at 322.58 71.12 0)
+    (property "Reference" "#PWR044" (at 322.58 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 322.58 69.85 0)
@@ -10458,7 +10228,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR046") (unit 1)
+          (reference "#PWR044") (unit 1)
         )
       )
     )
@@ -10467,7 +10237,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 287.02 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ee811d37-39d9-4d1d-946e-f13b7f319924)
-    (property "Reference" "#PWR041" (at 287.02 162.56 0)
+    (property "Reference" "#PWR039" (at 287.02 162.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 287.02 153.67 0)
@@ -10483,7 +10253,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR041") (unit 1)
+          (reference "#PWR039") (unit 1)
         )
       )
     )
@@ -10527,7 +10297,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+5V") (at 330.2 52.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f20d6a86-0cef-4a18-9055-3c3211543b5f)
-    (property "Reference" "#PWR047" (at 330.2 55.88 0)
+    (property "Reference" "#PWR045" (at 330.2 55.88 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 330.2 46.99 0)
@@ -10543,7 +10313,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR047") (unit 1)
+          (reference "#PWR045") (unit 1)
         )
       )
     )
@@ -10552,7 +10322,7 @@
   (symbol (lib_id "SparkFun-PowerSymbol:+3.3V") (at 241.3 193.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f272996a-09f9-454f-96ba-6500937a224b)
-    (property "Reference" "#PWR030" (at 241.3 196.85 0)
+    (property "Reference" "#PWR028" (at 241.3 196.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 241.3 187.96 0)
@@ -10568,7 +10338,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR030") (unit 1)
+          (reference "#PWR028") (unit 1)
         )
       )
     )
@@ -10577,7 +10347,7 @@
   (symbol (lib_id "power:GND") (at 270.51 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f3fb8eeb-7301-4ea8-8a4c-0cf6557d68fc)
-    (property "Reference" "#PWR035" (at 270.51 140.97 0)
+    (property "Reference" "#PWR033" (at 270.51 140.97 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 270.51 139.7 0)
@@ -10593,32 +10363,7 @@
     (instances
       (project "MainBoard"
         (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR035") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "power:GND") (at 133.35 68.58 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid fe11b655-8225-41f9-80f5-fbdcc9d2760d)
-    (property "Reference" "#PWR019" (at 133.35 74.93 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Value" "GND" (at 133.35 73.66 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Footprint" "" (at 133.35 68.58 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "" (at 133.35 68.58 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid 2382aeaf-42d9-4af1-a54b-213846cffe59))
-    (instances
-      (project "MainBoard"
-        (path "/70111962-74ad-442f-8642-d12c4115fcfb"
-          (reference "#PWR019") (unit 1)
+          (reference "#PWR033") (unit 1)
         )
       )
     )
