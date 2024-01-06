@@ -484,6 +484,9 @@ Future<void> _readDataFromEsp32() async {
   }
 
   Future<void> sendAssetFile() async {
+        await _sendData('KAZAM');
+    await Future.delayed(Duration(seconds: 2));
+
     try {
       List<int> fileBytes = await loadBinFile();
       Uint8List uint8list = Uint8List.fromList(fileBytes);
