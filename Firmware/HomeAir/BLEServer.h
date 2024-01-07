@@ -3,6 +3,11 @@
 
 // BLE Library
 #include <NimBLEDevice.h> // https://github.com/h2zero/NimBLE-Arduino
+// Standard Library
+#include <stdint.h>
+#include <string.h>
+// ESP32 System Includes
+#include "esp_mac.h"
 // HomeAir files
 #include "SPIFFS.h"
 #include "Timekeeping.h"
@@ -10,8 +15,7 @@
 #include "spiffs_helper.h"
 #include "settings.h"
 #include "mygpio.h"
-// Standard Library
-#include <stdint.h>
+
 
 // BLE Defns
 #define SERVICE_UUID "9194f647-3a6c-4cf2-a6d5-187cb05728cd"

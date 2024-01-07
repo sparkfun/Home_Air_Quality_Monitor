@@ -2,6 +2,7 @@
 
 NimBLECharacteristic *pSensorCharacteristic;
 
+
 class MyCallbacks : public NimBLECharacteristicCallbacks {
 
   void onConnect(NimBLECharacteristic *pCharacteristic) {
@@ -131,9 +132,23 @@ void BLEServerCommunicationTask(void *pvParameter) {
   }
 }
 
+void BLEServerSetAdvertisingName(){
+  // Uses the last 2 bytes of the MAC address to set a unique advertising name
+  uint8_t macOut[8];
+  char retArr[14];
+  esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
+  if (espErr == ESP_OK){
+    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    Serial.printf("Setting MAC to %s\n", retArr);
+    NimBLEDevice::init(retArr);
+  }
+  else
+    Serial.println("Mac address failed to be read");
+}
+
 void BLEServerSetupBLE() {
-  // NimBLEDevice::init("NimBLE Test");
-  NimBLEDevice::init("ThingPlusTest");
+  // NimBLEDevice::init("ThingPlusTest");
+  BLEServerSetAdvertisingName();
 
   NimBLEDevice::setMTU(500); // Set max MTU size to 500 - much less than the 512
                              // fundamental limit

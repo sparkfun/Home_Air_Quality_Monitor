@@ -11,8 +11,8 @@ float rawDataArray[RAW_DATA_ARRAY_SIZE];
 void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
   while (1) {
-    Serial.print("Sensor Read from core ");
-    Serial.println(xPortGetCoreID());
+    // Serial.print("Sensor Read from core ");
+    // Serial.println(xPortGetCoreID());
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       // Acquire mutex
       mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
@@ -60,7 +60,7 @@ void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
     Serial.print("PAS CO2: pressure reference error: ");
     Serial.println(errorPtr);
   }
-  errorPtr = co2Sensor.startMeasure(5);
+  errorPtr = co2Sensor.startMeasure(5); // Start continous measurement with 5 second period
   if (XENSIV_PASCO2_OK != errorPtr) {
     Serial.print("PAS CO2: startmeasure error: ");
     Serial.println(errorPtr);
