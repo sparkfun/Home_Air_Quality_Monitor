@@ -98,29 +98,27 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     _sendReadCommand();
     await Future.delayed(Duration(seconds: 3));
 
-    const rapidReadInterval = Duration(milliseconds: 100); // Adjust this interval as needed for faster reading
-    _timer?.cancel(); 
+    const rapidReadInterval = Duration(
+        milliseconds: 100); // Adjust this interval as needed for faster reading
+    _timer?.cancel();
 
     _timer = Timer.periodic(rapidReadInterval, (Timer t) async {
-      await _readDataFromEsp32(); 
-    
+      await _readDataFromEsp32();
     });
   }
 
-Future<void> _readDataFromEsp32() async {
-  if (writeCharacteristic != null) {
-    try {
-      var value = await writeCharacteristic!.read(); 
-      print("Data read successfully"); 
-    } catch (e) {
-      print("Error reading from ESP32: $e"); 
+  Future<void> _readDataFromEsp32() async {
+    if (writeCharacteristic != null) {
+      try {
+        var value = await writeCharacteristic!.read();
+        print("Data read successfully");
+      } catch (e) {
+        print("Error reading from ESP32: $e");
+      }
+    } else {
+      print("Read characteristic not found");
     }
-  } else {
-    print("Read characteristic not found"); 
   }
-}
-
-
 
   Future<void> _discoverServices() async {
     _services = await widget.device.discoverServices();
@@ -133,7 +131,8 @@ Future<void> _readDataFromEsp32() async {
           print("Write characteristic found");
           break;
         }
-        if (characteristic.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
+        if (characteristic.uuid ==
+            Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
           readCharacteristic = characteristic;
           print("Read characteristic found");
         }
@@ -484,7 +483,7 @@ Future<void> _readDataFromEsp32() async {
   }
 
   Future<void> sendAssetFile() async {
-        await _sendData('KAZAM');
+    await _sendData('KAZAM');
     await Future.delayed(Duration(seconds: 2));
 
     try {
@@ -523,7 +522,7 @@ Future<void> _readDataFromEsp32() async {
   Future<void> sendFileInChunks(File file) async {
     final fileSize = await file.length();
     final fileBytes = await file.readAsBytes();
-    final blockSize = 512; // BLE packet size
+    final blockSize = 500; // BLE packet size
     int bytesTransferred = 0;
 
     for (int i = 0; i * blockSize < fileSize; i++) {
@@ -627,7 +626,7 @@ Future<void> _readDataFromEsp32() async {
                 child: Text('Start Reading'),
               ),
             ),
-                        Padding(
+            Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: _rapidReadCommand,
@@ -646,7 +645,7 @@ Future<void> _readDataFromEsp32() async {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: sendAssetFile, 
+                onPressed: sendAssetFile,
                 child: Text('Send Bin'),
               ),
             ),
