@@ -316,18 +316,19 @@ void spiffsStorageTask(void *pvParameter) {
         BLEStateFlagGroup,
         BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
-    } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING) {
+    } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Download request/demand received
       // Open a new file and read from the BLE buffer into it
       File dest_file = SPIFFS.open("/dest_file");
       if (!dest_file) {
         Serial.println("Dest_file not opened correctly. Quitting Download state");
-        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DOWNLOADING);
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_TRANSMITTING);
+        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING); //  Revert to normal operation on a failed upload
+        // We will signal something meaningful to the user here
         continue;
       }
       Serial.println("Dest_file opened");
-      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING) {
+      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
         // While downloading is true, read from buffer and store it
         xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE, BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);  // Write_complete is set in BLE onWrite callback
         // BLEMessageBuffer holds newest 512 bytes to append 

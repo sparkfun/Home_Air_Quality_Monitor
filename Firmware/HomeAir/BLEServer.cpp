@@ -68,7 +68,8 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         }
       } else if(BLEMessageType == "KAZAM"){
         Serial.println("KAZAM! - Starting to listen");
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_DOWNLOADING);
+        xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup)); // Clear current state
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD); // Set state to download new firmware
 
       } else if(BLEMessageType == "END!!"){
         Serial.println("Download finished!");
@@ -76,11 +77,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else {
         // Received message had no message type
         // Check to see if we're downloading, and if so, service this new packet
-        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING){
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD){
           // We're actively downloading, so new packet must be new info to process
           for (int i = 0;i<value.length();i++)
           {
-            BLEMessageBuffer[i] = *(value.data() + i);
+            // BLEMessageBuffer[i] = *(value.data() + i);
+            std::copy(&value[0], &value[value.length()-1], BLEMessageBuffer);
           }
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
         }
