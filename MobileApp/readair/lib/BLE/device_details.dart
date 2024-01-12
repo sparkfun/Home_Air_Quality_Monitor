@@ -31,24 +31,12 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   int _connectionStep = 0;
   BluetoothCharacteristic? writeCharacteristic;
   BluetoothCharacteristic? readCharacteristic;
+
   @override
   void initState() {
     super.initState();
     _discoverServices();
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   initializeConnection();
-  // }
-
-  // Future<void> initializeConnection() async {
-  //   await _discoverServices();
-  //   await _setupNotification();
-  //   await _initializeEsp32Connection();
-  //   _latestReceivedPacket = '';
-  // }
 
   @override
   void dispose() {
@@ -57,68 +45,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     super.dispose();
   }
 
-  void _setupPeriodicReadCommand() {
-    //_timer = Timer.periodic(Duration(minutes: 1), (Timer t) => _sendReadCommand());
-  }
-
-  Future<void> _sendReadCommand() async {
-    await _sendData("READ!");
-  }
-
-  Future<void> _initializeEsp32Connection() async {
-    // Send current time to ESP32
-    await _sendTimeToEsp32();
-    await Future.delayed(Duration(seconds: 1));
-
-    // Send 'TGMT=-7' command
-    await _sendData('TGMT=-7');
-    await Future.delayed(Duration(seconds: 1));
-
-    // Subscribe to ESP32
-    await _subscribeToDevice();
-  }
-
-  // Future<void> _discoverServices() async {
-  //   List<BluetoothService> services = await widget.device.discoverServices();
-  //   for (BluetoothService service in services) {
-  //     var characteristics = service.characteristics;
-  //     for (BluetoothCharacteristic characteristic in characteristics) {
-  //       if (characteristic.uuid ==
-  //           Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
-  //         writeCharacteristic = characteristic;
-  //         print("Write characteristic found");
-  //         // Once found, you can break out of the loop
-  //         return;
-  //       }
-  //     }
-  //   }
-  // }
-
-  void _rapidReadCommand() async {
-    _sendReadCommand();
-    await Future.delayed(Duration(seconds: 3));
-
-    const rapidReadInterval = Duration(
-        milliseconds: 100); // Adjust this interval as needed for faster reading
-    _timer?.cancel();
-
-    _timer = Timer.periodic(rapidReadInterval, (Timer t) async {
-      await _readDataFromEsp32();
-    });
-  }
-
-  Future<void> _readDataFromEsp32() async {
-    if (writeCharacteristic != null) {
-      try {
-        var value = await writeCharacteristic!.read();
-        print("Data read successfully");
-      } catch (e) {
-        print("Error reading from ESP32: $e");
-      }
-    } else {
-      print("Read characteristic not found");
-    }
-  }
+  //--------------------------------INITIALIZATION----------------------------------------------
 
   Future<void> _discoverServices() async {
     _services = await widget.device.discoverServices();
@@ -140,124 +67,31 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     }
   }
 
-  Future<void> _setupNotification() async {
-    final serviceUuid = Guid("9194f647-3a6c-4cf2-a6d5-187cb05728cd");
-    final characteristicUuid = Guid("588d30b0-33aa-4654-ab36-56dfa9974b13");
+  Future<void> _initializeEsp32Connection() async {
+    // Send current time to ESP32
+    await _sendTimeToEsp32();
+    await Future.delayed(Duration(seconds: 1));
 
-    final targetService =
-        _services.firstWhereOrNull((s) => s.uuid == serviceUuid);
+    // Send 'TGMT=-7' command
+    await _sendData('TGMT=-7');
+    await Future.delayed(Duration(seconds: 1));
 
-    if (targetService != null) {
-      var characteristic = targetService.characteristics
-          .firstWhereOrNull((c) => c.uuid == characteristicUuid);
-
-      if (characteristic != null) {
-        await characteristic.setNotifyValue(true);
-        characteristic.value.listen((value) {
-          // Process incoming data packet
-          String receivedData = String.fromCharCodes(value);
-          _latestReceivedPacket = receivedData;
-          _processDataPacket(receivedData);
-
-          // Show a notification message
-          //_showNotification("Data received from ESP32");
-        });
-        setState(() {
-          isSubscribed = true;
-        });
-      }
-    }
+    // Subscribe to ESP32
+    await _subscribeToDevice();
   }
 
-  void _showNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      duration: Duration(seconds: 2),
-    ));
-  }
-
-  void _processDataPacket(String data) {
-    // Split the incoming data by new lines to handle multiple packets
-    var packets = data.trim().split('\n');
-    for (var packetData in packets) {
-      try {
-        var parsedData = packetData.split(',');
-        if (parsedData.length == 12) {
-          var packet = DataPacket(
-            epochTime: double.tryParse(parsedData[0]) ?? 0.0,
-            co2: double.tryParse(parsedData[1]) ?? 0.0,
-            ppm1_0: double.tryParse(parsedData[2]) ?? 0.0,
-            ppm2_5: double.tryParse(parsedData[3]) ?? 0.0,
-            ppm4_0: double.tryParse(parsedData[4]) ?? 0.0,
-            ppm10_0: double.tryParse(parsedData[5]) ?? 0.0,
-            humid: double.tryParse(parsedData[6]) ?? 0.0,
-            temp: double.tryParse(parsedData[7]) ?? 0.0,
-            voc: double.tryParse(parsedData[8]) ?? 0.0,
-            co: double.tryParse(parsedData[9]) ?? 0.0,
-            ng: double.tryParse(parsedData[10]) ?? 0.0,
-            aqi: double.tryParse(parsedData[11]) ?? 0.0,
-          );
-
-          print(packetData);
-          DatabaseService.instance.insertOrUpdateDataPacket(packet);
-        } else {
-          //_showMessage("Received data does not match expected format.");
-        }
-      } catch (e) {
-        print("Error processing packet: $e");
-      }
-    }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _showReceivedDataDialog(String data) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Received Data'),
-          content: Text(data),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _customEsp32ConnectionSequence() async {
+  Future<void> _initializeAndAutoRead() async {
     await _initializeEsp32Connection();
     await Future.delayed(Duration(seconds: 3));
-
-    await _sendReadCommand();
+    await _sendData("READ!");
     await Future.delayed(Duration(seconds: 7));
 
-    await _receiveAndReadData();
-
-    _timer = Timer.periodic(Duration(seconds: 10), (Timer t) async {
-      await _receiveAndReadData();
-    });
+    _setupNotificationForImmediateRead();
   }
 
-  Future<void> _autoReadOnNotification() async {
-    await _initializeEsp32Connection();
-    await Future.delayed(Duration(seconds: 3));
-    await _sendReadCommand();
-    await Future.delayed(Duration(seconds: 7));
+//---------------------------------SUBSCRIPTION--------------------------------------------------
 
-    _setupNotificationWithAutoRead();
-  }
-
-  void _setupNotificationWithAutoRead() async {
+  Future<void> _subscribeToDevice() async {
     final serviceUuid = Guid("9194f647-3a6c-4cf2-a6d5-187cb05728cd");
     final characteristicUuid = Guid("588d30b0-33aa-4654-ab36-56dfa9974b13");
 
@@ -274,11 +108,9 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           String receivedData = String.fromCharCodes(value);
           _latestReceivedPacket = receivedData;
           _processDataPacket(receivedData);
-
           //_showNotification("Data received from ESP32");
-
-          _receiveAndReadData();
         });
+
         setState(() {
           isSubscribed = true;
         });
@@ -315,43 +147,70 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     }
   }
 
-  Future<void> _autoReadOnDataReceive() async {
-    // Initialize connection
-    await _initializeEsp32Connection();
-    await Future.delayed(Duration(seconds: 3));
-    await _sendReadCommand();
-    await Future.delayed(Duration(seconds: 7));
+//--------------------------------READ/WRITE-------------------------------------------------------
 
-    _setupNotificationForImmediateRead();
-  }
-
-  Future<void> _autoReads() async {
-    await _sendReadCommand();
-    await Future.delayed(Duration(seconds: 3));
-
-    _setupNotificationForImmediateRead();
-  }
-
-  Future<void> _sendData(String dataToSend) async {
+  Future<void> _sendTimeToEsp32() async {
     final serviceUuid = Guid("9194f647-3a6c-4cf2-a6d5-187cb05728cd");
     final characteristicUuid = Guid("588d30b0-33aa-4654-ab36-56dfa9974b13");
 
-    // Convert the String to a list of bytes
-    List<int> bytesToSend = utf8.encode(dataToSend);
+    // Get the current epoch time in seconds.
+    int epochTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
+    // Create the command string.
+    String timeCommand = "TIME=$epochTime";
+
+    // Convert the command string to bytes.
+    List<int> bytesToSend = utf8.encode(timeCommand);
+
+    // Find the service.
     final targetService = _services.firstWhereOrNull(
       (s) => s.uuid == serviceUuid,
     );
 
     if (targetService != null) {
+      // Find the characteristic.
       var characteristic = targetService.characteristics.firstWhereOrNull(
         (c) => c.uuid == characteristicUuid,
       );
 
       if (characteristic != null) {
+        // Write the time command to the ESP32.
         await characteristic.write(bytesToSend, withoutResponse: false);
       }
     }
+  }
+
+  void _rapidReadCommand() async {
+    _sendData("READ!");
+    await Future.delayed(Duration(seconds: 3));
+
+    const rapidReadInterval = Duration(
+        milliseconds: 100); // Adjust this interval as needed for faster reading
+    _timer?.cancel();
+
+    _timer = Timer.periodic(rapidReadInterval, (Timer t) async {
+      await _readDataFromEsp32();
+    });
+  }
+
+  Future<void> _readDataFromEsp32() async {
+    if (writeCharacteristic != null) {
+      try {
+        var value = await writeCharacteristic!.read();
+        print("Data read successfully");
+      } catch (e) {
+        print("Error reading from ESP32: $e");
+      }
+    } else {
+      print("Read characteristic not found");
+    }
+  }
+
+  Future<void> _autoReads() async {
+    await _sendData("READ!");
+    await Future.delayed(Duration(seconds: 3));
+
+    _setupNotificationForImmediateRead();
   }
 
   Future<void> _receiveAndReadData() async {
@@ -419,132 +278,61 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     }
   }
 
-  Future<void> _subscribeToDevice() async {
+  Future<void> _sendData(String dataToSend) async {
     final serviceUuid = Guid("9194f647-3a6c-4cf2-a6d5-187cb05728cd");
     final characteristicUuid = Guid("588d30b0-33aa-4654-ab36-56dfa9974b13");
 
-    final targetService =
-        _services.firstWhereOrNull((s) => s.uuid == serviceUuid);
+    // Convert the String to a list of bytes
+    List<int> bytesToSend = utf8.encode(dataToSend);
 
-    if (targetService != null) {
-      var characteristic = targetService.characteristics
-          .firstWhereOrNull((c) => c.uuid == characteristicUuid);
-
-      if (characteristic != null) {
-        await characteristic.setNotifyValue(true);
-        characteristic.value.listen((value) {
-          String receivedData = String.fromCharCodes(value);
-          _latestReceivedPacket = receivedData;
-          _processDataPacket(receivedData);
-          //_showNotification("Data received from ESP32");
-        });
-
-        setState(() {
-          isSubscribed = true;
-        });
-      }
-    }
-  }
-
-  Future<void> _sendTimeToEsp32() async {
-    final serviceUuid = Guid("9194f647-3a6c-4cf2-a6d5-187cb05728cd");
-    final characteristicUuid = Guid("588d30b0-33aa-4654-ab36-56dfa9974b13");
-
-    // Get the current epoch time in seconds.
-    int epochTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
-    // Create the command string.
-    String timeCommand = "TIME=$epochTime";
-
-    // Convert the command string to bytes.
-    List<int> bytesToSend = utf8.encode(timeCommand);
-
-    // Find the service.
     final targetService = _services.firstWhereOrNull(
       (s) => s.uuid == serviceUuid,
     );
 
     if (targetService != null) {
-      // Find the characteristic.
       var characteristic = targetService.characteristics.firstWhereOrNull(
         (c) => c.uuid == characteristicUuid,
       );
 
       if (characteristic != null) {
-        // Write the time command to the ESP32.
         await characteristic.write(bytesToSend, withoutResponse: false);
       }
     }
   }
 
-  Future<List<int>> loadBinFile() async {
-    final byteData = await rootBundle.load('assets/HomeAir.ino.bin');
-    return byteData.buffer.asUint8List();
-  }
+//--------------------------------PARSING----------------------------------------------------------
 
-  Future<void> sendAssetFile() async {
-    await _sendData('KAZAM');
-    await Future.delayed(Duration(seconds: 2));
+  void _processDataPacket(String data) {
+    // Split the incoming data by new lines to handle multiple packets
+    var packets = data.trim().split('\n');
+    for (var packetData in packets) {
+      try {
+        var parsedData = packetData.split(',');
+        if (parsedData.length == 12) {
+          var packet = DataPacket(
+            epochTime: double.tryParse(parsedData[0]) ?? 0.0,
+            co2: double.tryParse(parsedData[1]) ?? 0.0,
+            ppm1_0: double.tryParse(parsedData[2]) ?? 0.0,
+            ppm2_5: double.tryParse(parsedData[3]) ?? 0.0,
+            ppm4_0: double.tryParse(parsedData[4]) ?? 0.0,
+            ppm10_0: double.tryParse(parsedData[5]) ?? 0.0,
+            humid: double.tryParse(parsedData[6]) ?? 0.0,
+            temp: double.tryParse(parsedData[7]) ?? 0.0,
+            voc: double.tryParse(parsedData[8]) ?? 0.0,
+            co: double.tryParse(parsedData[9]) ?? 0.0,
+            ng: double.tryParse(parsedData[10]) ?? 0.0,
+            aqi: double.tryParse(parsedData[11]) ?? 0.0,
+          );
 
-    try {
-      List<int> fileBytes = await loadBinFile();
-      Uint8List uint8list = Uint8List.fromList(fileBytes);
-      File tempFile = File.fromRawPath(uint8list);
-      await sendFileInChunks(tempFile);
-    } catch (e) {
-      _showMessage("Error loading asset file: $e");
-    }
-  }
-
-  Future<void> pickAndSendFile() async {
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: ['bin']);
-
-    if (result != null) {
-      PlatformFile file = result.files.first;
-
-      String? filePath = file.path;
-
-      if (filePath == null) {
-        _showMessage("No file selected.");
-        return;
+          print(packetData);
+          DatabaseService.instance.insertOrUpdateDataPacket(packet);
+        } else {
+          //_showMessage("Received data does not match expected format.");
+        }
+      } catch (e) {
+        print("Error processing packet: $e");
       }
-
-      // Now you can use the filePath to read the file in chunks and send it
-      File binFile = File(filePath);
-      await sendFileInChunks(binFile);
-    } else {
-      // User canceled the picker
-      _showMessage("File pick cancelled.");
     }
-  }
-
-  Future<void> sendFileInChunks(File file) async {
-    final fileSize = await file.length();
-    final fileBytes = await file.readAsBytes();
-    final blockSize = 500; // BLE packet size
-    int bytesTransferred = 0;
-
-    for (int i = 0; i * blockSize < fileSize; i++) {
-      int start = i * blockSize;
-      int end = min(fileSize, (i + 1) * blockSize);
-      List<int> chunk = fileBytes.sublist(start, end);
-
-      await writeCharacteristic!.write(chunk, withoutResponse: true);
-      bytesTransferred += chunk.length;
-
-      // Update progress
-      double progress = (bytesTransferred / fileSize) * 100;
-      if (progress >= 5 && progress % 5 < 0.1) {
-        // Update every 5%
-        _showMessage("${progress.toInt()}% uploaded.");
-      }
-
-      // Add a delay if needed
-      await Future.delayed(Duration(milliseconds: 20));
-    }
-
-    _showMessage("File upload complete.");
   }
 
   Future<void> _readLatestPacket() async {
@@ -553,6 +341,176 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       _showReceivedDataDialog(packet.toString());
     } else {
       _showReceivedDataDialog("No data available");
+    }
+  }
+
+//--------------------------------MESSAGES--------------------------------------------------------
+
+  void _showNotification(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 2),
+    ));
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showReceivedDataDialog(String data) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Received Data'),
+          content: Text(data),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+//--------------------------------OTA UPDATES------------------------------------------------------
+
+  Future<List<int>> loadBinFile() async {
+    final byteData = await rootBundle.load('assets/HomeAir.ino.bin');
+    return byteData.buffer.asUint8List();
+  }
+
+Future<void> sendFirmwareUpdate() async {
+  try {
+    await _sendData('KAZAM');
+    await _waitForAck();
+
+    List<int> fileBytes = await loadBinFile();
+    int fileSize = fileBytes.length;
+
+    //Send the size of the update binary file
+    await _sendData(fileSize.toString());
+
+    await _sendFileInChunks(fileBytes, 500);
+  } catch (e) {
+    _showMessage("Error during firmware update: $e");
+  }
+}
+
+Future<void> _sendFileInChunks(List<int> fileBytes, int chunkSize) async {
+  int bytesTransferred = 0;
+  for (int i = 0; i * chunkSize < fileBytes.length; i++) {
+    int start = i * chunkSize;
+    int end = min(fileBytes.length, (i + 1) * chunkSize);
+    List<int> chunk = fileBytes.sublist(start, end);
+
+    await writeCharacteristic!.write(chunk, withoutResponse: true);
+    bytesTransferred += chunk.length;
+
+    // Update progress
+    double progress = (bytesTransferred / fileBytes.length) * 100;
+    if (progress >= 5 && progress % 5 < 0.1) {
+      _showMessage("${progress.toInt()}% uploaded.");
+    }
+
+    await Future.delayed(Duration(milliseconds: 20));
+  }
+  _showMessage("File upload complete.");
+}
+
+  // Future<void> sendAssetFile() async {
+  //   await _sendData('KAZAM');
+  //   await Future.delayed(Duration(seconds: 2));
+
+  //   try {
+  //     List<int> fileBytes = await loadBinFile();
+  //     Uint8List uint8list = Uint8List.fromList(fileBytes);
+  //     File tempFile = File.fromRawPath(uint8list);
+  //     await sendFileInChunks(tempFile);
+  //   } catch (e) {
+  //     _showMessage("Error loading asset file: $e");
+  //   }
+  // }
+
+  // Future<void> pickAndSendFile() async {
+  //   FilePickerResult? result = await FilePicker.platform
+  //       .pickFiles(type: FileType.custom, allowedExtensions: ['bin']);
+
+  //   if (result != null) {
+  //     PlatformFile file = result.files.first;
+
+  //     String? filePath = file.path;
+
+  //     if (filePath == null) {
+  //       _showMessage("No file selected.");
+  //       return;
+  //     }
+
+  //     // Now you can use the filePath to read the file in chunks and send it
+  //     File binFile = File(filePath);
+  //     await sendFileInChunks(binFile);
+  //   } else {
+  //     // User canceled the picker
+  //     _showMessage("File pick cancelled.");
+  //   }
+  // }
+
+  // Future<void> sendFileInChunks(File file) async {
+  //   final fileSize = await file.length();
+  //   final fileBytes = await file.readAsBytes();
+  //   final blockSize = 500; // BLE packet size
+  //   int bytesTransferred = 0;
+
+  //   for (int i = 0; i * blockSize < fileSize; i++) {
+  //     int start = i * blockSize;
+  //     int end = min(fileSize, (i + 1) * blockSize);
+  //     List<int> chunk = fileBytes.sublist(start, end);
+
+  //     await writeCharacteristic!.write(chunk, withoutResponse: true);
+  //     bytesTransferred += chunk.length;
+
+  //     // Update progress
+  //     double progress = (bytesTransferred / fileSize) * 100;
+  //     if (progress >= 5 && progress % 5 < 0.1) {
+  //       // Update every 5%
+  //       _showMessage("${progress.toInt()}% uploaded.");
+  //     }
+
+  //     // Add a delay if needed
+  //     await Future.delayed(Duration(milliseconds: 20));
+  //   }
+
+  //   _showMessage("File upload complete.");
+  //     // Add a delay if needed
+  // }
+
+  Future<void> _waitForAck() async {
+  Completer<void> completer = Completer<void>();
+
+  StreamSubscription? subscription = readCharacteristic?.value.listen((value) {
+    String receivedData = String.fromCharCodes(value);
+    if (receivedData.contains('a')) {
+      completer.complete();
+    }
+  });
+
+  await completer.future;
+  await subscription?.cancel();
+}
+
+  Future<bool> checkBinFileAvailability() async {
+    try {
+      final byteData = await rootBundle.load('assets/HomeAir.ino.bin');
+      print("File is available");
+      return true;
+    } catch (e) {
+      print("Error: File not available - $e");
+      return false;
     }
   }
 
@@ -583,39 +541,10 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 child: Text('Initialize ESP32 Connection'),
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _customEsp32ConnectionSequence,
-            //     child: Text('Timed Read initialization'),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _autoReadOnNotification,
-            //     child: Text('Auto Read on Notification'),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //       onPressed: () {
-            //         _sendData('TGMT=-7');
-            //       },
-            //       child: Text('Send Data')),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _sendReadCommand,
-            //     child: Text('Send "READ!"'),
-            //   ),
-            // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: _autoReadOnDataReceive,
+                onPressed: _initializeAndAutoRead,
                 child: Text('Initialize then start reading'),
               ),
             ),
@@ -645,33 +574,24 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: sendAssetFile,
+                onPressed: sendFirmwareUpdate,
                 child: Text('Send Bin'),
               ),
             ),
 
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _receiveAndReadData,
-            //     child: Text('Read Data'),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _sendTimeToEsp32,
-            //     child: Text('Set Time on ESP32'),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //     onPressed: _subscribeToDevice,
-            //     child: Text('Subscribe to ESP32'),
-            //   ),
-            // ),
-
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  bool isFileAvailable = await checkBinFileAvailability();
+                  String message = isFileAvailable
+                      ? "Bin file is available."
+                      : "Bin file is not available.";
+                  _showMessage(message);
+                },
+                child: Text('Check Bin File Availability'),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
