@@ -9,6 +9,7 @@
 #include "driver/spi_master.h"
 // HomeAir Includes
 #include "mygpio.h"
+#include "Timekeeping.h"
 // #include "epaper_driver.h"
 #include "PDLS_EXT3_Basic_Fast.h"
 #include "hV_HAL_Peripherals.h"
