@@ -4,7 +4,7 @@
 #include "FS.h"
 #include "SPIFFS.h"
 #include <Arduino.h>
-// Standard Library Functions
+// Standard Library
 #include <string>
 #include <cmath>
 // HomeAir Files

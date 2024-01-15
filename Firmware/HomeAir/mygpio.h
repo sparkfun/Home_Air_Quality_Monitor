@@ -8,9 +8,9 @@
 #include <Arduino.h>
 
 // Vendor Libraries
-#include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor
+#include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.1
 // #include <Adafruit_Sensor.h>
-#include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x
+#include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
 // HomeAir Files
 #include "AQI.h"
 #include "settings.h"

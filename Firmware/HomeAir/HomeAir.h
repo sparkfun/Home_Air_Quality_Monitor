@@ -4,7 +4,7 @@
 // C Standard Library
 #include <stdio.h>
 // Extended Data Types (Non-standard)
-#include <float16.h> // https://github.com/RobTillaart/float16
+#include <float16.h> // https://github.com/RobTillaart/float16 - Version 0.1.8
 // HomeAir Files
 #include "BLEServer.h"
 #include "Timekeeping.h"

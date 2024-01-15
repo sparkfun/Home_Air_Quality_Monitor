@@ -11,8 +11,8 @@ float rawDataArray[RAW_DATA_ARRAY_SIZE];
 void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
   while (1) {
-    Serial.print("Sensor Read from core ");
-    Serial.println(xPortGetCoreID());
+    // Serial.print("Sensor Read from core ");
+    // Serial.println(xPortGetCoreID());
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       // Acquire mutex
       mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
@@ -34,13 +34,13 @@ void setupSENSensor() {
   char errorMessage[256];
   error = sen5x.deviceReset();
   if (error) {
-    Serial.print("SEN54: Error trying to execute deviceReset(): ");
+    Serial.print("SEN5x: Error trying to execute deviceReset(): ");
     errorToString(error, errorMessage, 256);
     Serial.println(errorMessage);
   } else {
     error = sen5x.setTemperatureOffsetSimple(0); // No temp offset
     error = sen5x.startMeasurement();
-    Serial.println("SEN54: Set up sensor successfully!");
+    Serial.println("SEN5x: Set up sensor successfully!");
     online.sen5x = true;
   }
 }
@@ -60,7 +60,7 @@ void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
     Serial.print("PAS CO2: pressure reference error: ");
     Serial.println(errorPtr);
   }
-  errorPtr = co2Sensor.startMeasure(5);
+  errorPtr = co2Sensor.startMeasure(5); // Start continous measurement with 5 second period
   if (XENSIV_PASCO2_OK != errorPtr) {
     Serial.print("PAS CO2: startmeasure error: ");
     Serial.println(errorPtr);

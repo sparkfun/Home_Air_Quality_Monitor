@@ -230,7 +230,7 @@ void spiffsStorageTask(void *pvParameter) {
       //         rtc.getMonth() + 1, rtc.getDay(), rtc.getHour(),
       //         rtc.getMinute(), rtc.getSecond());
       Serial.printf("Set path to: %s", path);
-      SPIFFS.remove(path);  // Don't cull on boot
+      // SPIFFS.remove(path);  // Don't cull on boot
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_SETUP);
       xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
@@ -253,9 +253,9 @@ void spiffsStorageTask(void *pvParameter) {
         //           std::to_string(rawDataArray[9]) + "," +
         //           std::to_string(rawDataArray[10]) + "\n";
         snprintf(
-          message, 70,
-          "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
-          (double)rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
+          message, 80,
+          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
+          rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
           rawDataArray[10]);
@@ -285,8 +285,8 @@ void spiffsStorageTask(void *pvParameter) {
         insertPoint = 0;
         // Read single log from storage
         // file.readBytes(&BLEMessageBuffer[0], 55);
-        Serial.print("Read string from storage: ");
-        Serial.println(BLEMessageBuffer);
+        // Serial.print("Read string from storage: ");
+        // Serial.println(BLEMessageBuffer);
         // Notify BLE comm task of complete buffer
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY);
         xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER,
@@ -294,7 +294,7 @@ void spiffsStorageTask(void *pvParameter) {
       }
       file.close();
       Serial.println("Finished reading file!");
-      deleteFile(SPIFFS, path);
+      // deleteFile(SPIFFS, path);
       // Wait for buffer to be read before notifying EOF
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
                           BLE_FLAG_READ_COMPLETE, false, 600000);
@@ -316,17 +316,19 @@ void spiffsStorageTask(void *pvParameter) {
         BLEStateFlagGroup,
         BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
-    } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING) {
+    } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Download request/demand received
       // Open a new file and read from the BLE buffer into it
       File dest_file = SPIFFS.open("/dest_file");
       if (!dest_file) {
         Serial.println("Dest_file not opened correctly. Quitting Download state");
-        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DOWNLOADING);
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_TRANSMITTING);
+        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING); //  Revert to normal operation on a failed upload
+        // We will signal something meaningful to the user here
+        continue;
       }
       Serial.println("Dest_file opened");
-      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING) {
+      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
         // While downloading is true, read from buffer and store it
         xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE, BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);  // Write_complete is set in BLE onWrite callback
         // BLEMessageBuffer holds newest 512 bytes to append 

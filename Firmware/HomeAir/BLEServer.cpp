@@ -2,6 +2,7 @@
 
 NimBLECharacteristic *pSensorCharacteristic;
 
+
 class MyCallbacks : public NimBLECharacteristicCallbacks {
 
   void onConnect(NimBLECharacteristic *pCharacteristic) {
@@ -67,7 +68,8 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         }
       } else if(BLEMessageType == "KAZAM"){
         Serial.println("KAZAM! - Starting to listen");
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_DOWNLOADING);
+        xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup)); // Clear current state
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD); // Set state to download new firmware
 
       } else if(BLEMessageType == "END!!"){
         Serial.println("Download finished!");
@@ -75,11 +77,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else {
         // Received message had no message type
         // Check to see if we're downloading, and if so, service this new packet
-        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DOWNLOADING){
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD){
           // We're actively downloading, so new packet must be new info to process
           for (int i = 0;i<value.length();i++)
           {
-            BLEMessageBuffer[i] = *(value.data() + i);
+            // BLEMessageBuffer[i] = *(value.data() + i);
+            std::copy(&value[0], &value[value.length()-1], BLEMessageBuffer);
           }
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
         }
@@ -131,9 +134,23 @@ void BLEServerCommunicationTask(void *pvParameter) {
   }
 }
 
+void BLEServerSetAdvertisingName(){
+  // Uses the last 2 bytes of the MAC address to set a unique advertising name
+  uint8_t macOut[8];
+  char retArr[14];
+  esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
+  if (espErr == ESP_OK){
+    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    Serial.printf("Setting MAC to %s\n", retArr);
+    NimBLEDevice::init(retArr);
+  }
+  else
+    Serial.println("Mac address failed to be read");
+}
+
 void BLEServerSetupBLE() {
-  // NimBLEDevice::init("NimBLE Test");
-  NimBLEDevice::init("ThingPlusTest");
+  // NimBLEDevice::init("ThingPlusTest");
+  BLEServerSetAdvertisingName();
 
   NimBLEDevice::setMTU(500); // Set max MTU size to 500 - much less than the 512
                              // fundamental limit

@@ -10,7 +10,7 @@
 #define APP_FLAG_IDLE (1 << 4)
 #define APP_FLAG_PUSH_BUFFER (1 << 5)
 #define APP_FLAG_DONE_TRANSMITTING (1 << 6)
-#define APP_FLAG_DOWNLOADING (1 << 7)
+#define APP_FLAG_OTA_DOWNLOAD (1 << 7)
 
 #define BLE_FLAG_IDLE (1 << 0)
 #define BLE_FLAG_BUSY (1 << 1)
