@@ -6983,6 +6983,14 @@
     (uuid e22be4de-ad7e-4a01-a6d5-a8a09b8ccd25)
   )
 
+  (text_box "ESP10 = GPIO6\nESP11 = GPIO7"
+    (at 149.86 148.59 0) (size 17.78 5.08)
+    (stroke (width 0) (type default))
+    (fill (type none))
+    (effects (font (size 1.27 1.27)) (justify left top))
+    (uuid aabc4d12-92d6-460f-8a5f-c2fb78376779)
+  )
+
   (text "ESP32-S3 & CONNECTORS\n" (at 15.24 100.33 0)
     (effects (font (size 2.54 2.54) (thickness 0.4064) bold) (justify left bottom))
     (uuid 23d8ab50-c400-42bd-b852-2c4fdddec1a1)
