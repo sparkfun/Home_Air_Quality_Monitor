@@ -70,6 +70,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         Serial.println("KAZAM! - Starting to listen");
         xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup)); // Clear current state
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD); // Set state to download new firmware
+        // Send an ACK to start download
+        pSensorCharacteristic->setValue("a");
+        pSensorCharacteristic->notify();
+        Serial.printf("\tKazam: Ack sent\n");
 
       } else if(BLEMessageType == "END!!"){
         Serial.println("Download finished!");
@@ -110,7 +114,7 @@ void BLEServerCommunicationTask(void *pvParameter) {
                           BLE_FLAG_BUFFER_READY, false, 60000);
       Serial.println("Buffer ready!");
       pSensorCharacteristic->setValue(BLEMessageBuffer);
-      delay(200); // Trying a small delay
+      pSensorCharacteristic->notify();
       Serial.print("Set value to: ");
       Serial.println(BLEMessageBuffer);
       // Notify
@@ -152,7 +156,7 @@ void BLEServerSetupBLE() {
   // NimBLEDevice::init("ThingPlusTest");
   BLEServerSetAdvertisingName();
 
-  NimBLEDevice::setMTU(500); // Set max MTU size to 500 - much less than the 512
+  NimBLEDevice::setMTU(400); // Set max MTU size to 500 - much less than the 512
                              // fundamental limit
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);

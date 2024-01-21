@@ -7,6 +7,8 @@ struct struct_online{
   bool BLE = false;
   bool sen5x = false;
   bool pasco2 = false;
+  bool ng = false;
+  bool co = false;
 
 };
 

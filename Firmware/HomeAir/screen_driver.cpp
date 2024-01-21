@@ -11,16 +11,7 @@ void screendriverEpaperSetup() {
   deviceScreen.selectFont(1);
 }
 
-void screendriverPrintMacAddress() {
-  // Test function for reading out the MAC address of the ESP32 device
-  uint8_t macOut[8];
-  esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
-  if (espErr == ESP_OK) {
-    Serial.printf("MAC is %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
-                  macOut[0], macOut[1], macOut[2], macOut[3], macOut[4], macOut[5]);
-  } else
-    Serial.println("Mac address failed to be read");
-}
+
 
 String screendriverGetMacAddress() {
   uint8_t macOut[8];
@@ -33,6 +24,10 @@ String screendriverGetMacAddress() {
     Serial.println("Mac address failed to be read");
     return "";
   }
+}
+
+void screendriverPrintMacAddress() {
+  Serial.println("MAC Address: " + screendriverGetMacAddress());
 }
 
 void screendriverShowTime(){

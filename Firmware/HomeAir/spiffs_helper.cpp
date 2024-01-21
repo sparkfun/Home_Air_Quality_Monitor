@@ -319,6 +319,7 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Download request/demand received
       // Open a new file and read from the BLE buffer into it
+      deleteFile(SPIFFS, "/dest_file"); // Clear file before printing to it
       File dest_file = SPIFFS.open("/dest_file");
       if (!dest_file) {
         Serial.println("Dest_file not opened correctly. Quitting Download state");
@@ -328,13 +329,18 @@ void spiffsStorageTask(void *pvParameter) {
         continue;
       }
       Serial.println("Dest_file opened");
+      int i = 1;
       while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-        // While downloading is true, read from buffer and store it
+        // While downloading is true, read from BLEMessageBuffer and store it
         xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE, BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);  // Write_complete is set in BLE onWrite callback
         // BLEMessageBuffer holds newest 512 bytes to append 
         dest_file.print(BLEMessageBuffer);
         Serial.print("Downloaded bytes: ");
         Serial.println(BLEMessageBuffer);
+        if (i > 10){
+          i = 1;
+          Serial.println((uint32_t) dest_file.size());
+        }
       }
       // After DOWNLOADING has concluded, close the file we were appending to
       Serial.print("Total downloaded file size: ");
