@@ -93,10 +93,9 @@ class ScanningPage extends StatelessWidget {
                       if (snapshot.hasData) {
                         var devicesWithName = snapshot.data!
                             .where((result) =>
-                                result.device.name != null &&
-                                result.device.name!.isNotEmpty &&
-                                result.device.name == "MyESP32")
-                            .toList();
+                                result.device.platformName.isNotEmpty //&&
+                                //result.device.platformName == "NimBLE Test")
+                            ).toList();
 
                         if (devicesWithName.isEmpty) {
                           return const Center(
@@ -186,10 +185,10 @@ class BluetoothController extends GetxController {
    
   Future<void> checkConnectedDevice(BuildContext context) async {
   var connectedDevices = await FlutterBluePlus.connectedDevices;
-  var filteredDevices = connectedDevices.where((d) => d.name == 'MyESP32');
+  var filteredDevices = connectedDevices.where((d) => d.name == 'NimBLE Test');
 
-  if (filteredDevices.isNotEmpty) {
-    BluetoothDevice targetDevice = filteredDevices.first;
+  if (connectedDevices.isNotEmpty) {
+    BluetoothDevice targetDevice = connectedDevices.first;
     connectedDevice = targetDevice;
     await discoverServices();
     Get.off(() => DeviceDetailsPage(

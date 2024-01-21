@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:readair/BLE/ble_setup.dart';
+import 'package:readair/data/packet.dart';
 import 'dart:io';
 
 import 'package:readair/homescreen/home.dart';
@@ -25,7 +25,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'ReadAIR App v0.01'),
+      home: MyHomePage(title: 'ReadAIR App v0.01'),
+      //home: MyHomePage(title: 'ReadAIR App v0.01', data: DatabaseService.instance.getLastPacket(),),
       // navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
