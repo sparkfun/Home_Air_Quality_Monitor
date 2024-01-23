@@ -541,7 +541,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 onPressed: () {
                   _sendData("STAT!");
                 },
-                child: Text('Send UPDAT'),
+                child: Text('Send STAT'),
               ),
             ),
             Padding(
