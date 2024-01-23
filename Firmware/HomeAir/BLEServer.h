@@ -9,12 +9,8 @@
 // ESP32 System Includes
 #include "esp_mac.h"
 // HomeAir files
-#include "SPIFFS.h"
-#include "Timekeeping.h"
-#include "os_flags.h"
-#include "spiffs_helper.h"
-#include "settings.h"
-#include "mygpio.h"
+#include "HomeAir.h"
+
 
 
 // BLE Defns
@@ -27,4 +23,6 @@ void BLEServerCommunicationTask(void *);
 
 extern char BLEMessageBuffer[BLE_BUFFER_LENGTH];
 extern NimBLECharacteristic *pSensorCharacteristic;
+extern size_t updateSize;
+extern size_t MTUSize;
 #endif

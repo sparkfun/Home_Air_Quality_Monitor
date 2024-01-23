@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "freertos/event_groups.h"
+#include "HomeAir.h"
 
 #define APP_FLAG_SETUP (1 << 1)
 #define APP_FLAG_RUNNING (1 << 2)

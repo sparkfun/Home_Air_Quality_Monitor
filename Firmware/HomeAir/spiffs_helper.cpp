@@ -213,6 +213,8 @@ void spiffsStorageTask(void *pvParameter) {
   int lineLength = 0;
   int numPackets = 6;
   int insertPoint = 0;
+  int downloadIttr = 0;
+  size_t writtenSize = 0;
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
@@ -317,35 +319,49 @@ void spiffsStorageTask(void *pvParameter) {
         BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-      // Download request/demand received
-      // Open a new file and read from the BLE buffer into it
-      deleteFile(SPIFFS, "/dest_file"); // Clear file before printing to it
-      File dest_file = SPIFFS.open("/dest_file");
-      if (!dest_file) {
-        Serial.println("Dest_file not opened correctly. Quitting Download state");
-        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING); //  Revert to normal operation on a failed upload
-        // We will signal something meaningful to the user here
-        continue;
-      }
-      Serial.println("Dest_file opened");
-      int i = 1;
-      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-        // While downloading is true, read from BLEMessageBuffer and store it
-        xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE, BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);  // Write_complete is set in BLE onWrite callback
-        // BLEMessageBuffer holds newest 512 bytes to append 
-        dest_file.print(BLEMessageBuffer);
-        Serial.print("Downloaded bytes: ");
-        Serial.println(BLEMessageBuffer);
-        if (i > 10){
-          i = 1;
-          Serial.println((uint32_t) dest_file.size());
+      // Init OTA download, and if successful begin writing to the partition
+      if (updateSize != 0) {
+        if (Update.begin(updateSize)) {
+          // Serial.println("Starting update of size %zu", updateSize);
+          while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+            int chrono = millis();
+            writtenSize = Update.write((uint8_t *)BLEMessageBuffer, 4096);
+            chrono = millis() - chrono;
+            Serial.printf("Write took %fms\nProgress: %zu\n", chrono, Update.progress());
+            delay(50);
+            Serial.printf("Wrote %zu bytes\n", writtenSize);
+            if (++downloadIttr % 100 == 0) {
+              
+              Serial.printf("Processed %d packets\n", downloadIttr);
+              Serial.printf("Update progress: %zu", Update.progress());
+            }
+            xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
+                                BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
+          }
+          // OTA Update has concluded -> received "DONE!" message
+          Serial.printf("Done received. Wrote %zu bytes.\n", Update.progress());
+          if (Update.end(true)) {
+            Serial.println("OTA Update transmission has ended.");
+            if (Update.isFinished()) {
+              Serial.println("OTA Update has successfully been applied.");
+              Serial.println("Restarting...");
+              delay(3000);
+              ESP.restart();
+            } else {
+              Serial.println("Something went wrong while downloading OTA.");
+              Serial.println("Restarting...");
+              delay(3000);
+              ESP.restart();
+            }
+          } else {
+            Serial.println("Update.end() failed. Eat shit.");
+            xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
+            vTaskResume(mygpioSensorReadTaskHandle);
+          }
         }
+      } else {
+        Serial.println("Update size not received; OTA not started.");
       }
-      // After DOWNLOADING has concluded, close the file we were appending to
-      Serial.print("Total downloaded file size: ");
-      Serial.println((uint32_t) dest_file.size());
-      dest_file.close();
     }
   }
 }

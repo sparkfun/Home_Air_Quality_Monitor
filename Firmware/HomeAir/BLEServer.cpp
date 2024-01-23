@@ -1,6 +1,9 @@
 #include "BLEServer.h"
 
 NimBLECharacteristic *pSensorCharacteristic;
+size_t updateSize = 0;
+bool updateSizeRecieved = false;  // Switch used when downloading OTA update
+size_t MTUSize = 512;
 
 
 class MyCallbacks : public NimBLECharacteristicCallbacks {
@@ -27,12 +30,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
     if (value.length() > 0) {
 
-      Serial.println("*********");
-      Serial.print("New value: ");
-      for (int i = 0; i < value.length(); i++)
-        Serial.print(value[i]);
-      Serial.println();
-      Serial.println("*********");
+      // Serial.println("*********");
+      // Serial.print("New value: ");
+      // for (int i = 0; i < value.length(); i++)
+      //   Serial.print(value[i]);
+      // Serial.println();
+      // Serial.println("*********");
       // Example : TIME=1699143542
       // Epoch time is guaranteed to be 10 digits
       std::string BLEMessageType = value.substr(0, 5);
@@ -64,29 +67,47 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
           // Acquire mutex
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
-          xSemaphoreGive(rawDataMutex); // Release mutex
+          xSemaphoreGive(rawDataMutex);  // Release mutex
         }
-      } else if(BLEMessageType == "KAZAM"){
+      } else if (BLEMessageType == "KAZAM") {
         Serial.println("KAZAM! - Starting to listen");
-        xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup)); // Clear current state
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD); // Set state to download new firmware
+        xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup));  // Clear current state
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);      
+        vTaskSuspend(mygpioSensorReadTaskHandle); // Suspend GPIO task while we update
+        // Set state to download new firmware
         // Send an ACK to start download
         pSensorCharacteristic->setValue("a");
         pSensorCharacteristic->notify();
         Serial.printf("\tKazam: Ack sent\n");
 
-      } else if(BLEMessageType == "END!!"){
+      } else if (BLEMessageType == "END!!") {
         Serial.println("Download finished!");
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
+      } else if (BLEMessageType == "SIZE=") {
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+          // We're actively downloading, so new packet must be new info to process
+          if (!updateSizeRecieved) {
+            updateSize = stoi(value.substr(5, value.length() - 5));
+            updateSizeRecieved = true;
+            Serial.printf("Size of incoming OTA update: %d\n", stoi(value.substr(5, value.length() - 5)));
+          }
+        }
+      } else if (BLEMessageType == "DONE!") {
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+          xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
+          xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
+        }
+
+      } else if (BLEMessageType == "STAT!") {
+        listDir(SPIFFS, "/", 0);
       } else {
         // Received message had no message type
         // Check to see if we're downloading, and if so, service this new packet
-        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD){
-          // We're actively downloading, so new packet must be new info to process
-          for (int i = 0;i<value.length();i++)
-          {
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+          for (int i = 0; i < value.length(); i++) {
             // BLEMessageBuffer[i] = *(value.data() + i);
-            std::copy(&value[0], &value[value.length()-1], BLEMessageBuffer);
+            std::copy(&value[0], &value[value.length() - 1], BLEMessageBuffer);
+            // Serial.println("Packet received");
           }
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
         }
@@ -103,8 +124,8 @@ void BLEServerCommunicationTask(void *pvParameter) {
       // Serial.print("Current number of clients: ");
       // Serial.println(pSensorCharacteristic->getSubscribedCount());
       BLEStatus = xEventGroupWaitBits(
-          BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
-          BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
+        BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
+        BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
       if (BLEStatus & BLE_FLAG_FILE_DONE) {
         break;
       }
@@ -130,7 +151,7 @@ void BLEServerCommunicationTask(void *pvParameter) {
     }
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DONE_TRANSMITTING) {
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DONE_TRANSMITTING);
-      uint8_t message[1] = {65};
+      uint8_t message[1] = { 65 };
       pSensorCharacteristic->notify(&message[0], 1, true);
       Serial.println("Ending transmission!");
     }
@@ -138,17 +159,16 @@ void BLEServerCommunicationTask(void *pvParameter) {
   }
 }
 
-void BLEServerSetAdvertisingName(){
+void BLEServerSetAdvertisingName() {
   // Uses the last 2 bytes of the MAC address to set a unique advertising name
   uint8_t macOut[8];
   char retArr[14];
   esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
-  if (espErr == ESP_OK){
+  if (espErr == ESP_OK) {
     snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
     Serial.printf("Setting MAC to %s\n", retArr);
     NimBLEDevice::init(retArr);
-  }
-  else
+  } else
     Serial.println("Mac address failed to be read");
 }
 
@@ -156,13 +176,13 @@ void BLEServerSetupBLE() {
   // NimBLEDevice::init("ThingPlusTest");
   BLEServerSetAdvertisingName();
 
-  NimBLEDevice::setMTU(400); // Set max MTU size to 500 - much less than the 512
-                             // fundamental limit
+  NimBLEDevice::setMTU(MTUSize);  // Set max MTU size to 500 - much less than the 512
+                                  // fundamental limit
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);
   pSensorCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID,
-      NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    CHARACTERISTIC_UUID,
+    NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
   // pSensorCharacteristic->setValue("Hallo");

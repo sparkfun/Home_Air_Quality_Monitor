@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "HomeAir.h"
 
 struct struct_online{
   bool SPIFFS = false;

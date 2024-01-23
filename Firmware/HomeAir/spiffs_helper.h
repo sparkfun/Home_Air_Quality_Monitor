@@ -4,14 +4,12 @@
 #include "FS.h"
 #include "SPIFFS.h"
 #include <Arduino.h>
+#include <Update.h>
 // Standard Library
 #include <string>
 #include <cmath>
 // HomeAir Files
-#include "BLEServer.h"
-#include "Timekeeping.h"
-#include "mygpio.h"
-#include "os_flags.h"
+#include "HomeAir.h"
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
 void readFile(fs::FS &fs, const char *path);
