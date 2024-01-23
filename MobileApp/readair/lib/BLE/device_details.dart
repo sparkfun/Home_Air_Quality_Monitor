@@ -32,19 +32,19 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   BluetoothCharacteristic? writeCharacteristic;
   BluetoothCharacteristic? readCharacteristic;
 
-    @override
-    void initState() {
-        super.initState();
-        _connectAndSetupDevice();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _connectAndSetupDevice();
+  }
 
-    Future<void> _connectAndSetupDevice() async {
-        // Ensure services are discovered
-        await _discoverServices();
+  Future<void> _connectAndSetupDevice() async {
+    // Ensure services are discovered
+    await _discoverServices();
 
-        // Request MTU change
-        await _requestMtuSize(512);
-    }
+    // Request MTU change
+    await _requestMtuSize(512);
+  }
 
   @override
   void dispose() {
@@ -97,15 +97,14 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     _setupNotificationForImmediateRead();
   }
 
-
-    Future<void> _requestMtuSize(int requestedMtu) async {
-        try {
-            int resultingMtu = await widget.device.requestMtu(requestedMtu);
-            print('MTU size after negotiation: $resultingMtu');
-        } catch (e) {
-            print('Error requesting MTU size: $e');
-        }
+  Future<void> _requestMtuSize(int requestedMtu) async {
+    try {
+      int resultingMtu = await widget.device.requestMtu(requestedMtu);
+      print('MTU size after negotiation: $resultingMtu');
+    } catch (e) {
+      print('Error requesting MTU size: $e');
     }
+  }
 
 //---------------------------------SUBSCRIPTION--------------------------------------------------
 
@@ -203,7 +202,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     await Future.delayed(Duration(seconds: 3));
 
     const rapidReadInterval = Duration(
-        milliseconds: 100); // Adjust this interval as needed for faster reading
+        milliseconds: 50); // Adjust this interval as needed for faster reading
     _timer?.cancel();
 
     _timer = Timer.periodic(rapidReadInterval, (Timer t) async {
@@ -215,6 +214,9 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     if (writeCharacteristic != null) {
       try {
         var value = await writeCharacteristic!.read();
+        String receivedData = String.fromCharCodes(value);
+        _latestReceivedPacket = receivedData;
+        _processDataPacket(receivedData);
         print("Data read successfully");
       } catch (e) {
         print("Error reading from ESP32: $e");
@@ -403,68 +405,67 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     return byteData.buffer.asUint8List();
   }
 
-Future<void> sendFirmwareUpdate() async {
-  try {
-    await _sendData('KAZAM');
-    print("KAZAM sent");
+  Future<void> sendFirmwareUpdate() async {
+    try {
+      await _sendData('KAZAM');
+      print("KAZAM sent");
 
-    //await _waitForAck();
-    await Future.delayed(Duration(seconds: 2));
+      //await _waitForAck();
+      await Future.delayed(Duration(seconds: 2));
 
-    List<int> fileBytes = await loadBinFile();
-    int fileSize = fileBytes.length;
+      List<int> fileBytes = await loadBinFile();
+      int fileSize = fileBytes.length;
 
-    //Send the size of the update binary file
-    await _sendData("SIZE=${fileSize.toString()}");
+      //Send the size of the update binary file
+      await _sendData("SIZE=${fileSize.toString()}");
 
-    await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 1));
 
-    await _sendFileInChunks(fileBytes, 496);
-  } catch (e) {
-    _showMessage("Error during firmware update: $e");
-    print("Error during firmware update: $e");
+      await _sendFileInChunks(fileBytes, 496);
+    } catch (e) {
+      _showMessage("Error during firmware update: $e");
+      print("Error during firmware update: $e");
+    }
   }
-}
 //
 
-Future<void> _sendFileInChunks(List<int> fileBytes, int chunkSize) async {
-  int bytesTransferred = 0;
-  for (int i = 0; i * chunkSize < fileBytes.length; i++) {
-    int start = i * chunkSize;
-    int end = min(fileBytes.length, (i + 1) * chunkSize);
-    List<int> chunk = fileBytes.sublist(start, end);
+  Future<void> _sendFileInChunks(List<int> fileBytes, int chunkSize) async {
+    int bytesTransferred = 0;
+    for (int i = 0; i * chunkSize < fileBytes.length; i++) {
+      int start = i * chunkSize;
+      int end = min(fileBytes.length, (i + 1) * chunkSize);
+      List<int> chunk = fileBytes.sublist(start, end);
 
-    await writeCharacteristic!.write(chunk, withoutResponse: false);
-    bytesTransferred += chunk.length;
+      await writeCharacteristic!.write(chunk, withoutResponse: false);
+      bytesTransferred += chunk.length;
 
-    //print(chunk);
+      //print(chunk);
 
-  
-    double progress = (bytesTransferred / fileBytes.length) * 100;
-    if (progress >= 5 && progress % 5 < 0.1) {
-      _showMessage("${progress.toInt()}% uploaded.");
+      double progress = (bytesTransferred / fileBytes.length) * 100;
+      if (progress >= 5 && progress % 5 < 0.1) {
+        _showMessage("${progress.toInt()}% uploaded.");
+      }
+
+      await Future.delayed(Duration(milliseconds: 20));
     }
-
-    await Future.delayed(Duration(milliseconds: 20));
+    _showMessage("File upload complete.");
+    _sendData("DONE!");
   }
-  _showMessage("File upload complete.");
-  _sendData("DONE!");
-}
-
 
   Future<void> _waitForAck() async {
-  Completer<void> completer = Completer<void>();
+    Completer<void> completer = Completer<void>();
 
-  StreamSubscription? subscription = readCharacteristic?.value.listen((value) {
-    String receivedData = String.fromCharCodes(value);
-    if (receivedData.contains('a')) {
-      completer.complete();
-    }
-  });
+    StreamSubscription? subscription =
+        readCharacteristic?.value.listen((value) {
+      String receivedData = String.fromCharCodes(value);
+      if (receivedData.contains('a')) {
+        completer.complete();
+      }
+    });
 
-  await completer.future;
-  await subscription?.cancel();
-}
+    await completer.future;
+    await subscription?.cancel();
+  }
 
   Future<bool> checkBinFileAvailability() async {
     try {
@@ -530,6 +531,15 @@ Future<void> _sendFileInChunks(List<int> fileBytes, int chunkSize) async {
               child: ElevatedButton(
                 onPressed: () {
                   _sendData("UPDAT");
+                },
+                child: Text('Send UPDAT'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  _sendData("STAT!");
                 },
                 child: Text('Send UPDAT'),
               ),
