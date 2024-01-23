@@ -26,7 +26,8 @@ class _BluetoothPageState extends State<BluetoothPage> {
       setState(() {});
     });
     // Check if a device is already connected
-    final BluetoothController bluetoothController = Get.find<BluetoothController>();
+    final BluetoothController bluetoothController =
+        Get.find<BluetoothController>();
     bluetoothController.checkConnectedDevice(context);
   }
 
@@ -93,9 +94,10 @@ class ScanningPage extends StatelessWidget {
                       if (snapshot.hasData) {
                         var devicesWithName = snapshot.data!
                             .where((result) =>
-                                result.device.platformName.isNotEmpty //&&
+                                    result.device.platformName.isNotEmpty //&&
                                 //result.device.platformName == "NimBLE Test")
-                            ).toList();
+                                )
+                            .toList();
 
                         if (devicesWithName.isEmpty) {
                           return const Center(
@@ -144,6 +146,7 @@ class BluetoothController extends GetxController {
     try {
       await device.connect();
       connectedDevice = device;
+      await requestMtuSize(device, 512);
       discoverServices();
 
       // Navigate to the Device Details Page
@@ -174,30 +177,38 @@ class BluetoothController extends GetxController {
 
   void checkConnected(BuildContext context) {
     if (connectedDevice != null) {
-           // Navigate to the Device Details Page
-           Get.to(() => DeviceDetailsPage(
-                 device: connectedDevice!,
-                 onDisconnect: () => disconnectFromDevice(context),
-             ));
-       }
-   }
-
-   
-  Future<void> checkConnectedDevice(BuildContext context) async {
-  var connectedDevices = await FlutterBluePlus.connectedDevices;
-  var filteredDevices = connectedDevices.where((d) => d.name == 'NimBLE Test');
-
-  if (connectedDevices.isNotEmpty) {
-    BluetoothDevice targetDevice = connectedDevices.first;
-    connectedDevice = targetDevice;
-    await discoverServices();
-    Get.off(() => DeviceDetailsPage(
-      device: targetDevice, 
-      onDisconnect: () => disconnectFromDevice(context),
-    ));
+      // Navigate to the Device Details Page
+      Get.to(() => DeviceDetailsPage(
+            device: connectedDevice!,
+            onDisconnect: () => disconnectFromDevice(context),
+          ));
+    }
   }
-}
 
+  Future<void> checkConnectedDevice(BuildContext context) async {
+    var connectedDevices = await FlutterBluePlus.connectedDevices;
+    var filteredDevices =
+        connectedDevices.where((d) => d.name == 'NimBLE Test');
+
+    if (connectedDevices.isNotEmpty) {
+      BluetoothDevice targetDevice = connectedDevices.first;
+      connectedDevice = targetDevice;
+      await discoverServices();
+      Get.off(() => DeviceDetailsPage(
+            device: targetDevice,
+            onDisconnect: () => disconnectFromDevice(context),
+          ));
+    }
+  }
+
+  Future<void> requestMtuSize(BluetoothDevice device, int requestedMtu) async {
+    try {
+      int resultingMtu = await device.requestMtu(requestedMtu);
+      print('MTU size after negotiation: $resultingMtu');
+    } catch (e) {
+      print('Error requesting MTU size: $e');
+    }
+  }
 
   Future scanDevices() async {
     FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
