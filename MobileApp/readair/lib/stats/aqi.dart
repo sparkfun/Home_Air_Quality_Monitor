@@ -149,67 +149,7 @@ class _AQIPageState extends State<AQIPage> {
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 300,
-                child: LineChart(
-                  LineChartData(
-                    minY: 0, // Y-axis begins at 0
-                    maxY: 100, // Y-axis peaks at 100
-                    gridData: FlGridData(
-                      show: true,
-                      getDrawingHorizontalLine: (value) {
-                        return FlLine(
-                          color: const Color(0xff37434d),
-                          strokeWidth: 1,
-                        );
-                      },
-                      drawVerticalLine: true,
-                      getDrawingVerticalLine: (value) {
-                        return FlLine(
-                          color: const Color(0xff37434d),
-                          strokeWidth: 1,
-                        );
-                      },
-                    ),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text('${value.toInt()}');
-                          },
-                          reservedSize: 40,
-                          interval:
-                              20, // Optional: to display the side titles at given interval
-                        ),
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text('${(value.toInt() + 1)}');
-                          },
-                          reservedSize: 20,
-                        ),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: true),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: aqiSpots, // Here we use the actual data
-                        isCurved: true,
-                        dotData: FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                        color: Theme.of(context).primaryColor,
-                        barWidth: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            DataGraph(aqiSpots: aqiSpots),
 
             const Divider(
               thickness: 3,
@@ -457,6 +397,80 @@ class _AQIPageState extends State<AQIPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class DataGraph extends StatelessWidget {
+  const DataGraph({
+    super.key,
+    required this.aqiSpots,
+  });
+
+  final List<FlSpot> aqiSpots;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 300,
+        child: LineChart(
+          LineChartData(
+            minY: 0, // Y-axis begins at 0
+            maxY: 100, // Y-axis peaks at 100
+            gridData: FlGridData(
+              show: true,
+              getDrawingHorizontalLine: (value) {
+                return FlLine(
+                  color: const Color(0xff37434d),
+                  strokeWidth: 1,
+                );
+              },
+              drawVerticalLine: true,
+              getDrawingVerticalLine: (value) {
+                return FlLine(
+                  color: const Color(0xff37434d),
+                  strokeWidth: 1,
+                );
+              },
+            ),
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    return Text('${value.toInt()}');
+                  },
+                  reservedSize: 40,
+                  interval:
+                      20, // Optional: to display the side titles at given interval
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    return Text('${(value.toInt() + 1)}');
+                  },
+                  reservedSize: 20,
+                ),
+              ),
+            ),
+            borderData: FlBorderData(show: true),
+            lineBarsData: [
+              LineChartBarData(
+                spots: aqiSpots, // Here we use the actual data
+                isCurved: true,
+                dotData: FlDotData(show: false),
+                belowBarData: BarAreaData(show: false),
+                color: Theme.of(context).primaryColor,
+                barWidth: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );
