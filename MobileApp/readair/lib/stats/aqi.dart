@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
 import 'package:readair/data/packet.dart';
+import 'package:readair/stats/graph.dart';
 
 class AQIPage extends StatefulWidget {
   // const AQIPage({super.key, required this.title});
@@ -16,6 +17,7 @@ class AQIPage extends StatefulWidget {
 }
 
 class _AQIPageState extends State<AQIPage> {
+    List<DataPacket> packets = [];
   final Random _random = Random();
 
   int? AQIcurrentValue;
@@ -88,6 +90,12 @@ class _AQIPageState extends State<AQIPage> {
   @override
   Widget build(BuildContext context) {
     List<FlSpot> data = generateRandomData();
+
+        List<DataPoint> dataPoints = packets
+        .map((packet) => DataPoint(packet.aqi, packet.epochTime.toInt()))
+        .toList();
+
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

@@ -3,9 +3,14 @@ import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/data/packet.dart';
 import 'package:readair/settings/settings.dart';
 import 'package:readair/stats/aqi.dart';
+import 'package:readair/stats/co.dart';
+import 'package:readair/stats/co2.dart';
 import 'package:readair/stats/humid.dart';
+import 'package:readair/stats/ppm10p0.dart';
+import 'package:readair/stats/ppm2p5.dart';
 import 'package:readair/stats/stats.dart';
 import 'package:readair/stats/temp.dart';
+import 'package:readair/stats/voc.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -143,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AQIPage()),
+                        MaterialPageRoute(builder: (context) => CO2Page()),
                       );
                     },
                     child: Card(
@@ -166,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => TempPage()),
+                  MaterialPageRoute(builder: (context) => HumidPage()),
                 );
               },
               child: Card(
@@ -188,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AQIPage()),
+                        MaterialPageRoute(builder: (context) => COPage()),
                       );
                     },
                     child: Card(
@@ -209,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AQIPage()),
+                        MaterialPageRoute(builder: (context) => VOCPage()),
                       );
                     },
                     child: Card(
@@ -256,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AQIPage()),
+                        MaterialPageRoute(builder: (context) => ppm2p5Page()),
                       );
                     },
                     child: Card(
@@ -301,7 +306,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AQIPage()),
+                        MaterialPageRoute(builder: (context) => ppm10p0Page()),
                       );
                     },
                     child: Card(

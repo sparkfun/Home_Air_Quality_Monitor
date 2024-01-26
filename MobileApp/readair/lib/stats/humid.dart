@@ -16,6 +16,7 @@ class _HumidPageState extends State<HumidPage> {
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
+  //fixed values for testing only
   int currentValue = 55; //The Current Value
   int averageOverTwoFourHour = 43; //Average over past 24 hours
   int max = 67; //Maximum value over past 24 hours
@@ -23,13 +24,13 @@ class _HumidPageState extends State<HumidPage> {
 
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
-    if (value <= 49) {
+    if (value <= 50) {
       return Color.fromARGB(255, 229, 193, 13);
     } else if (value > 50 && value <= 60) {
       return Color.fromARGB(255, 48, 133, 56);
-    } else if (value > 61 && value <= 65) {
+    } else if (value > 60 && value <= 65) {
       return Color.fromARGB(255, 229, 114, 13);
-    } else if (value > 66 && value <= 70) {
+    } else if (value > 65 && value <= 70) {
       return Color.fromARGB(255, 217, 19, 4);
     } else {
       return Color.fromARGB(255, 121, 0, 0);
@@ -38,13 +39,13 @@ class _HumidPageState extends State<HumidPage> {
 
   String message(int value) {
     //Displays message below current value
-    if (value <= 49) {
+    if (value <= 50) {
       return "Dry";
     } else if (value > 50 && value <= 60) {
       return "Moderate";
-    } else if (value > 61 && value <= 65) {
+    } else if (value > 60 && value <= 65) {
       return "Sticky";
-    } else if (value > 66 && value <= 70) {
+    } else if (value > 65 && value <= 70) {
       return "Unhealthy";
     } else {
       return "Dangerous";
@@ -166,7 +167,6 @@ class _HumidPageState extends State<HumidPage> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Card(
-                //IF STATEMENT! Change color with Quality of Air
                 color: CoordinatedColor(averageOverTwoFourHour),
                 child: ListTile(
                   title: Center(
@@ -281,7 +281,7 @@ class _HumidPageState extends State<HumidPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('50-60',
+                    child: Text('51-60',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -353,7 +353,7 @@ class _HumidPageState extends State<HumidPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('70 & Higher',
+                    child: Text('70 & Above',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
