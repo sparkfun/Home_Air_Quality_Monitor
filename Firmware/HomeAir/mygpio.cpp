@@ -77,26 +77,36 @@ void setupMQSensors() {
   // Both sensors are connected to ADC 1 with 10 channels
   // analogReadResolution(12);
   // analogSetAttenuation((adc_attenuation_t) 3); // 11db
-  Serial.println("Set Analog Read Parameters");
-  online.ng = true;
-  online.co = true;
+  if (adc_set_data_width(ADC_UNIT_BOTH, ADC_WIDTH_BIT_12) == ESP_OK){
+    Serial.println("ADC1 & ADC2 Configured.");
+    online.ng = true;
+    online.co = true;
+  } else {
+    Serial.println("ADCs NOT configured!");
+  }
+  // if (adc2_config_width(ADC_WIDTH_BIT_12) == ESP_OK){
+  //   Serial.println("ADC2 Configured.");
+  //   online.co = true;
+  // } else {
+  //   Serial.println("ADC2 NOT configured")
+  // }
 }
 
 float readNGSensor() {
   // float reading = analogRead(pin_NGInput);
   if (online.ng) {
-    int reading = analogRead(pin_NGInput);
-    Serial.printf("\tNG: %d\n");
-    return reading;
+    int NGReading = analogRead(pin_NGInput);
+    // Serial.printf("\tNG: %d\n", NGReading);
+    return NGReading;
   }
   return -1;
 }
 
 float readCOSensor() {
   if (online.co) {
-    int reading = analogRead(pin_NGInput);
-    Serial.printf("\tCO: %d\n");
-    return reading;
+    int COReading = analogRead(pin_COInput);
+    // Serial.printf("\tCO: %d\n", COReading);
+    return COReading;
   }
   return -1;
 }
@@ -169,6 +179,13 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   // Serial.println(ret_array[10]);
   ret_array[AQI] =
     aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
+
+  Serial.print("Measurements: ");
+  for(int i=0;i<11;i++)
+  {
+    Serial.printf("%f, ", ret_array[i]);
+  }
+  Serial.println();
 }
 
 void setupGPIO() {

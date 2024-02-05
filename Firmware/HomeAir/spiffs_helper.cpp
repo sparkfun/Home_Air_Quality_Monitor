@@ -1,3 +1,4 @@
+#include "FS.h"
 #include "spiffs_helper.h"
 
 /* You only need to format SPIFFS the first time you run a
@@ -204,6 +205,18 @@ float reducePrecision(float var) {
   return (float)value / 100;
 }
 
+void onProgressCallback(size_t progress, size_t total){
+  float percentage = (progress / total) * 100;
+  Serial.println("Callback is hit!");
+  if(percentage > 5 && (int)percentage % 5 <= .1){
+    Serial.printf("Progress: %f\n", percentage);
+  }
+  // if (progress / total > 0.05 && (progress / total) % 0.05 <= 0.001){
+  //   Serial.printf("Progress: %zu\n", (progress * 100 / total));
+  // }
+}
+
+
 void spiffsStorageTask(void *pvParameter) {
   char path[13] = { "/datalog.txt" };
   // std::string message;
@@ -215,6 +228,7 @@ void spiffsStorageTask(void *pvParameter) {
   int insertPoint = 0;
   int downloadIttr = 0;
   size_t writtenSize = 0;
+  Update.onProgress(onProgressCallback);
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
@@ -321,46 +335,62 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
-        if (Update.begin(updateSize)) {
-          // Serial.println("Starting update of size %zu", updateSize);
-          while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-            int chrono = millis();
-            writtenSize = Update.write((uint8_t *)BLEMessageBuffer, 4096);
-            chrono = millis() - chrono;
-            Serial.printf("Write took %fms\nProgress: %zu\n", chrono, Update.progress());
-            delay(50);
-            Serial.printf("Wrote %zu bytes\n", writtenSize);
-            if (++downloadIttr % 100 == 0) {
-              
-              Serial.printf("Processed %d packets\n", downloadIttr);
-              Serial.printf("Update progress: %zu", Update.progress());
-            }
-            xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
-                                BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
-          }
-          // OTA Update has concluded -> received "DONE!" message
-          Serial.printf("Done received. Wrote %zu bytes.\n", Update.progress());
-          if (Update.end(true)) {
-            Serial.println("OTA Update transmission has ended.");
-            if (Update.isFinished()) {
-              Serial.println("OTA Update has successfully been applied.");
-              Serial.println("Restarting...");
-              delay(3000);
-              ESP.restart();
-            } else {
-              Serial.println("Something went wrong while downloading OTA.");
-              Serial.println("Restarting...");
-              delay(3000);
-              ESP.restart();
-            }
+        // Check for room in SPIFFS
+        Serial.printf("%d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
+        if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
+          // We have enough room to directly receive BLE data
+          SPIFFS.remove("/dest_bin");
+          file = SPIFFS.open("/dest_bin", "w");
+          if (!file) {
+            Serial.println("Error opening dest file.");
+
           } else {
-            Serial.println("Update.end() failed. Eat shit.");
-            xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
-            vTaskResume(mygpioSensorReadTaskHandle);
+            while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+              xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
+                                  BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
+              writtenSize += file.write((uint8_t*)&BLEMessageBuffer[0], 509);
+              // Add setBits for done writing to ack in BLE
+              if(++downloadIttr % 5 == 0){
+                Serial.printf("Written %zu bytes so far to SPIFFS file.\n", writtenSize);
+                Serial.printf("%d packets written\n", downloadIttr);
+              }
+              if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE){
+                break;
+              }
+            }
+            // OTA Update has been received to SPIFFS
+            Serial.printf("Percentage written %f\n", file.size()/updateSize);
+            file.close();
+            if(Update.begin(updateSize)){
+              // Space exists for update in OTA partition
+              Serial.println("Writing file to OTA partition...");
+              file = SPIFFS.open("/dest_bin", "r");
+              writtenSize = Update.writeStream(file);
+              file.close();
+              if (writtenSize >= updateSize){
+                Serial.println("Entire update file was written.");
+              } else {
+                Serial.println("Failure writing update file.");
+              }
+              if(Update.end(true)){
+                Serial.println("OTA done!");
+                if (Update.isFinished()){
+                  Serial.println("OTA Verified. Rebooting...");
+                  delay(3000);
+                  ESP.restart();
+                } else {
+                  Serial.println("Update not finished. Rebooting...");
+                  delay(3000);
+                  ESP.restart();
+                }
+              } else {
+                Serial.println("End failed. I don't know why. Rebooting...");
+                delay(3000);
+                ESP.restart();
+              }
+            }
           }
         }
-      } else {
-        Serial.println("Update size not received; OTA not started.");
       }
     }
   }

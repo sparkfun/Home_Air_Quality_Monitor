@@ -14,7 +14,9 @@
 #include "hV_HAL_Peripherals.h"
 #include "hV_Configuration.h"
 // Pin defns for breadboard
-const pins_t breadBoardBreakout =
+
+
+const pins_t myMfnBoard 
 {
     // .panelBusy = 45, //"BUSY<Red
     // .panelDC = 48, //Orange
@@ -25,14 +27,14 @@ const pins_t breadBoardBreakout =
     // .flashCS = 21, //Purple
     // .panelCS = 11, ///Grey
 
-    .panelBusy = 45, //"BUSY", Red breadboard jumper
-    .panelDC = 48, //"D/C", Orange breadboard jumper
-    .panelReset = 47, //"RST", Yellow breadboard jumper
-    // .panelMISO = 37, //"MISO", Green breadboard jumper
-    // .panelMOSI = 36, //"MOSI", Blue breadboard jumper
-    // .panelSCK = 35, //"SCK", Brown breadboard jumper
-    .flashCS = 21, //"FCSM", Purple breadboard jumper
-    .panelCS = 11, //"ECSM", Grey breadboard jumper
+    .panelBusy = 40, //"BUSY", Red breadboard jumper
+    .panelDC = 42, //"D/C", Orange breadboard jumper
+    .panelReset = 39, //"RST", Yellow breadboard jumper
+    // .panelMISO = NOT_CONNECTED, //"MISO", Green breadboard jumper
+    // .panelMOSI = 37, //"MOSI", Blue breadboard jumper
+    // .panelSCK = 41, //"SCK", Brown breadboard jumper
+    .flashCS = 38, //"FCSM", Purple breadboard jumper
+    .panelCS = 11 //"ECSM", Grey breadboard jumper
 };
 
 void screendriverEpaperSetup();

@@ -158,13 +158,13 @@ float aqiGetCompositeAQI(float ppm25, float ppm10, float CO) {
   float AQICO = getCOAQI(CO);
 
   if (AQI25 > AQI10 && AQI25 > AQICO) {
-    Serial.println("AQI Source: PPM 2.5");
+    // Serial.println("AQI Source: PPM 2.5");
     return AQI25;
   } else if (AQI10 > AQI25 && AQI10 > AQICO) {
-    Serial.println("AQI Source: PPM 10.0");
+    // Serial.println("AQI Source: PPM 10.0");
     return AQI10;
   } else {
-    Serial.println("AQI Source: CO");
+    // Serial.println("AQI Source: CO");
     return AQICO;
   }
 }

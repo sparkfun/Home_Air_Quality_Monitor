@@ -1,6 +1,9 @@
 #include "screen_driver.h"
 
-Screen_EPD_EXT3_Fast deviceScreen(eScreen_EPD_EXT3_266_0C_Fast, breadBoardBreakout);
+Screen_EPD_EXT3_Fast deviceScreen(eScreen_EPD_EXT3_266_0C_Fast, myMfnBoard);
+
+
+
 
 void screendriverEpaperSetup() {
   deviceScreen.begin();

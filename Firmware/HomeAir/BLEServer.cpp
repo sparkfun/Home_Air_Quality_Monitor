@@ -95,7 +95,9 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "DONE!") {
         if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
           xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
+          xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_DOWNLOAD_COMPLETE);
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
+          Serial.println("DONE! received");
         }
 
       } else if (BLEMessageType == "STAT!") {
@@ -107,8 +109,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           for (int i = 0; i < value.length(); i++) {
             // BLEMessageBuffer[i] = *(value.data() + i);
             std::copy(&value[0], &value[value.length() - 1], BLEMessageBuffer);
+            // Serial.printf("L=%d\n", value.length());
             // Serial.println("Packet received");
           }
+          BLEMessageBuffer[value.length()] = '\0'; // Set null terminator
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
         }
       }
