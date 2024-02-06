@@ -25,6 +25,7 @@
 #define BLE_FLAG_FILE_DONE (1 << 9)
 #define BLE_FLAG_WRITE_COMPLETE (1 << 10)
 #define BLE_FLAG_DOWNLOAD_COMPLETE (1 << 11)
+#define BLE_FLAG_SAVE_COMPLETE (1 << 12)
 
 extern EventGroupHandle_t appStateFlagGroup;
 extern EventGroupHandle_t BLEStateFlagGroup;

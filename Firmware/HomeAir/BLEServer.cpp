@@ -77,6 +77,8 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // Set state to download new firmware
         // Send an ACK to start download
         pSensorCharacteristic->setValue("a");
+        Serial.printf("\tAck sent!\n");
+        delay(1000);
         pSensorCharacteristic->notify();
         Serial.printf("\tKazam: Ack sent\n");
 
@@ -114,6 +116,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           }
           BLEMessageBuffer[value.length()] = '\0'; // Set null terminator
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
+          xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE, BLE_FLAG_SAVE_COMPLETE, false, ONE_MIN_MS);
+          Serial.printf("\tPost Ack sent!\n");
+          pSensorCharacteristic->setValue("a");
+          pSensorCharacteristic->notify();
         }
       }
     }

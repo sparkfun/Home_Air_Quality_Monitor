@@ -45,7 +45,7 @@ void setup() {
   appStateFlagGroup = xEventGroupCreate();
   BLEStateFlagGroup = xEventGroupCreate();
   xEventGroupSetBits(appStateFlagGroup, APP_FLAG_SETUP);
-
+ 
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
 

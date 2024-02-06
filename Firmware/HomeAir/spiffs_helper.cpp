@@ -354,6 +354,7 @@ void spiffsStorageTask(void *pvParameter) {
                 Serial.printf("Written %zu bytes so far to SPIFFS file.\n", writtenSize);
                 Serial.printf("%d packets written\n", downloadIttr);
               }
+              xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
               if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE){
                 break;
               }
