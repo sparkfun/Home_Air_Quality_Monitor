@@ -67,6 +67,8 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
           // Acquire mutex
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+          pSensorCharacteristic->setValue(BLEMessageBuffer);
+          pSensorCharacteristic->notify();
           xSemaphoreGive(rawDataMutex);  // Release mutex
         }
       } else if (BLEMessageType == "KAZAM") {
