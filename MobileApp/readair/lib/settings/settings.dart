@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readair/BLE/ble_server.dart';
 import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/settings/custom.dart';
 import 'package:readair/settings/export.dart'; // Ensure this import is correct for your project setup
@@ -35,6 +36,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   "WiFi and Bluetooth Connectivity"),
               SizedBox(height: 20),
               _settingTile(context, Icons.share, "Data", "Clear data, Export data"),
+              // SizedBox(height: 20),
+              // _settingTile(context, Icons.bluetooth_connected, "OTA Debug", "Act as a server"),
+
             ],
           ),
         ),
@@ -69,6 +73,12 @@ class _SettingsPageState extends State<SettingsPage> {
             MaterialPageRoute(builder: (context) => ExportPage()),
           );
         }
+        //         if (title == "OTA Debug") {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => ServerPage()),
+        //   );
+        // }
       },
     );
   }

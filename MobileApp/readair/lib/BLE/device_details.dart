@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/data/packet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -44,6 +47,11 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
 
     // Request MTU change
     await _requestMtuSize(512);
+
+        final BluetoothController bluetoothController = Get.find<BluetoothController>();
+
+    // Subscribe to the device
+    bluetoothController.subscribeToDevice(widget.device);
   }
 
   @override
@@ -320,6 +328,20 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     }
   }
 
+  Future<void> _readFromEspAndDisplay() async {
+    try {
+      // Read the characteristic
+      var value = await readCharacteristic?.read();
+      String receivedData = String.fromCharCodes(value ?? []);
+
+      // Display the result in an alert dialog
+      _showReceivedDataDialog(receivedData);
+    } catch (e) {
+      print("Error reading from ESP32: $e");
+      _showMessage("Error reading from ESP32: $e");
+    }
+  }
+
 //--------------------------------PARSING----------------------------------------------------------
 
   void _processDataPacket(String data) {
@@ -411,6 +433,8 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       print("KAZAM sent");
 
       //await _waitForAck();
+      print("ACK received");
+
       await Future.delayed(Duration(seconds: 2));
 
       List<int> fileBytes = await loadBinFile();
@@ -446,26 +470,37 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
         _showMessage("${progress.toInt()}% uploaded.");
       }
 
-      await Future.delayed(Duration(milliseconds: 20));
+      //await Future.delayed(Duration(milliseconds: 20));
     }
     _showMessage("File upload complete.");
     _sendData("DONE!");
   }
 
-  Future<void> _waitForAck() async {
-    Completer<void> completer = Completer<void>();
+  Future<void> _waitForAck(
+      {Duration timeout = const Duration(seconds: 10)}) async {
+    final startTime = DateTime.now();
+    String receivedData = '';
 
-    StreamSubscription? subscription =
-        readCharacteristic?.value.listen((value) {
-      String receivedData = String.fromCharCodes(value);
-      if (receivedData.contains('a')) {
-        completer.complete();
+    while (!receivedData.contains('a')) {
+      if (DateTime.now().difference(startTime) > timeout) {
+        throw TimeoutException(
+            "Did not receive 'a' in the allotted time: $timeout");
       }
-    });
 
-    await completer.future;
-    await subscription?.cancel();
+      final value = await readCharacteristic?.read();
+      receivedData = String.fromCharCodes(value ?? []);
+
+      print("Received Data: ${receivedData.toString()}");
+
+      if (receivedData.contains('a')) {
+        break;
+      }
+      await Future.delayed(Duration(milliseconds: 200));
+    }
+
+    print("Received 'a'. Acknowledgement complete.");
   }
+
 
   Future<bool> checkBinFileAvailability() async {
     try {
@@ -526,24 +561,24 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 child: Text('Read Every 100 miliseconds'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _sendData("UPDAT");
-                },
-                child: Text('Send UPDAT'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _sendData("STAT!");
-                },
-                child: Text('Send STAT'),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: () {
+            //       _sendData("UPDAT");
+            //     },
+            //     child: Text('Send UPDAT'),
+            //   ),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: () {
+            //       _sendData("STAT!");
+            //     },
+            //     child: Text('Send STAT'),
+            //   ),
+            // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -565,6 +600,14 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 child: Text('Check Bin File Availability'),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: _readFromEspAndDisplay,
+                child: Text('Read Data from ESP'),
+              ),
+            ),
+
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(

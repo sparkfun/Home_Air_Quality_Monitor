@@ -133,7 +133,7 @@ class DatabaseService {
     final List<Map<String, dynamic>> maps = await db.query(
       'data_packets',
       orderBy: 'epochTime DESC',
-      limit: 5,
+      limit: 100,
     );
 
     return List.generate(maps.length, (i) {

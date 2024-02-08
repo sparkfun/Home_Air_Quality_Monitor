@@ -46,6 +46,7 @@ dependencies:
   file_picker: ^6.1.1
   provider: ^6.1.1
   intl: ^0.19.0
+  flutter_ble_peripheral: ^1.2.3
 
 dev_dependencies:
   flutter_test:

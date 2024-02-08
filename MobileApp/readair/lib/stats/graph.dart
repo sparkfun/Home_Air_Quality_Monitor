@@ -10,7 +10,9 @@ class DataPoint {
   DataPoint(this.measurement, this.epoch);
 }
 
-class GraphWidget extends StatelessWidget {
+enum TimeRange { last24Hours, lastWeek, allTime }
+
+class GraphWidget extends StatefulWidget {
   final String title;
   final List<DataPoint> dataPoints;
 
@@ -18,10 +20,20 @@ class GraphWidget extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<GraphWidget> createState() => _GraphWidgetState();
+}
+
+class _GraphWidgetState extends State<GraphWidget> {
+  TimeRange _selectedTimeRange = TimeRange.last24Hours; // Default value
+
+  @override
   Widget build(BuildContext context) {
+    final filteredDataPoints =
+        _filterDataPoints(widget.dataPoints, _selectedTimeRange);
     // Ensuring only 100 datasets are shown
-    final points =
-        dataPoints.length > 100 ? dataPoints.sublist(0, 100) : dataPoints;
+    final points = filteredDataPoints.length > 100
+        ? filteredDataPoints.sublist(0, 100)
+        : filteredDataPoints;
     final double minY = points.isNotEmpty
         ? max(points.map((e) => e.measurement).reduce(min) - 100.0, 0.0)
         : 0.0;
@@ -37,7 +49,28 @@ class GraphWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(title,
+          child: DropdownButton<TimeRange>(
+            value: _selectedTimeRange,
+            onChanged: (TimeRange? newValue) {
+              setState(() {
+                _selectedTimeRange = newValue!;
+              });
+            },
+            items: <TimeRange>[
+              TimeRange.last24Hours,
+              TimeRange.lastWeek,
+              TimeRange.allTime
+            ].map<DropdownMenuItem<TimeRange>>((TimeRange value) {
+              return DropdownMenuItem<TimeRange>(
+                value: value,
+                child: Text(_getTimeRangeText(value)),
+              );
+            }).toList(),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(widget.title,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         ),
         Container(
@@ -147,5 +180,39 @@ class GraphWidget extends StatelessWidget {
   List<FlSpot> _createSpots(List<DataPoint> points) {
     return List.generate(points.length,
         (index) => FlSpot(index.toDouble(), points[index].measurement));
+  }
+
+  List<DataPoint> _filterDataPoints(
+      List<DataPoint> dataPoints, TimeRange timeRange) {
+    final now = DateTime.now();
+    switch (timeRange) {
+      case TimeRange.last24Hours:
+        final last24HoursEpoch =
+            now.subtract(Duration(hours: 24)).millisecondsSinceEpoch ~/ 1000;
+        return dataPoints
+            .where((point) => point.epoch >= last24HoursEpoch)
+            .toList();
+      case TimeRange.lastWeek:
+        final lastWeekEpoch =
+            now.subtract(Duration(days: 7)).millisecondsSinceEpoch ~/ 1000;
+        return dataPoints
+            .where((point) => point.epoch >= lastWeekEpoch)
+            .toList();
+      case TimeRange.allTime:
+        return dataPoints;
+    }
+  }
+
+  String _getTimeRangeText(TimeRange timeRange) {
+    switch (timeRange) {
+      case TimeRange.last24Hours:
+        return 'Last 24 Hours';
+      case TimeRange.lastWeek:
+        return 'Last Week';
+      case TimeRange.allTime:
+        return 'All Time';
+      default:
+        return '';
+    }
   }
 }

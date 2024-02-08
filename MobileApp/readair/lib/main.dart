@@ -15,14 +15,6 @@ void main() {
   runApp(const MyApp());
 }
 
-// void main() {
-//   runApp(
-//     ChangeNotifierProvider(
-//       create: (context) => BluetoothConnectionProvider(),
-//       child: const MyApp(), // Your main app widget
-//     ),
-//   );
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
