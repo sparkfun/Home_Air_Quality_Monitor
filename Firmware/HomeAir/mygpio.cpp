@@ -180,12 +180,12 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   ret_array[AQI] =
     aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
 
-  Serial.print("Measurements: ");
-  for(int i=0;i<11;i++)
-  {
-    Serial.printf("%f, ", ret_array[i]);
-  }
-  Serial.println();
+  // Serial.print("Measurements: ");
+  // for(int i=0;i<11;i++)
+  // {
+  //   Serial.printf("%f, ", ret_array[i]);
+  // }
+  // Serial.println();
 }
 
 void setupGPIO() {

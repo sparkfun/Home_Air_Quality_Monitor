@@ -70,7 +70,7 @@ void writeFile(fs::FS &fs, const char *path, const char *message) {
 }
 
 void appendFile(fs::FS &fs, const char *path, const char *message) {
-  Serial.printf("Appending to file: %s\r\n", path);
+  // Serial.printf("Appending to file: %s\r\n", path);
 
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
@@ -196,6 +196,10 @@ void deleteAllFiles(fs::FS &fs) {
   Serial.println("Deleted all files in directory.");
 }
 
+void getFormattedMessageFromRawDataArray(char* dest, int size){
+
+}
+
 float reducePrecision(float var) {
   // 37.66666 * 100 =3766.66
   // 3766.66 + .5 =3767.16    for rounding off value
@@ -275,7 +279,7 @@ void spiffsStorageTask(void *pvParameter) {
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
           rawDataArray[10]);
-        Serial.print("Appending to file: ");
+        // Serial.print("Appending to file: ");
         // Serial.println(message.c_str());
         Serial.println(message);
         // appendLineToFile(SPIFFS, path, message.c_str());

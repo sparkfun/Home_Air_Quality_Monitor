@@ -2,8 +2,8 @@
 
 NimBLECharacteristic *pSensorCharacteristic;
 size_t updateSize = 0;
-bool updateSizeRecieved = false;  // Switch used when downloading OTA update
 size_t MTUSize = 512;
+bool updateSizeRecieved = false;  // Switch used when downloading OTA update
 
 
 class MyCallbacks : public NimBLECharacteristicCallbacks {
@@ -63,12 +63,28 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "DEL!!") {
         // Manually cull the entire root directory
         deleteAllFiles(SPIFFS);
+      } else if(BLEMessageType == "TEST!"){
+        Serial.println("TEST! received...");
+        delay(3000);
+        pSensorCharacteristic->setValue("a");
+        delay(3000);
+        pSensorCharacteristic->notify();
       } else if (BLEMessageType == "UPDAT") {
         if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
           // Acquire mutex
+          Serial.println("UPDAT recieved!");
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
-          pSensorCharacteristic->setValue(BLEMessageBuffer);
+          char message[90];
+          snprintf(message, 90,
+          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n\n",
+          rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
+          rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
+          rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
+          rawDataArray[10]);
+          pSensorCharacteristic->setValue(message);
           pSensorCharacteristic->notify();
+          Serial.printf("Set BLE value to: ");
+          Serial.println(BLEMessageBuffer);
           xSemaphoreGive(rawDataMutex);  // Release mutex
         }
       } else if (BLEMessageType == "KAZAM") {
@@ -101,6 +117,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_DOWNLOAD_COMPLETE);
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
+          vTaskResume(mygpioSensorReadTaskHandle);
           Serial.println("DONE! received");
         }
 
@@ -112,7 +129,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
           for (int i = 0; i < value.length(); i++) {
             // BLEMessageBuffer[i] = *(value.data() + i);
-            std::copy(&value[0], &value[value.length() - 1], BLEMessageBuffer);
+            std::copy(&value[0], &value[value.length()], BLEMessageBuffer);
             // Serial.printf("L=%d\n", value.length());
             // Serial.println("Packet received");
           }
@@ -142,24 +159,24 @@ void BLEServerCommunicationTask(void *pvParameter) {
         break;
       }
       // Else: File exists and buffer will be written to and read out
-      Serial.print("Waiting for buffer to be ready...");
+      // Serial.print("Waiting for buffer to be ready...");
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY,
                           BLE_FLAG_BUFFER_READY, false, 60000);
-      Serial.println("Buffer ready!");
+      // Serial.println("Buffer ready!");
       pSensorCharacteristic->setValue(BLEMessageBuffer);
       pSensorCharacteristic->notify();
-      Serial.print("Set value to: ");
+      // Serial.print("Set value to: ");
       Serial.println(BLEMessageBuffer);
       // Notify
       // pSensorCharacteristic->notify((const uint8_t*) &BLEMessageBuffer,
       // BLE_BUFFER_LENGTH, true); pSensorCharacteristic->notify(false);
-      Serial.println("Notification sent!");
-      Serial.println("Waiting for data to be read...");
+      // Serial.println("Notification sent!");
+      // Serial.println("Waiting for data to be read...");
       // printCurrentBLEFlagStatus();
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
                           BLE_FLAG_READ_COMPLETE, false, 600000);
       xEventGroupSetBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER);
-      Serial.println("Buffer read!");
+      // Serial.println("Buffer read!");
     }
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DONE_TRANSMITTING) {
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DONE_TRANSMITTING);
@@ -185,11 +202,9 @@ void BLEServerSetAdvertisingName() {
 }
 
 void BLEServerSetupBLE() {
-  // NimBLEDevice::init("ThingPlusTest");
   BLEServerSetAdvertisingName();
 
-  NimBLEDevice::setMTU(MTUSize);  // Set max MTU size to 500 - much less than the 512
-                                  // fundamental limit
+  NimBLEDevice::setMTU(MTUSize);
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);
   pSensorCharacteristic = pService->createCharacteristic(
@@ -197,7 +212,6 @@ void BLEServerSetupBLE() {
     NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
-  // pSensorCharacteristic->setValue("Hallo");
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is
   // working for backward compatibility

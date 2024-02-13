@@ -52,7 +52,7 @@ void setup() {
   xTaskCreatePinnedToCore(
       mygpioSensorReadTask,        /*Function to call*/
       "Sensor Read Task",          /*Task name*/
-      10000,                       /*Stack size*/
+      4096,                       /*Stack size*/
       NULL,                        /*Function parameters*/
       5,                           /*Priority*/
       &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
@@ -79,7 +79,7 @@ void setup() {
   xTaskCreatePinnedToCore(
       timekeepingSyncTask,        /*Function to call*/
       "Time Sync Task",           /*Task name*/
-      10000,                      /*Stack size*/
+      1024,                      /*Stack size*/
       NULL,                       /*Function parameters*/
       1,                          /*Priority*/
       &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/

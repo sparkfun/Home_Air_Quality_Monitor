@@ -16,7 +16,7 @@
 // BLE Defns
 #define SERVICE_UUID "9194f647-3a6c-4cf2-a6d5-187cb05728cd"
 #define CHARACTERISTIC_UUID "588d30b0-33aa-4654-ab36-56dfa9974b13"
-const uint16_t BLE_BUFFER_LENGTH = 512;
+const uint16_t BLE_BUFFER_LENGTH = 510;
 
 void BLEServerSetupBLE();
 void BLEServerCommunicationTask(void *);
