@@ -10,9 +10,9 @@
 // HomeAir Includes
 #include "HomeAir.h"
 // #include "epaper_driver.h"
-#include "PDLS_EXT3_Basic_Fast.h"
-#include "hV_HAL_Peripherals.h"
-#include "hV_Configuration.h"
+#include "src/EPDDriver/PDLS_EXT3_Basic_Fast.h"
+#include "src/EPDDriver/hV_HAL_Peripherals_fast.h"
+#include "src/EPDDriver/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
 
@@ -27,14 +27,24 @@ const pins_t myMfnBoard
     // .flashCS = 21, //Purple
     // .panelCS = 11, ///Grey
 
-    .panelBusy = 40, //"BUSY", Red breadboard jumper
-    .panelDC = 42, //"D/C", Orange breadboard jumper
+    // .panelBusy = 40, //"BUSY", Red breadboard jumper
+    // .panelDC = 42, //"D/C", Orange breadboard jumper
+    // .panelReset = 39, //"RST", Yellow breadboard jumper
+    // // .panelMISO = NOT_CONNECTED, //"MISO", Green breadboard jumper
+    // // .panelMOSI = 37, //"MOSI", Blue breadboard jumper
+    // // .panelSCK = 41, //"SCK", Brown breadboard jumper
+    // .flashCS = 38, //"FCSM", Purple breadboard jumper
+    // .panelCS = 11 //"ECSM", Grey breadboard jumper
+
+    
+    .panelBusy = 41,  //"BUSY", Red breadboard jumper
+    .panelDC = 40,    //"D/C", Orange breadboard jumper
     .panelReset = 39, //"RST", Yellow breadboard jumper
-    // .panelMISO = NOT_CONNECTED, //"MISO", Green breadboard jumper
-    // .panelMOSI = 37, //"MOSI", Blue breadboard jumper
-    // .panelSCK = 41, //"SCK", Brown breadboard jumper
-    .flashCS = 38, //"FCSM", Purple breadboard jumper
-    .panelCS = 11 //"ECSM", Grey breadboard jumper
+    .panelMISO = 38,  //"MISO", Green breadboard jumper
+    .panelMOSI = 37,  //"MOSI", Blue breadboard jumper
+    .panelSCK = 42,   //"SCK", Brown breadboard jumper
+    .flashCS = 36,    //"FCSM", Purple breadboard jumper
+    .panelCS = 35,    //"ECSM", Grey breadboard jumper
 };
 
 void screendriverEpaperSetup();

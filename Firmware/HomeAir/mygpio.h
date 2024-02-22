@@ -49,8 +49,8 @@ const uint8_t PERIODIC_MEAS_INTERVAL_IN_SECONDS = 10;
 const uint16_t PRESSURE_REFERENCE = 1000;
 const uint8_t RAW_DATA_ARRAY_SIZE = 11;
 // Standard GPIO Pin definitions
-const uint8_t pin_NGInput = 4;
-const uint8_t pin_COInput = 16;
+const uint8_t pin_NGInput = 11;
+const uint8_t pin_COInput = 12;
 // const gpio_num_t esp_NGPin = GPIO_NUM_7;
 // const gpio_num_t esp_COPin = GPIO_NUM_6;
 // const adc1_channel_t esp_NGChannel = ADC1_CHANNEL_6;

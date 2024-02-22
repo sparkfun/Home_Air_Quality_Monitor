@@ -123,6 +123,18 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
+      } else if (BLEMessageType == "="){
+        // Dot position & enable
+        // time position & enable
+        // leftFrame data
+        // rightFrame data
+        // sensorReadPeriod
+        // EPDUpdatePeriod
+        // averagingMode
+        // MQ disable (4 or 7)
+        // 
+        
+        
       } else {
         // Received message had no message type
         // Check to see if we're downloading, and if so, service this new packet
@@ -136,7 +148,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           BLEMessageBuffer[value.length()] = '\0'; // Set null terminator
           xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
           xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE, BLE_FLAG_SAVE_COMPLETE, false, ONE_MIN_MS);
-          Serial.printf("\tPost Ack sent!\n");
+          // Serial.printf("\tPost Ack sent!\n");
           pSensorCharacteristic->setValue("a");
           pSensorCharacteristic->notify();
         }

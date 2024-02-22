@@ -339,11 +339,11 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
+        SPIFFS.remove("/dest_bin"); // Make room for new OTA
         // Check for room in SPIFFS
-        Serial.printf("%d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
+        Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
         if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
           // We have enough room to directly receive BLE data
-          SPIFFS.remove("/dest_bin");
           file = SPIFFS.open("/dest_bin", "w");
           if (!file) {
             Serial.println("Error opening dest file.");
@@ -365,6 +365,16 @@ void spiffsStorageTask(void *pvParameter) {
             }
             // OTA Update has been received to SPIFFS
             Serial.printf("Percentage written %f\n", file.size()/updateSize);
+            Serial.printf("File written: %zu\n", file.size());
+            Serial.printf("WrittenSize: %zu\n", writtenSize);
+
+            // Trim end of file from TRANSFER_COMPLETE to the END
+            float chrono = millis();
+            size_t endIndex = file.find("TRANSFER_COMPLETE");
+            Serial.printf("file.find() took %f ms\n", millis() - chrono);
+            Serial.printf("Found token at %zu\n", endIndex);
+            // BLEMessageBuffer.erase(endIndex, )
+
             file.close();
             if(Update.begin(updateSize)){
               // Space exists for update in OTA partition
@@ -390,11 +400,17 @@ void spiffsStorageTask(void *pvParameter) {
                 }
               } else {
                 Serial.println("End failed. I don't know why. Rebooting...");
-                delay(3000);
+                delay(5000);
                 ESP.restart();
               }
             }
           }
+        } else {
+          // Not enough room in SPIFFS for update even after clearing previous OTA
+          Serial.println("No room for OTA in SPIFFS!");
+          delay(500);
+          Serial.println("Restarting...");
+          delay(5000);
         }
       }
     }

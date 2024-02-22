@@ -10,7 +10,6 @@ struct struct_online{
   bool pasco2 = false;
   bool ng = false;
   bool co = false;
-
 };
 
 extern struct_online online;
