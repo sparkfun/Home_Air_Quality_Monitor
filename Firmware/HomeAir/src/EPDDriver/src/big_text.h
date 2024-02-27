@@ -10,7 +10,7 @@
 #ifndef LARGE_TUFFY
 #define LARGE_TUFFY
 
-static const uint8_t largeTuffy[95][200] =
+static uint8_t largeTuffy[95][200] =
     {  
         {//Image Name: 32.jpg ; Width: 32 ; Height: 50
 0xff,0xff,0xff,0xff, // 1

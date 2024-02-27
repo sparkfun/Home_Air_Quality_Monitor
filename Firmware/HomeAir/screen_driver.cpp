@@ -14,7 +14,7 @@ void screendriverEpaperSetup() {
   deviceScreen.selectFont(1);
   deviceScreen.drawSparkfunLogo();
   deviceScreen.flush();
-  vTaskDelay(3000);
+  vTaskDelay(1000*epd_settings.logoTime);
 }
 
 
@@ -45,6 +45,8 @@ void screendriverShowTime(){
   }
 }
 
+
+//For debugging purposes
 void screendriverShowDetailedMeasurements(){
   if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
     deviceScreen.gText(5, 5, "CO2 PPM: " + String(rawDataArray[CO2_PPM]));
@@ -74,7 +76,7 @@ void globalRefresh() {
 }
 
 
-void updateFrames(){
+void updateSensorFrames(){
   if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
     deviceScreen.drawSensorFrame(epd_settings.frame0sensor, 0);
     deviceScreen.drawSensorFrame(epd_settings.frame1sensor, 1);
@@ -102,16 +104,25 @@ void updateFrames(){
   deviceScreen.flush();
 }
 
+void firmwareUpdateScreen() {
+  deviceScreen.firmwareUpdateScreen(epd_settings.updatePercent);
+}
+
+void drawPairingScreen() {
+  
+}
+
 void drawScreen() {
+  // Sparkfun logo is drawn in epd setup function; first state drawn here is pairing screen
   if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
     // draw pairing screen
+    drawPairingScreen();
   } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
     // draw sensor screen
-    updateFrames();
-    
+    updateSensorFrames();
   } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
-    deviceScreen.firmwareUpdateScreen(5);
+    firmwareUpdateScreen();
   } else {
     Serial.println("Unkown flag state in EPD");
     return;
@@ -123,16 +134,27 @@ void drawScreen() {
 void screendriverRunScreenTask(void *pvParameter) {
   screendriverPrintMacAddress();
   screendriverEpaperSetup();
+
+  //Counter for burn-in prevention
+  volatile int refreshCounter = 0;
   while (1) {
      {
       // Prologue
-      deviceScreen.clear();
+      // deviceScreen.clear();
       // Function Body 
       screendriverShowTime();
       screendriverShowDetailedMeasurements();
       // Epilogue
       screendriverFlushWithChrono();
-      vTaskDelay(1000);
+
+      drawScreen();
+
+      //Burn-in prevention code
+      refreshCounter ++;
+      refreshCounter %= epd_settings.cyclesBetweenFullRefresh;
+      if(refreshCounter == 0) deviceScreen.globalRefresh(epd_settings.numRefreshCycles);
+
+      vTaskDelay(1000*epd_settings.refreshTime);
     }
   }
 }
