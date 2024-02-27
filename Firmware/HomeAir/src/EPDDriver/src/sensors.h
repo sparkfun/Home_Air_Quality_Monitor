@@ -3,13 +3,16 @@
 // Configuration
 #include "hV_Configuration_fast.h"
 
-class sensor
+#ifndef EPD_SENSOR
+#define EPD_SENSOR
+
+class epdSensor
 {
   public:
     ///
     /// @brief Constructor
     ///
-    sensor();
+    epdSensor();
     
     static const uint8_t co2 = 0;
     static const uint8_t co = 1;
@@ -23,4 +26,6 @@ class sensor
 
 };
 
-extern sensor mySensor;
+extern epdSensor mySensor;
+
+#endif

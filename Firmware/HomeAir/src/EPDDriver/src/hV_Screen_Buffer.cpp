@@ -2279,7 +2279,7 @@ void hV_Screen_Buffer::drawText(int x, int y, int fontSize, String msg, String c
     for(int i = 0; i < msg.length(); i++) {
         currentChar = msg.charAt(i) - 32;
         x_location += i*34;
-        partialScreenBitmap(x_location, y_location, largeTuffy[currentChar], 50, 32);
+        // partialScreenBitmap(x_location, y_location, largeTuffy[currentChar], 50, 32);
     }
   }
   else selectFont(Font_Terminal16x24);
