@@ -48,7 +48,8 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     // Request MTU change
     await _requestMtuSize(512);
 
-        final BluetoothController bluetoothController = Get.find<BluetoothController>();
+    final BluetoothController bluetoothController =
+        Get.find<BluetoothController>();
 
     // Subscribe to the device
     bluetoothController.subscribeToDevice(widget.device);
@@ -58,6 +59,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   void dispose() {
     _timer?.cancel();
     isSubscribed = false;
+
     super.dispose();
   }
 
@@ -423,7 +425,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
 //--------------------------------OTA UPDATES------------------------------------------------------
 
   Future<List<int>> loadBinFile() async {
-    final byteData = await rootBundle.load('assets/HomeAir.ino.bin');
+    final byteData = await rootBundle.load('assets/update.bin');
     return byteData.buffer.asUint8List();
   }
 
@@ -432,7 +434,9 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       await _sendData('KAZAM');
       print("KAZAM sent");
 
-      //await _waitForAck();
+      await Future.delayed(Duration(seconds: 2));
+      
+      await _waitForAck();
       print("ACK received");
 
       await Future.delayed(Duration(seconds: 2));
@@ -445,7 +449,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
 
       await Future.delayed(Duration(seconds: 1));
 
-      await _sendFileInChunks(fileBytes, 496);
+      await _sendFileInChunks(fileBytes, 509);
     } catch (e) {
       _showMessage("Error during firmware update: $e");
       print("Error during firmware update: $e");
@@ -476,31 +480,48 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     _sendData("DONE!");
   }
 
-  Future<void> _waitForAck(
-      {Duration timeout = const Duration(seconds: 10)}) async {
-    final startTime = DateTime.now();
-    String receivedData = '';
 
-    while (!receivedData.contains('a')) {
-      if (DateTime.now().difference(startTime) > timeout) {
-        throw TimeoutException(
-            "Did not receive 'a' in the allotted time: $timeout");
-      }
-
-      final value = await readCharacteristic?.read();
-      receivedData = String.fromCharCodes(value ?? []);
-
-      print("Received Data: ${receivedData.toString()}");
-
-      if (receivedData.contains('a')) {
-        break;
-      }
-      await Future.delayed(Duration(milliseconds: 200));
-    }
-
-    print("Received 'a'. Acknowledgement complete.");
+  Future<void> _waitForAck({Duration timeout = const Duration(seconds: 10)}) async {
+  // Check if the characteristic is set
+  if (readCharacteristic == null) {
+    print("Read characteristic is not set.");
+    return;
   }
 
+  // Use a Completer to wait for the 'a' character
+  Completer<void> ackCompleter = Completer();
+
+  // Subscribe to characteristic changes
+  final subscription = writeCharacteristic!.value.listen((value) {
+    String receivedData = String.fromCharCodes(value);
+    print("Received Data: $receivedData");
+
+    // Complete the completer if 'a' is received
+    if (receivedData.contains('a')) {
+      if (!ackCompleter.isCompleted) {
+        ackCompleter.complete();
+      }
+    }
+  });
+
+  // Wait for either the 'a' character or the timeout
+  try {
+    await Future.any([
+      ackCompleter.future,
+      Future.delayed(timeout, () {
+        // If the timeout completes first, throw a TimeoutException
+        if (!ackCompleter.isCompleted) {
+          ackCompleter.completeError(TimeoutException("Did not receive 'a' in the allotted time: $timeout"));
+        }
+      })
+    ]);
+    print("Received 'a'. Acknowledgement complete.");
+  } catch (e) {
+    print(e);// Rethrow the exception to be handled by the caller
+  } finally {
+    await subscription.cancel();
+  }
+}
 
   Future<bool> checkBinFileAvailability() async {
     try {
@@ -529,10 +550,17 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
             Text('Device ID: ${widget.device.id.id}',
                 style: TextStyle(fontSize: 20)),
             SizedBox(height: 24),
-            Text('Subscribed: ${isSubscribed ? "Yes" : "No"}',
-                style: TextStyle(
+            GetBuilder<BluetoothController>(
+              builder: (controller) {
+                return Text(
+                  controller.isSubscribed ? "Subscribed" : "Not Subscribed",
+                  style: TextStyle(
                     fontSize: 20,
-                    color: isSubscribed ? Colors.green : Colors.red)),
+                    color: controller.isSubscribed ? Colors.green : Colors.red,
+                  ),
+                );
+              },
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(

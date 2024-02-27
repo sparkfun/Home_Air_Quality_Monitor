@@ -8,6 +8,7 @@ import 'package:flutter_ble_peripheral/flutter_ble_peripheral.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:readair/BLE/device_details.dart';
+import 'package:readair/data/packet.dart';
 
 class BluetoothPage extends StatefulWidget {
   // const BluetoothPage({super.key, required this.title});
@@ -144,6 +145,8 @@ class ScanningPage extends StatelessWidget {
 class BluetoothController extends GetxController {
   BluetoothDevice? connectedDevice;
   List<BluetoothService>? bluetoothServices;
+  bool isSubscribed = false;
+  Timer? _updatTimer;
 
   Future<void> connectToDevice(
       BluetoothDevice device, BuildContext context) async {
@@ -152,6 +155,13 @@ class BluetoothController extends GetxController {
       connectedDevice = device;
       await requestMtuSize(device, 512);
       discoverServices();
+      await subscribeToDevice(device);
+
+      @override
+      void onInit() {
+        super.onInit();
+        // Initialize the timer or other resources if needed
+      }
 
       // Navigate to the Device Details Page
       Get.to(() => DeviceDetailsPage(
@@ -167,6 +177,9 @@ class BluetoothController extends GetxController {
   void disconnectFromDevice(BuildContext context) async {
     if (connectedDevice != null) {
       await connectedDevice!.disconnect();
+      isSubscribed = false; // Reset subscription status
+      _updatTimer?.cancel(); // Stop sending "UPDAT"
+      update(); // Update UI
       Get.back(); // Navigate back to the previous screen
     }
   }
@@ -205,30 +218,136 @@ class BluetoothController extends GetxController {
     }
   }
 
-    Future<void> subscribeToDevice(BluetoothDevice device) async {
+  void _processDataPacket(String data) {
+    // Split the incoming data by new lines to handle multiple packets
+    var packets = data.trim().split('\n');
+    for (var packetData in packets) {
+      try {
+        var parsedData = packetData.split(',');
+        if (parsedData.length == 12) {
+          var packet = DataPacket(
+            epochTime: double.tryParse(parsedData[0]) ?? 0.0,
+            co2: double.tryParse(parsedData[1]) ?? 0.0,
+            ppm1_0: double.tryParse(parsedData[2]) ?? 0.0,
+            ppm2_5: double.tryParse(parsedData[3]) ?? 0.0,
+            ppm4_0: double.tryParse(parsedData[4]) ?? 0.0,
+            ppm10_0: double.tryParse(parsedData[5]) ?? 0.0,
+            humid: double.tryParse(parsedData[6]) ?? 0.0,
+            temp: double.tryParse(parsedData[7]) ?? 0.0,
+            voc: double.tryParse(parsedData[8]) ?? 0.0,
+            co: double.tryParse(parsedData[9]) ?? 0.0,
+            ng: double.tryParse(parsedData[10]) ?? 0.0,
+            aqi: double.tryParse(parsedData[11]) ?? 0.0,
+          );
+
+          print(packetData);
+          DatabaseService.instance.insertOrUpdateDataPacket(packet);
+        } else {
+          //_showMessage("Received data does not match expected format.");
+        }
+      } catch (e) {
+        print("Error processing packet: $e");
+      }
+    }
+  }
+
+  // Future<void> subscribeToDevice(BluetoothDevice device) async {
+  //   try {
+  //     var services = await device.discoverServices();
+  //     for (var service in services) {
+  //       for (var characteristic in service.characteristics) {
+  //         // Define your characteristic UUIDs that you want to subscribe to
+  //         if (characteristic.properties.notify) {
+  //           await characteristic.setNotifyValue(true);
+  //           characteristic.value.listen((value) {
+  //             // Handle incoming data
+  //             String receivedData = String.fromCharCodes(value);
+  //             _processDataPacket(receivedData);
+  //           });
+  //           isSubscribed = true;
+  //           print("Subscribed to characteristic: ${characteristic.uuid}");
+  //           // You may want to break or continue based on your application's needs
+  //         }
+  //       }
+  //     }
+  //     update(); // Notify listeners about the change
+  //   } catch (e) {
+  //     print("Error subscribing to device: $e");
+  //     isSubscribed = false;
+  //     update(); // Notify listeners about the change
+  //   }
+  // }
+
+  Future<void> subscribeToDevice(BluetoothDevice device) async {
     try {
+      // Ensure the device is connected before attempting to communicate
+      if (connectedDevice == null) {
+        print("Device is not connected.");
+        return;
+      }
+
+      // Send current time to ESP32
+      await _sendTimeToEsp32(device);
+      await Future.delayed(Duration(seconds: 1));
+
+      // Send 'TGMT=-7' command
+      await _sendData(device, 'TGMT=-7');
+      await Future.delayed(Duration(seconds: 1));
+
+
+
+      // Proceed with discovering services and subscribing to the characteristic
       var services = await device.discoverServices();
       for (var service in services) {
-        var characteristics = service.characteristics;
-        for (var characteristic in characteristics) {
-          // Assuming these UUIDs are the ones you're interested in
-          if (characteristic.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13")) {
-            // Setup notifications
+        for (var characteristic in service.characteristics) {
+          if (characteristic.properties.notify) {
             await characteristic.setNotifyValue(true);
             characteristic.value.listen((value) {
-              // Handle incoming data
               String receivedData = String.fromCharCodes(value);
-              print("Received data: $receivedData");
-              // You might want to update the UI or process data here
+              _processDataPacket(receivedData);
             });
-            print("Subscribed to characteristic");
-            update(); // Update UI if necessary
+            isSubscribed = true;
+            update(); // Notify listeners about the change
+            print("Subscribed to characteristic: ${characteristic.uuid}");
+            break; // Exit the loop once subscribed
           }
         }
       }
+
+      //_sendData(device, "READ!");
+
+      _updatTimer?.cancel(); // Cancel any existing timer
+      _updatTimer = Timer.periodic(Duration(seconds: 20), (timer) async {
+        await _sendData(device, "UPDAT");
+        print("Sent UPDAT");
+      });
+
     } catch (e) {
-      print("Error subscribing to device: $e");
+      print("Error in subscription process: $e");
+      isSubscribed = false;
+      update(); // Notify listeners about the change
     }
+  }
+
+  // Helper method to send data to the ESP32
+  Future<void> _sendData(BluetoothDevice device, String data) async {
+    var services = await device.discoverServices();
+    for (var service in services) {
+      var characteristic = service.characteristics.firstWhereOrNull(
+          (c) => c.uuid == Guid("588d30b0-33aa-4654-ab36-56dfa9974b13"));
+      if (characteristic != null) {
+        await characteristic.write(utf8.encode(data));
+        print("Sent $data to device");
+        return;
+      }
+    }
+    print("Characteristic for sending data not found.");
+  }
+
+  // Assumes _sendTimeToEsp32 is similar to _sendData but specifically for sending the current time
+  Future<void> _sendTimeToEsp32(BluetoothDevice device) async {
+    int epochTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    await _sendData(device, "TIME=$epochTime");
   }
 
   Future<void> requestMtuSize(BluetoothDevice device, int requestedMtu) async {
@@ -245,192 +364,12 @@ class BluetoothController extends GetxController {
     // FlutterBluePlus.stopScan();
   }
 
+    @override
+  void onClose() {
+    // Clean up resources
+    _updatTimer?.cancel();
+    super.onClose();
+  }
+
   Stream<List<ScanResult>> get scanRes => FlutterBluePlus.scanResults;
 }
-
-// class BlePeripheralProvider with ChangeNotifier {
-//   final FlutterBlePeripheral _blePeripheral = FlutterBlePeripheral();
-//   BluetoothCharacteristic? _rwCharacteristic;
-//   late AdvertiseData _advertiseData;
-//   late AdvertiseSettings _advertiseSettings;
-
-//   Uint8List? _otaData;
-//   int _otaOffset = 0;
-
-//   bool _isAdvertising = false; // Default value
-
-//   bool get isAdvertising => _isAdvertising;
-
-//   final String _serviceUuid = "2e93ce4d-58db-42d0-ae83-8f8ae1d74e0d";
-//   final String _characteristicUuid = "f6b7a0ba-547b-4607-bae2-0d6ec26ff5cf";
-
-//   BlePeripheralProvider() {
-//     _advertiseData = AdvertiseData(
-//       serviceUuid: _serviceUuid, // The UUID of the service
-//       includeDeviceName: true,
-//       includePowerLevel: true,
-//       manufacturerData: Uint8List.fromList(utf8.encode('FlutterBlePeripheral')),
-//     );
-
-//     void setRwCharacteristic(BluetoothCharacteristic characteristic) {
-//       _rwCharacteristic = characteristic;
-//     }
-
-//     // Initialize the advertising settings
-//     _advertiseSettings = AdvertiseSettings(
-//       timeout: 10000,
-//     );
-
-//     _blePeripheral.onPeripheralStateChanged?.listen((event) {
-//       // Update isAdvertising based on the event
-//       if (event == PeripheralState.advertising) {
-//         _isAdvertising = true;
-//         print("Advertising data");
-//       } else if (event == PeripheralState.idle) {
-//         _isAdvertising = false;
-//         print("Not advertising");
-//       }
-//       notifyListeners(); // Notify listeners about the change
-//     });
-//     // Subscribe to peripheral state changes
-//     _blePeripheral.onPeripheralStateChanged?.listen((event) {
-//       if (event == PeripheralState.advertising) {
-//         print("Advertising data");
-//       } else if (event == PeripheralState.idle) {
-//         print("Not advertising");
-//       }
-//       notifyListeners();
-//     });
-//   }
-
-// Future<void> startAdvertising() async {
-//   try {
-//     print("Attempting to start advertising...");
-//     await _blePeripheral.start(
-//       advertiseData: _advertiseData,
-//       advertiseSettings: _advertiseSettings,
-//     );
-//     print("Started Advertising");
-//   } catch (e) {
-//     print("Failed to start advertising: $e");
-//   }
-//   notifyListeners();
-// }
-
-
-//   Future<void> stopAdvertising() async {
-//     try {
-//       await _blePeripheral.stop();
-//       print("Stopped Advertising");
-//       _isAdvertising = false; // Update the flag
-//     } catch (e) {
-//       print("Failed to stop advertising: $e");
-//     }
-//     notifyListeners();
-//   }
-
-//   Future<bool> checkBinFileAvailability() async {
-//     try {
-//       final byteData = await rootBundle.load('assets/HomeAir.ino.bin');
-//       print("File is available");
-//       return true;
-//     } catch (e) {
-//       print("Error: File not available - $e");
-//       return false;
-//     }
-//   }
-
-//   Future<void> startOtaUpdate(Uint8List otaData) async {
-//     try {
-//       await _sendData('SERV!');
-//       print("SERV! sent");
-
-//       _otaData = otaData;
-//       _otaOffset = 0; // Reset offset
-//       notifyListeners(); // Notify UI or other components
-//       print("OTA update prepared. Waiting for read requests...");
-//     } catch (e) {
-//       print("Error during firmware update: $e");
-//     }
-//   }
-
-//   // Future<void> startOtaUpdate(Uint8List otaData) async {
-//   //   try {
-//   //     // Notify the client (ESP) that the server will start sending the OTA update
-//   //     await _sendData('SERV!');
-//   //     print("SERV! sent");
-
-//   //     int fileSize = otaData.length;
-//   //     int chunkSize = 500; // Define the size of each chunk
-//   //     int bytesTransferred = 0;
-
-//   //     // Split the binary data into chunks and send each chunk
-//   //     for (int i = 0; i * chunkSize < fileSize; i++) {
-//   //       int start = i * chunkSize;
-//   //       int end = min(fileSize, (i + 1) * chunkSize);
-//   //       Uint8List chunk = otaData.sublist(start, end);
-
-//   //       // Send the chunk to the ESP (client)
-//   //       await _sendChunk(chunk);
-//   //       bytesTransferred += chunk.length;
-
-//   //       double progress = (bytesTransferred / fileSize) * 100;
-//   //       if (progress >= 5 && progress % 5 < 0.1) {
-//   //         print("${progress.toInt()}% uploaded.");
-//   //       }
-
-//   //       // Add a delay if necessary to ensure the ESP has time to process the chunk
-//   //       await Future.delayed(Duration(milliseconds: 20));
-//   //     }
-
-//   //     // Notify the completion of the file transfer
-//   //     print("File upload complete.");
-//   //     await _sendData("DONE!");
-//   //   } catch (e) {
-//   //     print("Error during firmware update: $e");
-//   //   }
-//   // }
-
-//   Future<void> _sendChunk(Uint8List chunk) async {
-//     if (_rwCharacteristic != null) {
-//       await _rwCharacteristic!.write(chunk, withoutResponse: false);
-//     } else {
-//       print("Write characteristic is not set.");
-//     }
-//   }
-
-//   void setOtaData(Uint8List otaData) {
-//     _otaData = otaData;
-//     _otaOffset = 0; // Reset offset
-//     notifyListeners();
-//   }
-
-//   Uint8List onReadRequest(int offset) {
-//     if (_otaData != null && _otaOffset < _otaData!.length) {
-//       int end = min(_otaOffset + 500, _otaData!.length); // Define chunk size
-//       Uint8List chunk = _otaData!.sublist(_otaOffset, end);
-//       _otaOffset = end; // Update offset
-//       print("Serving OTA chunk. Offset: $_otaOffset");
-//       return chunk;
-//     } else {
-//       print("All OTA data has been served.");
-//       return Uint8List.fromList([]); // Return an empty array when done
-//     }
-//   }
-
-//   Future<void> _sendData(String data) async {
-//     if (_rwCharacteristic != null) {
-//       List<int> bytesToSend = utf8.encode(data);
-//       await _rwCharacteristic!.write(bytesToSend, withoutResponse: false);
-//       print("Sent data: $data");
-//     } else {
-//       print("Characteristic is not set.");
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _blePeripheral.stop();
-//     super.dispose();
-//   }
-// }

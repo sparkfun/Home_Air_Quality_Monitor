@@ -91,9 +91,11 @@ class _AQIPageState extends State<AQIPage> {
   Widget build(BuildContext context) {
     List<FlSpot> data = generateRandomData();
 
-        List<DataPoint> dataPoints = packets
-        .map((packet) => DataPoint(packet.aqi, packet.epochTime.toInt()))
-        .toList();
+  List<DataPoint> dataPoints = aqiSpots
+      .asMap()
+      .entries
+      .map((entry) => DataPoint(entry.value.y, entry.key))
+      .toList();
 
 
     return Scaffold(
@@ -113,13 +115,12 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(8.0),
               child: Card(
                 //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIcurrentValue!),
+                color: AQIColor(AQIcurrentValue ?? 0),
                 child: ListTile(
                   title: Center(
                       child: Text('AQI', style: TextStyle(fontSize: 25))),
                   subtitle: Center(
-                      child: Text('$AQIcurrentValue',
-                          style: TextStyle(fontSize: 60))),
+                      child: Text('${AQIcurrentValue ?? "N/A"}', style: TextStyle(fontSize: 60))),
                   textColor: Colors.white70,
 
                   //trailing: Icon(Icons.wb_sunny, size: 40),
@@ -131,7 +132,7 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('The AQI is ${AQImessage(AQIcurrentValue!)}',
+                    child: Text('The AQI is ${AQImessage(AQIcurrentValue ?? 0)}',
                         style: TextStyle(fontSize: 25))),
 
                 //trailing: Icon(Icons.wb_sunny, size: 40),
@@ -146,18 +147,8 @@ class _AQIPageState extends State<AQIPage> {
             ),
             // add more stuff here!!
             //const SizedBox(height: 2), //Spacing between the "boxes"
-            const Padding(
-              padding: EdgeInsets.all(6.0),
-              child: ListTile(
-                title: Center(
-                    child:
-                        Text('24 Hour Span', style: TextStyle(fontSize: 30))),
 
-                //trailing: Icon(Icons.wb_sunny, size: 40),
-              ),
-            ),
-
-            DataGraph(aqiSpots: aqiSpots),
+            GraphWidget(title: "Air Quality Index Over Time", dataPoints: dataPoints),
 
             const Divider(
               thickness: 3,
@@ -179,12 +170,12 @@ class _AQIPageState extends State<AQIPage> {
               padding: EdgeInsets.all(8.0),
               child: Card(
                 //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIcurrentValue!),
+                color: AQIColor(AQIcurrentValue ?? 0),
                 child: ListTile(
-                  title: Center(
-                      child: Text('AQI', style: TextStyle(fontSize: 20))),
+                  title: const Center(
+                      child: Text('AQI', style: TextStyle(fontSize: 20)),),
                   subtitle: Center(
-                      child: Text('$AQIcurrentValue',
+                      child: Text('${AQIcurrentValue ?? "N/A"}',
                           style: TextStyle(fontSize: 50))),
                   textColor: Colors.white70,
 
@@ -216,7 +207,7 @@ class _AQIPageState extends State<AQIPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImax!),
+                      color: AQIColor(AQImax ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -232,7 +223,7 @@ class _AQIPageState extends State<AQIPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: AQIColor(AQImin!),
+                      color: AQIColor(AQImin ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

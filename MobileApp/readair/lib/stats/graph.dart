@@ -139,7 +139,7 @@ class _GraphWidgetState extends State<GraphWidget> {
                   // Or set this to true and adjust the below property
                   // curveSmoothness: 0.1, // Experiment with this value to reduce curve effect
                   dotData: FlDotData(
-                      show: true,
+                      show: false,
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: 4,
@@ -173,6 +173,7 @@ class _GraphWidgetState extends State<GraphWidget> {
             ),
           ),
         ),
+        SizedBox(height: 20,)
       ],
     );
   }
