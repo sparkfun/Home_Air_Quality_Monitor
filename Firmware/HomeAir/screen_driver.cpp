@@ -12,6 +12,9 @@ void screendriverEpaperSetup() {
   deviceScreen.setOrientation(3);       // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST);  // Set Flush Mode
   deviceScreen.selectFont(1);
+  deviceScreen.drawSparkfunLogo();
+  deviceScreen.flush();
+  vTaskDelay(3000);
 }
 
 
@@ -61,6 +64,59 @@ void screendriverFlushWithChrono(){
   deviceScreen.flush();
   chrono = millis() - chrono;
   // Serial.printf("\tScreen refresh took %i\n", chrono);
+}
+
+
+void globalRefresh() {
+  if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
+    deviceScreen.regenerate();
+  }
+}
+
+void updateFrames(){
+  if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
+    deviceScreen.drawSensorFrame(epd_settings.frame0sensor, 0);
+    deviceScreen.drawSensorFrame(epd_settings.frame1sensor, 1);
+    for(int i = 0; i < 2; i ++) {
+
+      uint8_t currentSensor;
+
+      if(i == 0) currentSensor = epd_settings.frame0sensor;
+      else currentSensor = epd_settings.frame1sensor;
+
+      if(currentSensor == mySensor.temperature || currentSensor == mySensor.humidity) {
+        deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[5]));
+        deviceScreen.updateFrameVal(i, mySensor.temperature, String(rawDataArray[6]));
+      }
+      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[0]));
+      else if(currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[8]));
+      else if(currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[9]));
+      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[0]));
+      else if(currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[7]));
+      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[10]));
+      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[2]));
+    }
+    xSemaphoreGive(rawDataMutex);
+  }
+  deviceScreen.flush();
+}
+
+void drawScreen() {
+  if(epd_settings.state == 0) myScreen.drawSparkfunLogo();
+  else if(epd_settings.state == 1) {
+    // draw pairing screen
+  }
+  else if(epd_settings.state == 2) {
+    // draw sensor screen
+    updateFrames();
+    
+  }
+  else if(epd_settings.state == 4) {
+    // draw update screen
+    updateScreen();
+  }
+  myScreen.flush();
+  return;
 }
 
 void screendriverRunScreenTask(void *pvParameter) {

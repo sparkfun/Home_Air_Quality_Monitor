@@ -21,13 +21,9 @@
 ///
 
 // Screen
-// #include "PDLS_EXT3_Basic_Global.h"
-#include "PDLS_EXT3_Basic_Fast.h"
-
-// SDK
-// #include <Arduino.h>
-#include "hV_HAL_Peripherals.h"
-
+#include "src/PDLS_EXT3_Basic_Fast.h"
+#include "src/hV_HAL_Peripherals_fast.h"
+#include "src/hV_Configuration_fast.h"
 // Include application, user and local libraries
 #include <SPI.h>
 #define HOMEAIR_ESP32 (1)
