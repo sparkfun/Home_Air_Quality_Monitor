@@ -28,7 +28,7 @@
 // Configuration
 #include "hV_Configuration_fast.h"
 
-// #include "big_text.h"
+#include "big_text.h"
 
 #ifndef hV_SCREEN_BUFFER_RELEASE
 ///
