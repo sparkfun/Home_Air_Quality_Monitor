@@ -184,7 +184,6 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
     }
   }
 }
-}
 ;
 
 void BLEServerCommunicationTask(void *pvParameter) {
