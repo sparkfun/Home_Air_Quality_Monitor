@@ -37,9 +37,9 @@ enum sensorMap {
   HUMIDITY = 5,
   TEMP = 6,
   VOC = 7,
-  CO = 8,
-  NG = 9,
-  NOX  = 10,
+  NOX = 8,
+  CO = 9,
+  NG = 10,
   AQI = 11
 };
 

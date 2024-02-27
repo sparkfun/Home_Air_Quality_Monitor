@@ -76,14 +76,14 @@ void globalRefresh() {
 
 void updateFrames(){
   if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
-    deviceScreen.drawSensorFrame(epd_settings.frame1sensor, 0);
-    deviceScreen.drawSensorFrame(epd_settings.frame2sensor, 1);
+    deviceScreen.drawSensorFrame(preferences.getUShort("frame1Sensor"), 0);
+    deviceScreen.drawSensorFrame(preferences.getUShort("frame2Sensor"), 1);
     for(int i = 0; i < 2; i ++) {
 
       uint8_t currentSensor;
 
-      if(i == 0) currentSensor = epd_settings.frame1sensor;
-      else currentSensor = epd_settings.frame2sensor;
+      if(i == 0) currentSensor = preferences.getUShort("frame1Sensor");
+      else currentSensor = preferences.getUShort("frame2Sensor");
 
       if(currentSensor == mySensor.temperature || currentSensor == mySensor.humidity) {
         deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[5]));

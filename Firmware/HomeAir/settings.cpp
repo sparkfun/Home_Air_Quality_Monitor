@@ -3,7 +3,7 @@
 
 struct_online online;
 
-display_settings epd_settings;
+// display_settings epd_settings;
 
 // struct display_settings{
 //   bool wallMounted = false;

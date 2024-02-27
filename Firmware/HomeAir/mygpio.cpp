@@ -160,9 +160,9 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   5: Humidity - SEN
   6: Temperature - SEN
   7: VOCs - SEN
-  8: CO - MQ7
-  9: NG - MQ4
-  10: NOX - SEN
+  8: NOX - SEN
+  9: CO - MQ7
+  10: NG - MQ4
   11: AQI - Composite
   */
   // CO2

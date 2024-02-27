@@ -124,9 +124,9 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
       } else if (value.substr(0, 3) == "EPD") {
-        Serial.printf("Received EPD config type: %s\n", BLEMessageType);
-        Serial.printf("Received EPD config value: %s\n", value.substr(5, value.length() - 5));
         int messageValue = stoi(value.substr(5, value.length() - 5));
+        Serial.printf("Received EPD config type: %s\n", BLEMessageType);
+        Serial.printf("Received EPD config value: %s\n", messageValue);
         if (BLEMessageType == "EPDDE") {
           // EPD Dot Enable
           // "EPDDE=1"
