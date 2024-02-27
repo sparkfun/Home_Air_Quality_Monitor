@@ -7,9 +7,9 @@
 ///
 #include "stdint.h"
 
-// #ifndef largeTuffy
+#ifndef LARGE_TUFFY
+#define LARGE_TUFFY
 
-// #define largeTuffy
 static const uint8_t largeTuffy[95][200] =
     {  
         {//Image Name: 32.jpg ; Width: 32 ; Height: 50
@@ -4838,4 +4838,4 @@ static const uint8_t largeTuffy[95][200] =
 }
     };
 
-// #endif
+#endif
