@@ -10,7 +10,7 @@
 
   The program uses BLE (Bluetooth Low-Energy) to interface with the accompanying
   mobile app and uses an RTOS to manage communication, sensor reading, storage,
-  and displaying live info on the screen.
+  and displaying live info on the epaper screen.
 */
 
 #include "HomeAir.h"

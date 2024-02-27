@@ -102,21 +102,21 @@ void updateFrames(){
 }
 
 void drawScreen() {
-  if(epd_settings.state == 0) myScreen.drawSparkfunLogo();
-  else if(epd_settings.state == 1) {
+  if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
     // draw pairing screen
-  }
-  else if(epd_settings.state == 2) {
+  } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
     // draw sensor screen
     updateFrames();
     
-  }
-  else if(epd_settings.state == 4) {
+  } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
     updateScreen();
+  } else {
+    Serial.println("Unkown flag state in EPD");
+    return;
   }
-  myScreen.flush();
-  return;
+  // myScreen.flush();
+  // return;
 }
 
 void screendriverRunScreenTask(void *pvParameter) {

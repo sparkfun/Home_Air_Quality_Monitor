@@ -10,7 +10,7 @@
 #include "esp32-hal-adc.h"
 
 // Vendor Libraries
-#include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.1
+#include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.2
 #include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
 // HomeAir Files
 #include "HomeAir.h"
@@ -41,6 +41,7 @@ enum sensorMap {
   NG = 9,
   AQI = 10
 };
+
 
 const uint32_t I2C_FREQ_HZ = 100000;
 const uint8_t I2C_SDA_PIN = 17;
