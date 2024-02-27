@@ -10,9 +10,9 @@
 // HomeAir Includes
 #include "HomeAir.h"
 // #include "epaper_driver.h"
-#include "src/EPDDriver/PDLS_EXT3_Basic_Fast.h"
-#include "src/EPDDriver/hV_HAL_Peripherals_fast.h"
-#include "src/EPDDriver/hV_Configuration_fast.h"
+#include "src/EPDDriver/src/PDLS_EXT3_Basic_Fast.h"
+#include "src/EPDDriver/src/hV_HAL_Peripherals_fast.h"
+#include "src/EPDDriver/src/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
 

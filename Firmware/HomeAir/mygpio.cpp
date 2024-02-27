@@ -120,7 +120,7 @@ void readSENSensor(float *retArray, uint8_t arraySize) {
     error = sen5x.readMeasuredValues(retArray[PPM_1_0], retArray[PPM_2_5],
                                      retArray[PPM_4_0], retArray[PPM_10],
                                      retArray[HUMIDITY], retArray[TEMP],
-                                     retArray[VOC], unusedValue);
+                                     retArray[VOC], retArray[NOX]);
 
     if (error) {
       Serial.print("Error trying to execute readMeasuredValues(): ");
@@ -162,13 +162,14 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   7: VOCs - SEN
   8: CO - MQ7
   9: NG - MQ4
-  10: AQI - Composite
+  10: NOX - SEN
+  11: AQI - Composite
   */
   // CO2
   ret_array[CO2_PPM] = readCO2PPM(co2Error, co2Sensor);
   // SEN
-  // Uses ret_array[1] through ret_array[7]
-  readSENSensor(ret_array, 7);
+  // Uses ret_array[1] through ret_array[8]
+  readSENSensor(ret_array, 8);
   // CO
   ret_array[CO] = readCOSensor();
   // Serial.print("CO ppm: ");

@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include "HomeAir.h"
-#include "src/EPDDriver/sensors.h"
+#include "src/EPDDriver/src/sensors.h"
 
 struct struct_online{
   bool SPIFFS = false;

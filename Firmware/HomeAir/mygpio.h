@@ -39,7 +39,8 @@ enum sensorMap {
   VOC = 7,
   CO = 8,
   NG = 9,
-  AQI = 10
+  NOX  = 10,
+  AQI = 11
 };
 
 
@@ -48,7 +49,7 @@ const uint8_t I2C_SDA_PIN = 17;
 const uint8_t I2C_SCL_PIN = 18;
 const uint8_t PERIODIC_MEAS_INTERVAL_IN_SECONDS = 10;
 const uint16_t PRESSURE_REFERENCE = 1000;
-const uint8_t RAW_DATA_ARRAY_SIZE = 11;
+const uint8_t RAW_DATA_ARRAY_SIZE = 12;
 // Standard GPIO Pin definitions
 const uint8_t pin_NGInput = 11;
 const uint8_t pin_COInput = 12;

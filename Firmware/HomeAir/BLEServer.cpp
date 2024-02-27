@@ -123,7 +123,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
-      } else if (BLEMessageType == "="){
+      } else if (BLEMessageType == "EPD"){
         // Dot position & enable
         // time position & enable
         // leftFrame data
