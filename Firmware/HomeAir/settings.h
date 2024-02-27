@@ -22,8 +22,8 @@ struct display_settings{
   bool dotEnabled = true;
   uint8_t clockLocation = 0;
   uint8_t dotLocation = 0;
-  uint8_t frame0sensor;
   uint8_t frame1sensor;
+  uint8_t frame2sensor;
   uint16_t refreshTime = 5;
 };
 
