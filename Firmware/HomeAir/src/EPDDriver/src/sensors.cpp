@@ -1,8 +1,8 @@
 #include "sensors.h"
 
-sensor::sensor()
+epdSensor::epdSensor()
 {
     ;
 }
 
-sensor mySensor = sensor();
+epdSensor mySensor = epdSensor();
