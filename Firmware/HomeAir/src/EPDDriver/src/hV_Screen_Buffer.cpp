@@ -1932,7 +1932,6 @@ void hV_Screen_Buffer::drawSensorFrame(uint8_t sensor, uint8_t frameNumber) {
         0xfe,0x7e,0x7e,0x3f,0xff,0xff, // 9
         0xfe,0x7e,0x7e,0x3f,0xff,0xff, // 10
         0xfe,0x7e,0x3e,0x3f,0xff,0xff, // 11
-        0xfe,0x7e,0x3e,0x3f,0xff,0xff, // 12
         0xfe,0x7e,0x7e,0x3f,0xff,0xff, // 13
         0xfe,0x7e,0x3e,0x3f,0xff,0xff, // 14
         0xfe,0x7e,0x7e,0x38,0x0f,0xff, // 15
@@ -2108,12 +2107,12 @@ void hV_Screen_Buffer::firmwareUpdateScreen(uint8_t percent) {
 
 void hV_Screen_Buffer::updateFrameVal(uint8_t frameNumber, uint8_t sensor, String sensorReading) {
     // clearFrame(frameNumber);
-    uint8_t baseline_x;
+    uint16_t baseline_x;
     if(frameNumber == 1) baseline_x = 148;
     else baseline_x = 0;
     if(sensorReading.length() == 2) baseline_x += 16;
     if(sensorReading.length() == 1) baseline_x += 48;
-    if(sensorReading.length() > 3) baseline_x -= 12;
+    if(sensorReading.length() > 3) baseline_x += 4;
     if(sensor == mySensor.humidity) drawNumBig(sensorReading, baseline_x+39, 90);
     else if (sensor == mySensor.temperature) drawNumBig(sensorReading, baseline_x+39, 3);
     else drawNumBig(sensorReading, baseline_x+22, 90);

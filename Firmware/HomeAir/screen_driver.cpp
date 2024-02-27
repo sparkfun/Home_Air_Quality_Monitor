@@ -47,13 +47,13 @@ void screendriverShowTime(){
 
 void screendriverShowDetailedMeasurements(){
   if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
-    deviceScreen.gText(5, 5, "CO2 PPM: " + String(rawDataArray[0]));
+    deviceScreen.gText(5, 5, "CO2 PPM: " + String(rawDataArray[CO2_PPM]));
     // deviceScreen.gText(5, 5, "Counter: " + String(i++));
-    deviceScreen.gText(5, 20, "Temperature: " + String(rawDataArray[6]));
-    deviceScreen.gText(5, 35, "Humidity: " + String(rawDataArray[5]));
-    deviceScreen.gText(5, 50, "CO (PPM): " + String(rawDataArray[8]));
-    deviceScreen.gText(5, 65, "CH4 (PPM): " + String(rawDataArray[9]));
-    deviceScreen.gText(5, 80, "AQI: " + String(rawDataArray[10]));
+    deviceScreen.gText(5, 20, "Temperature: " + String(rawDataArray[TEMP]));
+    deviceScreen.gText(5, 35, "Humidity: " + String(rawDataArray[HUMIDITY]));
+    deviceScreen.gText(5, 50, "CO (PPM): " + String(rawDataArray[CO]));
+    deviceScreen.gText(5, 65, "CH4 (PPM): " + String(rawDataArray[NG]));
+    deviceScreen.gText(5, 80, "AQI: " + String(rawDataArray[AQI]));
     deviceScreen.gText(5, 120, "MAC: " + screendriverGetMacAddress());
     xSemaphoreGive(rawDataMutex);
   }
@@ -73,6 +73,7 @@ void globalRefresh() {
   }
 }
 
+
 void updateFrames(){
   if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
     deviceScreen.drawSensorFrame(epd_settings.frame0sensor, 0);
@@ -88,13 +89,13 @@ void updateFrames(){
         deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[5]));
         deviceScreen.updateFrameVal(i, mySensor.temperature, String(rawDataArray[6]));
       }
-      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[0]));
-      else if(currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[8]));
-      else if(currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[9]));
-      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[0]));
-      else if(currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[7]));
-      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[10]));
-      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[2]));
+      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[HUMIDITY]));
+      else if(currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[CO]));
+      else if(currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[NG]));
+      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[CO2_PPM]));
+      else if(currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[VOC]));
+      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[AQI]));
+      else if(currentSensor == mySensor.particles) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[PPM_2_5]));
     }
     xSemaphoreGive(rawDataMutex);
   }
@@ -126,7 +127,7 @@ void screendriverRunScreenTask(void *pvParameter) {
      {
       // Prologue
       deviceScreen.clear();
-      // Function Body
+      // Function Body 
       screendriverShowTime();
       screendriverShowDetailedMeasurements();
       // Epilogue
