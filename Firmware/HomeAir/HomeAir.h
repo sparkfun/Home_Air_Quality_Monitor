@@ -34,6 +34,8 @@ extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
   BLEServerCommunicationTaskHandle, timekeepingSyncTaskHandle,
   screendriverRunScreenTaskHandle;
 
+extern Preferences preferences;
+
 #define FORMAT_SPIFFS_IF_FAILED false
 
 #if CONFIG_FREERTOS_UNICORE

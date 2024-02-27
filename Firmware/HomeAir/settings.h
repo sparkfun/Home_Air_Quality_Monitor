@@ -13,8 +13,6 @@ struct struct_online{
   bool co = false;
 };
 
-extern struct_online online;
-
 struct display_settings{
   bool wallMounted = false;
   bool nightMode = false;
@@ -27,7 +25,9 @@ struct display_settings{
   uint16_t refreshTime = 5;
 };
 
+extern struct_online online;
 extern display_settings epd_settings;
 
+bool setupPreferences();
 
 #endif

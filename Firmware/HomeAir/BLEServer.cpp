@@ -126,34 +126,35 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (value.substr(0, 3) == "EPD") {
         Serial.printf("Received EPD config type: %s\n", BLEMessageType);
         Serial.printf("Received EPD config value: %s\n", value.substr(5, value.length() - 5));
+        int messageValue = stoi(value.substr(5, value.length() - 5));
         if (BLEMessageType == "EPDDE") {
           // EPD Dot Enable
           // "EPDDE=1"
-          epd_settings.dotEnabled = stoi(value.substr(5, value.length() - 5));
+          preferences.putBool("dotEnabled", messageValue);
         } else if (BLEMessageType == "EPDDL") {
           // EPD Dot location
           // "EPDDP=2"
-          epd_settings.dotLocation = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("dotLocation", messageValue);
         } else if (BLEMessageType == "EPDCE") {
           // EPD Clock Enable
           // "EPDCE=0"
-          epd_settings.clockEnabled = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("clockEnable", messageValue);
         } else if (BLEMessageType == "EPDCL") {
           // EPD Clock Location
           // "EPDCL=1"
-          epd_settings.clockLocation = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("clockLocation", messageValue);
         } else if (BLEMessageType == "EPDLF") {
           // EPD Clock Enable
           // "EPDLF=4"
-          epd_settings.frame1sensor = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("frame1Sensor", messageValue);
         } else if (BLEMessageType == "EPDRF") {
           // EPD Clock Enable
           // "EPDLF=5"
-          epd_settings.frame2sensor = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("frame2Sensor", messageValue);
         } else if (BLEMessageType == "EPDRP") {
           // EPD Refresh Period
           // "EPDRP=5"
-          epd_settings.refreshTime = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("refreshPeriod", messageValue);
         }
       }
       // sensorReadPeriod

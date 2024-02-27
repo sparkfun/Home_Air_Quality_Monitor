@@ -35,7 +35,7 @@ void setup() {
   // Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
   Serial.write("Setting up...");
-  // setupPreferences();
+  setupPreferences();
   // setupTime();
   #ifdef ARDUINO_ARCH_ESP32
   Serial.printf("\n\nARDUINO_ARCH_ESP32 = TRUE\n\n");
@@ -97,9 +97,4 @@ void setup() {
 // All loop functionality is completed with tasks defined in setup()
 void loop() {}
 
-void setupPreferences() {
-  // Preferences is good for single KVP storage.
-  // We want to use SPIFFS for large storage
-  // bool status = preferences.begin("my_app", false);
-  // Currently not used, may be used for user customization options
-}
+
