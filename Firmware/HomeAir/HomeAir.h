@@ -25,10 +25,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <Preferences.h>
-
-// String sensorMap[11] = {"CO2", "PPM1.0", "PPM2.5", "PPM4.0", "PPM10.0",
-// "Humidity", "Temperature",
-//   "VOCs", "CO", "NG", "AQI"};
+#include "esp_ota_ops.h"
 
 extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
   BLEServerCommunicationTaskHandle, timekeepingSyncTaskHandle,
@@ -36,6 +33,7 @@ extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
 
 extern Preferences preferences;
 
+#define VERSION_NUMBER 201
 #define FORMAT_SPIFFS_IF_FAILED false
 
 #if CONFIG_FREERTOS_UNICORE

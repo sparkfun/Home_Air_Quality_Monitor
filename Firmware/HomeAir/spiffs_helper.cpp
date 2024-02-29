@@ -274,11 +274,11 @@ void spiffsStorageTask(void *pvParameter) {
         //           std::to_string(rawDataArray[10]) + "\n";
         snprintf(
           message, 80,
-          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
+          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
           rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
-          rawDataArray[10]);
+          rawDataArray[10], rawDataArray[11]);
         // Serial.print("Appending to file: ");
         // Serial.println(message.c_str());
         Serial.println(message);
@@ -391,6 +391,7 @@ void spiffsStorageTask(void *pvParameter) {
                 Serial.println("OTA done!");
                 if (Update.isFinished()){
                   Serial.println("OTA Verified. Rebooting...");
+                  preferences.putBool("startingFromOTA", true);
                   delay(3000);
                   ESP.restart();
                 } else {

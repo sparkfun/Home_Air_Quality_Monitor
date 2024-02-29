@@ -74,17 +74,18 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           Serial.println("UPDAT recieved!");
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
           char message[90];
-          snprintf(
+          int charsWritten = snprintf(
               message, 90,
-              "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n\n",
+              "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n\n",
               rtc.getEpoch(), rawDataArray[0], rawDataArray[1], rawDataArray[2],
               rawDataArray[3], rawDataArray[4], rawDataArray[5],
               rawDataArray[6], rawDataArray[7], rawDataArray[8],
-              rawDataArray[9], rawDataArray[10]);
+              rawDataArray[9], rawDataArray[10], rawDataArray[11]);
+          // Serial.printf("Chars written: %d\n", charsWritten);
           pSensorCharacteristic->setValue(message);
           pSensorCharacteristic->notify();
           Serial.printf("Set BLE value to: ");
-          Serial.println(BLEMessageBuffer);
+          Serial.println(message);
           xSemaphoreGive(rawDataMutex); // Release mutex
         }
       } else if (BLEMessageType == "KAZAM") {

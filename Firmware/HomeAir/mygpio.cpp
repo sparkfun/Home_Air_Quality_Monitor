@@ -141,7 +141,7 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
         Serial.print("Error reading CO2 w/ error code:");
         Serial.println(errorPtr);
       }
-      delay(250);
+      delay(500);
     } while (co2PPM == 0);
     return co2PPM;
   }

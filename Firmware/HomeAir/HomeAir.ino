@@ -37,10 +37,6 @@ void setup() {
   Serial.write("Setting up...");
   setupPreferences();
   // setupTime();
-  #ifdef ARDUINO_ARCH_ESP32
-  Serial.printf("\n\nARDUINO_ARCH_ESP32 = TRUE\n\n");
-  #endif
-
   // Setup Flag Event Groups
   appStateFlagGroup = xEventGroupCreate();
   BLEStateFlagGroup = xEventGroupCreate();
