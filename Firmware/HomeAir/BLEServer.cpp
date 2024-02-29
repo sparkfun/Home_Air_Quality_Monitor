@@ -3,8 +3,7 @@
 NimBLECharacteristic *pSensorCharacteristic;
 size_t updateSize = 0;
 size_t MTUSize = 512;
-bool updateSizeRecieved = false;  // Switch used when downloading OTA update
-
+bool updateSizeRecieved = false; // Switch used when downloading OTA update
 
 class MyCallbacks : public NimBLECharacteristicCallbacks {
 
@@ -75,23 +74,27 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           Serial.println("UPDAT recieved!");
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
           char message[90];
-          snprintf(message, 90,
-                   "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n\n",
-                   rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
-                   rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
-                   rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
-                   rawDataArray[10]);
+          snprintf(
+              message, 90,
+              "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n\n",
+              rtc.getEpoch(), rawDataArray[0], rawDataArray[1], rawDataArray[2],
+              rawDataArray[3], rawDataArray[4], rawDataArray[5],
+              rawDataArray[6], rawDataArray[7], rawDataArray[8],
+              rawDataArray[9], rawDataArray[10]);
           pSensorCharacteristic->setValue(message);
           pSensorCharacteristic->notify();
           Serial.printf("Set BLE value to: ");
           Serial.println(BLEMessageBuffer);
-          xSemaphoreGive(rawDataMutex);  // Release mutex
+          xSemaphoreGive(rawDataMutex); // Release mutex
         }
       } else if (BLEMessageType == "KAZAM") {
         Serial.println("KAZAM! - Starting to listen");
-        xEventGroupClearBits(appStateFlagGroup, xEventGroupGetBits(appStateFlagGroup));  // Clear current state
+        xEventGroupClearBits(
+            appStateFlagGroup,
+            xEventGroupGetBits(appStateFlagGroup)); // Clear current state
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
-        vTaskSuspend(mygpioSensorReadTaskHandle);  // Suspend GPIO task while we update
+        vTaskSuspend(
+            mygpioSensorReadTaskHandle); // Suspend GPIO task while we update
         // Set state to download new firmware
         // Send an ACK to start download
         pSensorCharacteristic->setValue("a");
@@ -105,11 +108,13 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
       } else if (BLEMessageType == "SIZE=") {
         if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-          // We're actively downloading, so new packet must be new info to process
+          // We're actively downloading, so new packet must be new info to
+          // process
           if (!updateSizeRecieved) {
             updateSize = stoi(value.substr(5, value.length() - 5));
             updateSizeRecieved = true;
-            Serial.printf("Size of incoming OTA update: %d\n", stoi(value.substr(5, value.length() - 5)));
+            Serial.printf("Size of incoming OTA update: %d\n",
+                          stoi(value.substr(5, value.length() - 5)));
           }
         }
       } else if (BLEMessageType == "DONE!") {
@@ -124,36 +129,30 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
       } else if (value.substr(0, 3) == "EPD") {
+        int messageValue = stoi(value.substr(5, value.length() - 5));
         Serial.printf("Received EPD config type: %s\n", BLEMessageType);
-        Serial.printf("Received EPD config value: %s\n", value.substr(5, value.length() - 5));
+        Serial.printf("Received EPD config value: %s\n", messageValue);
         if (BLEMessageType == "EPDDE") {
           // EPD Dot Enable
-          // "EPDDE=1"
-          epd_settings.dotEnabled = stoi(value.substr(5, value.length() - 5));
+          preferences.putBool("dotEnabled", messageValue);
         } else if (BLEMessageType == "EPDDL") {
           // EPD Dot location
-          // "EPDDP=2"
-          epd_settings.dotLocation = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("dotLocation", messageValue);
         } else if (BLEMessageType == "EPDCE") {
           // EPD Clock Enable
-          // "EPDCE=0"
-          epd_settings.clockEnabled = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("clockEnable", messageValue);
         } else if (BLEMessageType == "EPDCL") {
           // EPD Clock Location
-          // "EPDCL=1"
-          epd_settings.clockLocation = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("clockLocation", messageValue);
         } else if (BLEMessageType == "EPDLF") {
-          // EPD Clock Enable
-          // "EPDLF=4"
-          epd_settings.frame1sensor = stoi(value.substr(5, value.length() - 5));
+          // EPD Left Frame Data
+          preferences.putUShort("frame1Sensor", messageValue);
         } else if (BLEMessageType == "EPDRF") {
-          // EPD Clock Enable
-          // "EPDLF=5"
-          epd_settings.frame2sensor = stoi(value.substr(5, value.length() - 5));
+          // EPD Right Frame Data
+          preferences.putUShort("frame2Sensor", messageValue);
         } else if (BLEMessageType == "EPDRP") {
           // EPD Refresh Period
-          // "EPDRP=5"
-          epd_settings.refreshTime = stoi(value.substr(5, value.length() - 5));
+          preferences.putUShort("refreshPeriod", messageValue);
         }
       }
       // sensorReadPeriod
@@ -169,9 +168,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           // Serial.printf("L=%d\n", value.length());
           // Serial.println("Packet received");
         }
-        BLEMessageBuffer[value.length()] = '\0';  // Set null terminator
+        BLEMessageBuffer[value.length()] = '\0'; // Set null terminator
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE);
-        xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE, BLE_FLAG_SAVE_COMPLETE, false, ONE_MIN_MS);
+        xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE,
+                            BLE_FLAG_SAVE_COMPLETE, false, ONE_MIN_MS);
         // Serial.printf("\tPost Ack sent!\n");
         pSensorCharacteristic->setValue("a");
         pSensorCharacteristic->notify();
@@ -190,8 +190,8 @@ void BLEServerCommunicationTask(void *pvParameter) {
       // Serial.print("Current number of clients: ");
       // Serial.println(pSensorCharacteristic->getSubscribedCount());
       BLEStatus = xEventGroupWaitBits(
-        BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
-        BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
+          BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
+          BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
       if (BLEStatus & BLE_FLAG_FILE_DONE) {
         break;
       }
@@ -217,7 +217,7 @@ void BLEServerCommunicationTask(void *pvParameter) {
     }
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DONE_TRANSMITTING) {
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DONE_TRANSMITTING);
-      uint8_t message[1] = { 65 };
+      uint8_t message[1] = {65};
       pSensorCharacteristic->notify(&message[0], 1, true);
       Serial.println("Ending transmission!");
     }
@@ -231,7 +231,8 @@ void BLEServerSetAdvertisingName() {
   char retArr[14];
   esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
   if (espErr == ESP_OK) {
-    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4],
+             macOut[5]);
     Serial.printf("Setting MAC to %s\n", retArr);
     NimBLEDevice::init(retArr);
   } else
@@ -245,8 +246,8 @@ void BLEServerSetupBLE() {
   NimBLEServer *pServer = NimBLEDevice::createServer();
   NimBLEService *pService = pServer->createService(SERVICE_UUID);
   pSensorCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID,
-    NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+      CHARACTERISTIC_UUID,
+      NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
   pService->start();

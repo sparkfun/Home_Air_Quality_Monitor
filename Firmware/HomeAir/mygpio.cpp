@@ -160,9 +160,9 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   5: Humidity - SEN
   6: Temperature - SEN
   7: VOCs - SEN
-  8: CO - MQ7
-  9: NG - MQ4
-  10: NOX - SEN
+  8: NOX - SEN
+  9: CO - MQ7
+  10: NG - MQ4
   11: AQI - Composite
   */
   // CO2
@@ -182,7 +182,7 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
     aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
 
   Serial.print("Measurements: ");
-  for(int i=0;i<11;i++)
+  for(int i=0;i<RAW_DATA_ARRAY_SIZE;i++)
   {
     Serial.printf("%f, ", ret_array[i]);
   }
