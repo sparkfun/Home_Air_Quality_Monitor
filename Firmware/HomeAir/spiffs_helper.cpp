@@ -5,6 +5,8 @@
    test or else use the SPIFFS plugin to create a partition
    https://github.com/me-no-dev/arduino-esp32fs-plugin */
 #define FORMAT_SPIFFS_IF_FAILED true
+float otaDownloadPercentage;
+
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\r\n", dirname);
@@ -225,13 +227,13 @@ void spiffsStorageTask(void *pvParameter) {
   char path[13] = { "/datalog.txt" };
   // std::string message;
   char message[512];
-  long epochLapTime = 0;
   File file, root;
   int lineLength = 0;
   int numPackets = 6;
   int insertPoint = 0;
   int downloadIttr = 0;
-  size_t writtenSize = 0;
+  int chrono = millis();
+  size_t writtenSize, prevSize = 0;
   Update.onProgress(onProgressCallback);
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
@@ -344,6 +346,8 @@ void spiffsStorageTask(void *pvParameter) {
         Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
         if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
           // We have enough room to directly receive BLE data
+          Serial.println("Space for OTA exists in SPIFFS...");
+          chrono = millis();
           file = SPIFFS.open("/dest_bin", "w");
           if (!file) {
             Serial.println("Error opening dest file.");
@@ -353,10 +357,12 @@ void spiffsStorageTask(void *pvParameter) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
                                   BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
               writtenSize += file.write((uint8_t*)&BLEMessageBuffer[0], 509);
+              otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
               // Add setBits for done writing to ack in BLE
               if(++downloadIttr % 5 == 0){
-                Serial.printf("Written %zu bytes so far to SPIFFS file.\n", writtenSize);
-                Serial.printf("%d packets written\n", downloadIttr);
+                Serial.printf("%.2f/sec\n", writtenSize-prevSize/(millis() - chrono));
+                prevSize = writtenSize;
+                Serial.printf("Download percentage: %.2f\n", otaDownloadPercentage);
               }
               xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
               if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE){
@@ -369,13 +375,14 @@ void spiffsStorageTask(void *pvParameter) {
             Serial.printf("WrittenSize: %zu\n", writtenSize);
 
             // Trim end of file from TRANSFER_COMPLETE to the END
-            float chrono = millis();
+            int chrono = millis();
             size_t endIndex = file.find("TRANSFER_COMPLETE");
             Serial.printf("file.find() took %f ms\n", millis() - chrono);
             Serial.printf("Found token at %zu\n", endIndex);
             // BLEMessageBuffer.erase(endIndex, )
 
             file.close();
+            Serial.println("Verifying new BIN...");
             if(Update.begin(updateSize)){
               // Space exists for update in OTA partition
               Serial.println("Writing file to OTA partition...");

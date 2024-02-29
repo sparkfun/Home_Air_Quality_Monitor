@@ -2,8 +2,7 @@
 
 
 struct_online online;
-
-// display_settings epd_settings;
+struct display_settings epd_settings;
 
 // struct display_settings{
 //   bool wallMounted = false;
@@ -40,6 +39,7 @@ bool setupPreferences() {
     if (preferences.getBool("startingFromOTA")){
       Serial.println("Booting from fresh OTA firmware");
       Serial.printf("Version number: %d", VERSION_NUMBER);
+      delay(3000);
       preferences.putBool("startingFromOTA", false);
     }
   }

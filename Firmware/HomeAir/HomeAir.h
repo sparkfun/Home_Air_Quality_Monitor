@@ -33,7 +33,7 @@ extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
 
 extern Preferences preferences;
 
-#define VERSION_NUMBER 201
+#define VERSION_NUMBER 200
 #define FORMAT_SPIFFS_IF_FAILED false
 
 #if CONFIG_FREERTOS_UNICORE

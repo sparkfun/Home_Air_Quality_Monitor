@@ -26,9 +26,7 @@ struct struct_online{
 // };
 
 extern struct_online online;
-// extern display_settings epd_settings;
 
-<<<<<<< HEAD
 struct display_settings{
 
   //UNIVERSAL SCREEN SETTINGS
@@ -57,10 +55,8 @@ struct display_settings{
   uint8_t updatePercent; // update progress, should not be more than 100
 };
 
-extern display_settings epd_settings;
+extern struct display_settings epd_settings;
 
-=======
 bool setupPreferences();
->>>>>>> 45554625cc7ffac74de4f610c10714d82a70049f
 
 #endif

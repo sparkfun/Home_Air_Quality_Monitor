@@ -105,7 +105,7 @@ void updateSensorFrames(){
 }
 
 void firmwareUpdateScreen() {
-  deviceScreen.firmwareUpdateScreen(epd_settings.updatePercent);
+  deviceScreen.firmwareUpdateScreen(otaDownloadPercentage);
 }
 
 void drawPairingScreen() {
@@ -154,7 +154,6 @@ void screendriverRunScreenTask(void *pvParameter) {
       refreshCounter %= epd_settings.cyclesBetweenFullRefresh;
       if(refreshCounter == 0) deviceScreen.globalRefresh(epd_settings.numRefreshCycles);
 
-      vTaskDelay(1000*epd_settings.refreshTime);
       vTaskDelay(preferences.getUShort("refreshPeriod") * 1000);
     }
   }
