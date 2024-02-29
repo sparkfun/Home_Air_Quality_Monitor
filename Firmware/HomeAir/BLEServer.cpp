@@ -126,7 +126,6 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (value.substr(0, 3) == "EPD") {
         Serial.printf("Received EPD config type: %s\n", BLEMessageType);
         Serial.printf("Received EPD config value: %s\n", value.substr(5, value.length() - 5));
-
         if (BLEMessageType == "EPDDE") {
           // EPD Dot Enable
           // "EPDDE=1"
@@ -146,24 +145,20 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         } else if (BLEMessageType == "EPDLF") {
           // EPD Clock Enable
           // "EPDLF=4"
-          epd_settings.frame0sensor = stoi(value.substr(5, value.length() - 5));
+          epd_settings.frame1sensor = stoi(value.substr(5, value.length() - 5));
         } else if (BLEMessageType == "EPDRF") {
           // EPD Clock Enable
           // "EPDLF=5"
-          epd_settings.frame1sensor = stoi(value.substr(5, value.length() - 5));
+          epd_settings.frame2sensor = stoi(value.substr(5, value.length() - 5));
         } else if (BLEMessageType == "EPDRP") {
           // EPD Refresh Period
           // "EPDRP=5"
           epd_settings.refreshTime = stoi(value.substr(5, value.length() - 5));
         }
-       
       }
-       // sensorReadPeriod
+      // sensorReadPeriod
       // averagingMode
       // MQ disable (4 or 7)
-
-
-
     } else {
       // Received message had no message type
       // Check to see if we're downloading, and if so, service this new packet
@@ -180,11 +175,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // Serial.printf("\tPost Ack sent!\n");
         pSensorCharacteristic->setValue("a");
         pSensorCharacteristic->notify();
+      } else {
+        Serial.println("Packet with no header received!");
       }
     }
   }
-}
-;
+};
 
 void BLEServerCommunicationTask(void *pvParameter) {
   BLEServerSetupBLE();

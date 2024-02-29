@@ -20,6 +20,7 @@ struct display_settings{
   //UNIVERSAL SCREEN SETTINGS
   bool wallMounted = false;
   bool nightMode = false;
+<<<<<<< HEAD
   bool clockEnabled = false;
   uint8_t clockLocation = 0; // 0=top right
   bool dotEnabled = false;
@@ -43,6 +44,15 @@ struct display_settings{
 
   //FIRMWARE UPDATE
   uint8_t updatePercent; // update progress, should not be more than 100
+=======
+  bool clockEnabled = true;
+  bool dotEnabled = true;
+  uint8_t clockLocation = 0;
+  uint8_t dotLocation = 0;
+  uint8_t frame1sensor;
+  uint8_t frame2sensor;
+  uint16_t refreshTime = 5;
+>>>>>>> 76c14eb1af67f77d8ebcfc27f5f4c209fa706b38
 };
 
 extern display_settings epd_settings;
