@@ -14,7 +14,7 @@ void screendriverEpaperSetup() {
   deviceScreen.selectFont(1);
   deviceScreen.drawSparkfunLogo();
   deviceScreen.flush();
-  vTaskDelay(1000*epd_settings.logoTime);
+  vTaskDelay(1000 * epd_settings.logoTime);
 }
 
 
@@ -36,9 +36,9 @@ void screendriverPrintMacAddress() {
   Serial.println("MAC Address: " + screendriverGetMacAddress());
 }
 
-void screendriverShowTime(){
+void screendriverShowTime() {
   // Shows the current time, if configured, in the upper right corner with 1 second accuracy in the format HH:MM:SS
-  if (dateConfigured){
+  if (dateConfigured) {
     deviceScreen.gText(230, 5, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()));
   } else {
     deviceScreen.gText(230, 5, "Set Time!");
@@ -47,8 +47,8 @@ void screendriverShowTime(){
 
 
 //For debugging purposes
-void screendriverShowDetailedMeasurements(){
-  if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
+void screendriverShowDetailedMeasurements() {
+  if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
     deviceScreen.gText(5, 5, "CO2 PPM: " + String(rawDataArray[CO2_PPM]));
     // deviceScreen.gText(5, 5, "Counter: " + String(i++));
     deviceScreen.gText(5, 20, "Temperature: " + String(rawDataArray[TEMP]));
@@ -61,7 +61,7 @@ void screendriverShowDetailedMeasurements(){
   }
 }
 
-void screendriverFlushWithChrono(){
+void screendriverFlushWithChrono() {
   uint32_t chrono = millis();
   deviceScreen.flush();
   chrono = millis() - chrono;
@@ -70,34 +70,33 @@ void screendriverFlushWithChrono(){
 
 
 void globalRefresh() {
-  if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
+  if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
     deviceScreen.regenerate();
   }
 }
 
 
-void updateSensorFrames(){
-  if(xSemaphoreTake(rawDataMutex, portMAX_DELAY)){
+void updateSensorFrames() {
+  if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
     deviceScreen.drawSensorFrame(preferences.getUShort("frame1Sensor"), 0);
     deviceScreen.drawSensorFrame(preferences.getUShort("frame2Sensor"), 1);
-    for(int i = 0; i < 2; i ++) {
+    for (int i = 0; i < 2; i++) {
 
       uint8_t currentSensor;
 
-      if(i == 0) currentSensor = preferences.getUShort("frame1Sensor");
+      if (i == 0) currentSensor = preferences.getUShort("frame1Sensor");
       else currentSensor = preferences.getUShort("frame2Sensor");
 
-      if(currentSensor == mySensor.temperature || currentSensor == mySensor.humidity) {
+      if (currentSensor == mySensor.temperature || currentSensor == mySensor.humidity) {
         deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[5]));
         deviceScreen.updateFrameVal(i, mySensor.temperature, String(rawDataArray[6]));
-      }
-      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[HUMIDITY]));
-      else if(currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[CO]));
-      else if(currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[NG]));
-      else if(currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[CO2_PPM]));
-      else if(currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[VOC]));
-      else if(currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[AQI]));
-      else if(currentSensor == mySensor.particles) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[PPM_2_5]));
+      } else if (currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[HUMIDITY]));
+      else if (currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[CO]));
+      else if (currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[NG]));
+      else if (currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[CO2_PPM]));
+      else if (currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[VOC]));
+      else if (currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[AQI]));
+      else if (currentSensor == mySensor.particles) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[PPM_2_5]));
     }
     xSemaphoreGive(rawDataMutex);
   }
@@ -109,18 +108,17 @@ void firmwareUpdateScreen() {
 }
 
 void drawPairingScreen() {
-  
 }
 
 void drawScreen() {
   // Sparkfun logo is drawn in epd setup function; first state drawn here is pairing screen
-  if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
+  if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
     // draw pairing screen
     drawPairingScreen();
-  } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
+  } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
     // draw sensor screen
     updateSensorFrames();
-  } else if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+  } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
     firmwareUpdateScreen();
   } else {
@@ -138,10 +136,10 @@ void screendriverRunScreenTask(void *pvParameter) {
   //Counter for burn-in prevention
   volatile int refreshCounter = 0;
   while (1) {
-     {
+    {
       // Prologue
       // deviceScreen.clear();
-      // Function Body 
+      // Function Body
       screendriverShowTime();
       screendriverShowDetailedMeasurements();
       // Epilogue
@@ -150,9 +148,9 @@ void screendriverRunScreenTask(void *pvParameter) {
       drawScreen();
 
       //Burn-in prevention code
-      refreshCounter ++;
+      refreshCounter++;
       refreshCounter %= epd_settings.cyclesBetweenFullRefresh;
-      if(refreshCounter == 0) deviceScreen.globalRefresh(epd_settings.numRefreshCycles);
+      if (refreshCounter == 0) deviceScreen.globalRefresh(epd_settings.numRefreshCycles);
 
       vTaskDelay(preferences.getUShort("refreshPeriod") * 1000);
     }

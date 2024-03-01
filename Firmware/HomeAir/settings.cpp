@@ -20,9 +20,8 @@ bool setupPreferences() {
   // Preferences is good for single KVP storage.
   // We want to use SPIFFS for large storage
   bool status = preferences.begin("HomeAirSettings", false);
-  if (status){
-    if(!preferences.getBool("firstTimeSetupComplete"))
-    {
+  if (status) {
+    if (!preferences.getBool("firstTimeSetupComplete")) {
       Serial.println("Preferences started successfully!");
       preferences.putBool("wallMounted", false);
       preferences.putBool("nightMode", false);
@@ -30,20 +29,20 @@ bool setupPreferences() {
       preferences.putBool("dotEnabled", true);
       preferences.putUShort("clockLocation", 1);
       preferences.putUShort("dotLocation", 0);
-      preferences.putUShort("frame1Sensor", 1); // Add enum for reading those out more clearly
+      preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
       preferences.putUShort("frame2Sensor", 5);
-      preferences.putUShort("refreshPeriod", 5);
+      preferences.putUShort("refreshPeriod", 5); // Time in seconds
       preferences.putBool("firstTimeSetupComplete", true);
-      return true;
     }
-    if (preferences.getBool("startingFromOTA")){
+    if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");
       Serial.printf("Version number: %d", VERSION_NUMBER);
       delay(3000);
       preferences.putBool("startingFromOTA", false);
     }
+
+    return true;
   }
   Serial.println("Error occured in starting preferences.");
   return false;
-  
 }

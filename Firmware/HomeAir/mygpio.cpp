@@ -77,7 +77,7 @@ void setupMQSensors() {
   // Both sensors are connected to ADC 1 with 10 channels
   // analogReadResolution(12);
   // analogSetAttenuation((adc_attenuation_t) 3); // 11db
-  if (adc_set_data_width(ADC_UNIT_BOTH, ADC_WIDTH_BIT_12) == ESP_OK){
+  if (adc_set_data_width(ADC_UNIT_BOTH, ADC_WIDTH_BIT_12) == ESP_OK) {
     Serial.println("ADC1 & ADC2 Configured.");
     online.ng = true;
     online.co = true;
@@ -182,8 +182,7 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
     aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
 
   Serial.print("Measurements: ");
-  for(int i=0;i<RAW_DATA_ARRAY_SIZE;i++)
-  {
+  for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
     Serial.printf("%f, ", ret_array[i]);
   }
   Serial.println();

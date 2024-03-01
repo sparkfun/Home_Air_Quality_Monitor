@@ -198,8 +198,7 @@ void deleteAllFiles(fs::FS &fs) {
   Serial.println("Deleted all files in directory.");
 }
 
-void getFormattedMessageFromRawDataArray(char* dest, int size){
-
+void getFormattedMessageFromRawDataArray(char *dest, int size) {
 }
 
 float reducePrecision(float var) {
@@ -211,10 +210,10 @@ float reducePrecision(float var) {
   return (float)value / 100;
 }
 
-void onProgressCallback(size_t progress, size_t total){
+void onProgressCallback(size_t progress, size_t total) {
   float percentage = (progress / total) * 100;
   Serial.println("Callback is hit!");
-  if(percentage > 5 && (int)percentage % 5 <= .1){
+  if (percentage > 5 && (int)percentage % 5 <= .1) {
     Serial.printf("Progress: %f\n", percentage);
   }
   // if (progress / total > 0.05 && (progress / total) % 0.05 <= 0.001){
@@ -341,7 +340,7 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
-        SPIFFS.remove("/dest_bin"); // Make room for new OTA
+        SPIFFS.remove("/dest_bin");  // Make room for new OTA
         // Check for room in SPIFFS
         Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
         if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
@@ -356,21 +355,21 @@ void spiffsStorageTask(void *pvParameter) {
             while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
                                   BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
-              writtenSize += file.write((uint8_t*)&BLEMessageBuffer[0], 509);
+              writtenSize += file.write((uint8_t *)&BLEMessageBuffer[0], 509);
               otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
               // Add setBits for done writing to ack in BLE
-              if(++downloadIttr % 5 == 0){
-                Serial.printf("%.2f/sec\n", writtenSize-prevSize/(millis() - chrono));
+              if (++downloadIttr % 5 == 0) {
+                Serial.printf("%.2f/sec\n", writtenSize - prevSize / (millis() - chrono));
                 prevSize = writtenSize;
                 Serial.printf("Download percentage: %.2f\n", otaDownloadPercentage);
               }
               xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
-              if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE){
+              if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE) {
                 break;
               }
             }
             // OTA Update has been received to SPIFFS
-            Serial.printf("Percentage written %f\n", file.size()/updateSize);
+            Serial.printf("Percentage written %f\n", file.size() / updateSize);
             Serial.printf("File written: %zu\n", file.size());
             Serial.printf("WrittenSize: %zu\n", writtenSize);
 
@@ -383,20 +382,20 @@ void spiffsStorageTask(void *pvParameter) {
 
             file.close();
             Serial.println("Verifying new BIN...");
-            if(Update.begin(updateSize)){
+            if (Update.begin(updateSize)) {
               // Space exists for update in OTA partition
               Serial.println("Writing file to OTA partition...");
               file = SPIFFS.open("/dest_bin", "r");
               writtenSize = Update.writeStream(file);
               file.close();
-              if (writtenSize >= updateSize){
+              if (writtenSize >= updateSize) {
                 Serial.println("Entire update file was written.");
               } else {
                 Serial.println("Failure writing update file.");
               }
-              if(Update.end(true)){
+              if (Update.end(true)) {
                 Serial.println("OTA done!");
-                if (Update.isFinished()){
+                if (Update.isFinished()) {
                   Serial.println("OTA Verified. Rebooting...");
                   preferences.putBool("startingFromOTA", true);
                   delay(3000);
