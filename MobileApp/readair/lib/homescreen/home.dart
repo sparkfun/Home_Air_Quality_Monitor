@@ -28,6 +28,13 @@ class _MyHomePageState extends State<MyHomePage> {
   double? aqi; //test
   double? co2;
   double? humid;
+  double? ppm1_0;
+  double? ppm2_5;
+  double? ppm4_0;
+  double? ppm10_0;
+  double? voc;
+  double? ng;
+  double? co;
 
   @override
   void initState() {
@@ -42,7 +49,13 @@ class _MyHomePageState extends State<MyHomePage> {
         temp = latestPacket.temp;
         aqi = latestPacket.aqi;
         co2 = latestPacket.co2;
+        co = latestPacket.co;
         humid = latestPacket.humid;
+        voc = latestPacket.voc;
+        ng = latestPacket.ng;
+        ppm2_5 = latestPacket.ppm2_5;
+        ppm10_0 = latestPacket.ppm10_0;
+
       });
     }
   }
@@ -57,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Row(
@@ -209,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('CO: ', style: TextStyle(fontSize: 18)),
+                            Text('CO: ${co?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                             Icon(Icons.cloud_circle),
                           ],
                         ),
@@ -230,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('VOC: ', style: TextStyle(fontSize: 18)),
+                            Text('VOC: ${voc?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                             Icon(Icons.heat_pump_rounded),
                           ],
                         ),
@@ -257,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('PPM 2.5', style: TextStyle(fontSize: 18)),
+                            Text('PPM 2.5: ${ppm2_5?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -278,7 +291,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('PPM 10.0', style: TextStyle(fontSize: 18)),
+                            Text('PPM 10.0: ${ppm10_0?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -303,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Nox', style: TextStyle(fontSize: 18)),
+                            Text('Nox: ${aqi?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -323,7 +336,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Methane', style: TextStyle(fontSize: 18)),
+                            Text('Methane: ${ng?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),

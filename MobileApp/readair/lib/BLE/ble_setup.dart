@@ -9,6 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:readair/BLE/device_details.dart';
 import 'package:readair/data/packet.dart';
+import 'package:readair/main.dart';
 
 class BluetoothPage extends StatefulWidget {
   // const BluetoothPage({super.key, required this.title});
@@ -148,6 +149,12 @@ class BluetoothController extends GetxController {
   bool isSubscribed = false;
   Timer? _updatTimer;
 
+  void showGlobalSnackBar(String message) {
+    scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> connectToDevice(
       BluetoothDevice device, BuildContext context) async {
     try {
@@ -224,7 +231,8 @@ class BluetoothController extends GetxController {
     for (var packetData in packets) {
       try {
         var parsedData = packetData.split(',');
-        if (parsedData.length == 12) {
+        // Adjust the condition to match the correct length for your packets
+        if ((parsedData.length == 12) || (parsedData.length == 13)) {
           var packet = DataPacket(
             epochTime: double.tryParse(parsedData[0]) ?? 0.0,
             co2: double.tryParse(parsedData[1]) ?? 0.0,
@@ -235,48 +243,29 @@ class BluetoothController extends GetxController {
             humid: double.tryParse(parsedData[6]) ?? 0.0,
             temp: double.tryParse(parsedData[7]) ?? 0.0,
             voc: double.tryParse(parsedData[8]) ?? 0.0,
-            co: double.tryParse(parsedData[9]) ?? 0.0,
-            ng: double.tryParse(parsedData[10]) ?? 0.0,
-            aqi: double.tryParse(parsedData[11]) ?? 0.0,
+            nox: double.tryParse(parsedData[9]) ?? 0.0,
+            co: double.tryParse(parsedData[10]) ?? 0.0,
+            ng: double.tryParse(parsedData[11]) ?? 0.0,
+            aqi: double.tryParse(parsedData[12]) ?? 0.0,
           );
 
-          print(packetData);
+          print("Received Packet: $packetData");
           DatabaseService.instance.insertOrUpdateDataPacket(packet);
         } else {
-          //_showMessage("Received data does not match expected format.");
+          // If the received data does not match expected format, show a global SnackBar
+          //showGlobalSnackBar("Received data does not match expected format.");
         }
       } catch (e) {
         print("Error processing packet: $e");
+        //showGlobalSnackBar("Error processing packet: $e");
       }
     }
   }
 
-  // Future<void> subscribeToDevice(BluetoothDevice device) async {
-  //   try {
-  //     var services = await device.discoverServices();
-  //     for (var service in services) {
-  //       for (var characteristic in service.characteristics) {
-  //         // Define your characteristic UUIDs that you want to subscribe to
-  //         if (characteristic.properties.notify) {
-  //           await characteristic.setNotifyValue(true);
-  //           characteristic.value.listen((value) {
-  //             // Handle incoming data
-  //             String receivedData = String.fromCharCodes(value);
-  //             _processDataPacket(receivedData);
-  //           });
-  //           isSubscribed = true;
-  //           print("Subscribed to characteristic: ${characteristic.uuid}");
-  //           // You may want to break or continue based on your application's needs
-  //         }
-  //       }
-  //     }
-  //     update(); // Notify listeners about the change
-  //   } catch (e) {
-  //     print("Error subscribing to device: $e");
-  //     isSubscribed = false;
-  //     update(); // Notify listeners about the change
-  //   }
-  // }
+  void _showMessage(String message) {
+    scaffoldMessengerKey.currentState
+        ?.showSnackBar(SnackBar(content: Text(message)));
+  }
 
   Future<void> subscribeToDevice(BluetoothDevice device) async {
     try {
@@ -293,8 +282,6 @@ class BluetoothController extends GetxController {
       // Send 'TGMT=-7' command
       await _sendData(device, 'TGMT=-7');
       await Future.delayed(Duration(seconds: 1));
-
-
 
       // Proceed with discovering services and subscribing to the characteristic
       var services = await device.discoverServices();
@@ -314,14 +301,13 @@ class BluetoothController extends GetxController {
         }
       }
 
-      //_sendData(device, "READ!");
+      _sendData(device, "READ!");
 
       _updatTimer?.cancel(); // Cancel any existing timer
-      _updatTimer = Timer.periodic(Duration(seconds: 20), (timer) async {
+      _updatTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
         await _sendData(device, "UPDAT");
         print("Sent UPDAT");
       });
-
     } catch (e) {
       print("Error in subscription process: $e");
       isSubscribed = false;
@@ -364,7 +350,7 @@ class BluetoothController extends GetxController {
     // FlutterBluePlus.stopScan();
   }
 
-    @override
+  @override
   void onClose() {
     // Clean up resources
     _updatTimer?.cancel();

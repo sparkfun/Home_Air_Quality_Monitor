@@ -352,7 +352,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     for (var packetData in packets) {
       try {
         var parsedData = packetData.split(',');
-        if (parsedData.length == 12) {
+        if ((data.length == 12) || (data.length == 13)) {
           var packet = DataPacket(
             epochTime: double.tryParse(parsedData[0]) ?? 0.0,
             co2: double.tryParse(parsedData[1]) ?? 0.0,
@@ -363,15 +363,16 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
             humid: double.tryParse(parsedData[6]) ?? 0.0,
             temp: double.tryParse(parsedData[7]) ?? 0.0,
             voc: double.tryParse(parsedData[8]) ?? 0.0,
-            co: double.tryParse(parsedData[9]) ?? 0.0,
-            ng: double.tryParse(parsedData[10]) ?? 0.0,
-            aqi: double.tryParse(parsedData[11]) ?? 0.0,
+            nox: double.tryParse(parsedData[9]) ?? 0.0,
+            co: double.tryParse(parsedData[10]) ?? 0.0,
+            ng: double.tryParse(parsedData[11]) ?? 0.0,
+            aqi: double.tryParse(parsedData[12]) ?? 0.0,
           );
 
           print(packetData);
           DatabaseService.instance.insertOrUpdateDataPacket(packet);
         } else {
-          //_showMessage("Received data does not match expected format.");
+          _showMessage("Received data does not match expected format.");
         }
       } catch (e) {
         print("Error processing packet: $e");
@@ -425,7 +426,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
 //--------------------------------OTA UPDATES------------------------------------------------------
 
   Future<List<int>> loadBinFile() async {
-    final byteData = await rootBundle.load('assets/update.bin');
+    final byteData = await rootBundle.load('assets/update1.bin');
     return byteData.buffer.asUint8List();
   }
 

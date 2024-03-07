@@ -67,25 +67,73 @@ class _HumidPageState extends State<HumidPage> {
         child: Column(
           children: [
             const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(currentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$currentValue%',
-                          style: TextStyle(fontSize: 60))),
-                  textColor: Colors.white70,
+                         const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current Humidity',
+                    style: TextStyle(fontSize: 20, color: Colors.black),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average Humidity', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(currentValue),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('$currentValue%',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(averageOverTwoFourHour),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('$averageOverTwoFourHour%',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            // Padding(
+            //   padding: EdgeInsets.all(8.0),
+            //   child: Card(
+            //     color: CoordinatedColor(currentValue),
+            //     child: ListTile(
+            //       title: Center(
+            //           child: Text('$currentValue%',
+            //               style: TextStyle(fontSize: 60))),
+            //       textColor: Colors.white70,
+            //     ),
+            //   ),
+            // ),
 
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
                     child: Text('The Humidity is ${message(currentValue)}',
-                        style: TextStyle(fontSize: 25))),
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
@@ -155,27 +203,27 @@ class _HumidPageState extends State<HumidPage> {
               endIndent: 20,
             ),
 
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
+            // const Padding(
+            //   padding: EdgeInsets.all(2.0),
+            //   child: ListTile(
+            //     title: Center(
+            //         child: Text('Average Over Past 24hrs',
+            //             style: TextStyle(fontSize: 25))),
+            //   ),
+            // ),
 
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(averageOverTwoFourHour),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$averageOverTwoFourHour%',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: EdgeInsets.all(8.0),
+            //   child: Card(
+            //     color: CoordinatedColor(averageOverTwoFourHour),
+            //     child: ListTile(
+            //       title: Center(
+            //           child: Text('$averageOverTwoFourHour%',
+            //               style: TextStyle(fontSize: 50))),
+            //       textColor: Colors.white70,
+            //     ),
+            //   ),
+            // ),
 
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

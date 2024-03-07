@@ -61,6 +61,7 @@ class _ExportPageState extends State<ExportPage> {
       humid: _random.nextDouble() * 100,
       temp: _random.nextDouble() * 30,
       voc: _random.nextDouble() * 50,
+      nox: _random.nextDouble() * 50,
       co: _random.nextDouble() * 10,
       ng: _random.nextDouble() * 10,
       aqi: _random.nextDouble() * 500,
@@ -197,6 +198,7 @@ class ExportService {
         "Humidity",
         "Temperature",
         "VOC",
+        "NOX",
         "CO",
         "NG",
         "AQI"
