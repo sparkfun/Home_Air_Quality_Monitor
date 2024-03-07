@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\phoen\OneDrive\Documents\Synced_folders\Home_Air_Quality_Monitor\PCBs\EpaperDisplayPCB.kicad_sch</source>
+    <date>2/29/2024 9:51:17 AM</date>
+    <tool>Eeschema 7.0.7</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>Home Air Epaper Display Schematic</title>
+        <company/>
+        <rev>2.1</rev>
+        <date/>
+        <source>EpaperDisplayPCB.kicad_sch</source>
+        <comment number="1" value="Author: Anton Vandeberge"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>0.1uF</value>
+      <footprint>SparkFun-Capacitor:C_0603_1608Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-00810</field>
+        <field name="Tolerance">+80%/-20%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="0.1uF_0603_25V_20%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-00810"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="+80%/-20%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c796a8bb-b322-4e23-a017-0460c43ace16</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0603_1608Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-13930</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">16V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0603_16V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-13930"/>
+      <property name="Voltage" value="16V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>dc0da9a4-251e-481d-ace4-f4a78445689e</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>4.7uF</value>
+      <footprint>SparkFun-Capacitor:C_0603_1608Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-14106</field>
+        <field name="Tolerance">20%</field>
+        <field name="Voltage">35V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="4.7uF_0603_35V_20%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-14106"/>
+      <property name="Voltage" value="35V"/>
+      <property name="Tolerance" value="20%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b6328443-8d53-4047-a931-ceea34a2b1c2</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>474b82a2-0d83-4ffa-b654-893d25aef478</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0490500c-a27b-4ce4-ae5d-9b37dcb2fd4f</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d44ff299-7a16-4db5-9459-3ef836c78ebd</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f90d3836-df59-499d-8949-c70633dcfa02</tstamps>
+    </comp>
+    <comp ref="C8">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>211ad1e9-1faa-4ac9-af8a-eb30b8086d15</tstamps>
+    </comp>
+    <comp ref="C9">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7c4bcc55-22ee-4f35-95fa-4b689075b12f</tstamps>
+    </comp>
+    <comp ref="C10">
+      <value>1.0uF</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <datasheet>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Tolerance">10%</field>
+        <field name="Voltage">25V</field>
+      </fields>
+      <libsource lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%" description="Unpolarized capacitor"/>
+      <property name="PROD_ID" value="CAP-08064"/>
+      <property name="Voltage" value="25V"/>
+      <property name="Tolerance" value="10%"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>578fd58f-460e-4b96-a459-51ea868a9b85</tstamps>
+    </comp>
+    <comp ref="D1">
+      <value>0.5A</value>
+      <footprint>SparkFun-Semiconductor-Standard:SOD-323</footprint>
+      <datasheet>https://assets.nexperia.com/documents/data-sheet/PMEG4005EJ.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">DIO-10955</field>
+        <field name="VDrop">0.42V</field>
+        <field name="VMax">40V</field>
+      </fields>
+      <libsource lib="SparkFun-DiscreteSemi" part="D_Schottky_0.5A_40V_0.42V" description="Schottky diode"/>
+      <property name="PROD_ID" value="DIO-10955"/>
+      <property name="VDrop" value="0.42V"/>
+      <property name="VMax" value="40V"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Schottky diode"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f5a3c88c-89c6-40ff-bbd2-6929feb8bd24</tstamps>
+    </comp>
+    <comp ref="D2">
+      <value>0.5A</value>
+      <footprint>SparkFun-Semiconductor-Standard:SOD-323</footprint>
+      <datasheet>https://assets.nexperia.com/documents/data-sheet/PMEG4005EJ.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">DIO-10955</field>
+        <field name="VDrop">0.42V</field>
+        <field name="VMax">40V</field>
+      </fields>
+      <libsource lib="SparkFun-DiscreteSemi" part="D_Schottky_0.5A_40V_0.42V" description="Schottky diode"/>
+      <property name="PROD_ID" value="DIO-10955"/>
+      <property name="VDrop" value="0.42V"/>
+      <property name="VMax" value="40V"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Schottky diode"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8b3a14b2-94c7-4c24-80bd-5435d9128c8e</tstamps>
+    </comp>
+    <comp ref="D3">
+      <value>0.5A</value>
+      <footprint>SparkFun-Semiconductor-Standard:SOD-323</footprint>
+      <datasheet>https://assets.nexperia.com/documents/data-sheet/PMEG4005EJ.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">DIO-10955</field>
+        <field name="VDrop">0.42V</field>
+        <field name="VMax">40V</field>
+      </fields>
+      <libsource lib="SparkFun-DiscreteSemi" part="D_Schottky_0.5A_40V_0.42V" description="Schottky diode"/>
+      <property name="PROD_ID" value="DIO-10955"/>
+      <property name="VDrop" value="0.42V"/>
+      <property name="VMax" value="40V"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Schottky diode"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1e079265-3015-4302-9041-e2c1c8ea6a3d</tstamps>
+    </comp>
+    <comp ref="J1">
+      <value>Conn_01x08</value>
+      <footprint>SparkFun-Connector:1X08</footprint>
+      <libsource lib="SparkFun-Connector" part="Conn_01x08" description="Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7833c1ac-bf3b-4c76-9c35-00b75dc20efe</tstamps>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x12_FPC_0.5mm</value>
+      <footprint>SparkFun-Connector:FPC_12_0.5MM</footprint>
+      <libsource lib="SparkFun-Connector" part="Conn_01x12_FPC_0.5mm" description="FPC 0.5mm Dual Contact Back Flip Arm"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="FPC 0.5mm Dual Contact Back Flip Arm"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>358f06ee-420a-4a07-be0f-dd7d60fbdd97</tstamps>
+    </comp>
+    <comp ref="L1">
+      <value>10uH</value>
+      <footprint>SparkFun-Capacitor:C_0805_2012Metric</footprint>
+      <fields>
+        <field name="Current">350mA</field>
+        <field name="PROD_ID">NDUC-19198</field>
+      </fields>
+      <libsource lib="SparkFun-Coil" part="10uH_0805_0.35A" description="Inductor"/>
+      <property name="PROD_ID" value="NDUC-19198"/>
+      <property name="Current" value="350mA"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Inductor"/>
+      <property name="ki_keywords" value="inductor choke coil reactor magnetic"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3d7b7209-d776-4878-bcbb-303f31cec0a5</tstamps>
+    </comp>
+    <comp ref="Q1">
+      <value>AO3404A</value>
+      <footprint>SparkFun-Semiconductor-Standard:SOT23-3</footprint>
+      <datasheet>https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/4850/DS_785_AO3404A.pdf</datasheet>
+      <fields>
+        <field name="IMax">5.8A</field>
+        <field name="PROD_ID">TRANS-12988</field>
+        <field name="VMax">30V</field>
+      </fields>
+      <libsource lib="SparkFun-DiscreteSemi" part="Q_NMOS_5.8A_50V" description="N-MOSFET transistor, drain/gate/source"/>
+      <property name="PROD_ID" value="TRANS-12988"/>
+      <property name="IMax" value="5.8A"/>
+      <property name="VMax" value="30V"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="N-MOSFET transistor, drain/gate/source"/>
+      <property name="ki_keywords" value="transistor NMOS N-MOS N-MOSFET"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e95c8199-61bd-4954-9985-c05f7eae8262</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>0.47</value>
+      <footprint>SparkFun-Resistor:R_0603_1608Metric</footprint>
+      <datasheet>https://industrial.panasonic.com/cdbs/www-data/pdf/RDN0000/AOA0000C313.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">RES-20715</field>
+      </fields>
+      <libsource lib="SparkFun-Resistor" part="0.47_0603" description="Resistor"/>
+      <property name="PROD_ID" value="RES-20715"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d701394e-68d4-4cb7-8e5e-1122aaff7d41</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>10k</value>
+      <footprint>SparkFun-Resistor:R_0603_1608Metric</footprint>
+      <datasheet>https://www.vishay.com/docs/20035/dcrcwe3.pdf</datasheet>
+      <fields>
+        <field name="PROD_ID">RES-00824</field>
+      </fields>
+      <libsource lib="SparkFun-Resistor" part="10k_0603" description="Resistor"/>
+      <property name="PROD_ID" value="RES-00824"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b7c2e766-e5ec-4dde-8678-bb143c9d5904</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>ePaper-2.1</value>
+      <footprint>SparkFun-Display:ePaper-2.13</footprint>
+      <datasheet>https://www.pervasivedisplays.com/wp-content/uploads/2021/12/1P227-00_03_E2213JS0C1-E2213JS0C2_20210820.pdf</datasheet>
+      <fields>
+        <field name="Connector">https://www.atom-connector.com/uploads/H2.55.pdf</field>
+        <field name="PROD_ID">CONN-14195</field>
+      </fields>
+      <libsource lib="SparkFun-Display" part="ePaper-2.1" description="2.1&quot; ePaper display"/>
+      <property name="PROD_ID" value="CONN-14195"/>
+      <property name="Connector" value="https://www.atom-connector.com/uploads/H2.55.pdf"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="EpaperDisplayPCB.kicad_sch"/>
+      <property name="ki_description" value="2.1&quot; ePaper display"/>
+      <property name="ki_keywords" value="connector 24 pin ZIFF"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2cf88cb2-7735-48cc-b7ac-3a470057e0bc</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="SparkFun-Aesthetic" part="OSHW_Logo">
+      <fields>
+        <field name="Reference">G</field>
+        <field name="Value">OSHW_Logo</field>
+        <field name="Footprint">SparkFun-Aesthetic:Creative_Commons_License</field>
+      </fields>
+    </libpart>
+    <libpart lib="SparkFun-Capacitor" part="0.1uF_0603_25V_20%">
+      <description>Unpolarized capacitor</description>
+      <docs>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">0.1uF</field>
+        <field name="Footprint">SparkFun-Capacitor:C_0603_1608Metric</field>
+        <field name="Datasheet">https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</field>
+        <field name="PROD_ID">CAP-00810</field>
+        <field name="Voltage">25V</field>
+        <field name="Tolerance">+80%/-20%</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Capacitor" part="1.0uF_0603_16V_10%">
+      <description>Unpolarized capacitor</description>
+      <docs>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">1.0uF</field>
+        <field name="Footprint">SparkFun-Capacitor:C_0603_1608Metric</field>
+        <field name="Datasheet">https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</field>
+        <field name="PROD_ID">CAP-13930</field>
+        <field name="Voltage">16V</field>
+        <field name="Tolerance">10%</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Capacitor" part="1.0uF_0805_25V_10%">
+      <description>Unpolarized capacitor</description>
+      <docs>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">1.0uF</field>
+        <field name="Footprint">SparkFun-Capacitor:C_0805_2012Metric</field>
+        <field name="Datasheet">https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</field>
+        <field name="PROD_ID">CAP-08064</field>
+        <field name="Voltage">25V</field>
+        <field name="Tolerance">10%</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Capacitor" part="4.7uF_0603_35V_20%">
+      <description>Unpolarized capacitor</description>
+      <docs>https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">4.7uF</field>
+        <field name="Footprint">SparkFun-Capacitor:C_0603_1608Metric</field>
+        <field name="Datasheet">https://cdn.sparkfun.com/assets/8/a/4/a/5/Kemet_Capacitor_Datasheet.pdf</field>
+        <field name="PROD_ID">CAP-14106</field>
+        <field name="Voltage">35V</field>
+        <field name="Tolerance">20%</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Coil" part="10uH_0805_0.35A">
+      <description>Inductor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">10uH</field>
+        <field name="Footprint">SparkFun-Capacitor:C_0805_2012Metric</field>
+        <field name="Datasheet">~</field>
+        <field name="PROD_ID">NDUC-19198</field>
+        <field name="Current">350mA</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Connector" part="Conn_01x08">
+      <description>Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x08</field>
+        <field name="Footprint">SparkFun-Connector:1X08</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Connector" part="Conn_01x12_FPC_0.5mm">
+      <description>FPC 0.5mm Dual Contact Back Flip Arm</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x12_FPC_0.5mm</field>
+        <field name="Footprint">SparkFun-Connector:FPC_12_0.5MM</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+        <pin num="11" name="Pin_11" type="passive"/>
+        <pin num="12" name="Pin_12" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-DiscreteSemi" part="D_Schottky_0.5A_40V_0.42V">
+      <description>Schottky diode</description>
+      <docs>https://assets.nexperia.com/documents/data-sheet/PMEG4005EJ.pdf</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">0.5A</field>
+        <field name="Footprint">SparkFun-Semiconductor-Standard:SOD-323</field>
+        <field name="Datasheet">https://assets.nexperia.com/documents/data-sheet/PMEG4005EJ.pdf</field>
+        <field name="PROD_ID">DIO-10955</field>
+        <field name="VDrop">0.42V</field>
+        <field name="VMax">40V</field>
+      </fields>
+      <pins>
+        <pin num="A" name="A" type="passive"/>
+        <pin num="C" name="C" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-DiscreteSemi" part="Q_NMOS_5.8A_50V">
+      <description>N-MOSFET transistor, drain/gate/source</description>
+      <docs>https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/4850/DS_785_AO3404A.pdf</docs>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">AO3404A</field>
+        <field name="Footprint">SparkFun-Semiconductor-Standard:SOT23-3</field>
+        <field name="Datasheet">https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/4850/DS_785_AO3404A.pdf</field>
+        <field name="PROD_ID">TRANS-12988</field>
+        <field name="IMax">5.8A</field>
+        <field name="VMax">30V</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="input"/>
+        <pin num="2" name="S" type="passive"/>
+        <pin num="3" name="D" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Display" part="ePaper-2.1">
+      <description>2.1" ePaper display</description>
+      <docs>https://www.pervasivedisplays.com/wp-content/uploads/2021/12/1P227-00_03_E2213JS0C1-E2213JS0C2_20210820.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ePaper-2.1</field>
+        <field name="Footprint">SparkFun-Display:ePaper-2.13</field>
+        <field name="Datasheet">https://www.pervasivedisplays.com/wp-content/uploads/2021/12/1P227-00_03_E2213JS0C1-E2213JS0C2_20210820.pdf</field>
+        <field name="PROD_ID">CONN-14195</field>
+        <field name="Connector">https://www.atom-connector.com/uploads/H2.55.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="NC" type="no_connect"/>
+        <pin num="2" name="GDR" type="output"/>
+        <pin num="3" name="RESE" type="input"/>
+        <pin num="4" name="NC" type="no_connect"/>
+        <pin num="5" name="VDHR" type="power_in"/>
+        <pin num="6" name="NC" type="no_connect"/>
+        <pin num="7" name="NC" type="no_connect"/>
+        <pin num="8" name="BS" type="input"/>
+        <pin num="9" name="~{BUSY}" type="output"/>
+        <pin num="10" name="~{RST}" type="input"/>
+        <pin num="11" name="D/~{C}" type="input"/>
+        <pin num="12" name="~{CS}" type="input"/>
+        <pin num="13" name="SCLK" type="input"/>
+        <pin num="14" name="SDIO" type="bidirectional"/>
+        <pin num="15" name="VDDIO" type="power_in"/>
+        <pin num="16" name="VDD" type="power_in"/>
+        <pin num="17" name="GND" type="power_out"/>
+        <pin num="18" name="VDDD" type="power_in"/>
+        <pin num="19" name="NC" type="no_connect"/>
+        <pin num="20" name="VDH" type="power_in"/>
+        <pin num="21" name="VGH" type="power_in"/>
+        <pin num="22" name="VDL" type="power_in"/>
+        <pin num="23" name="VGL" type="power_in"/>
+        <pin num="24" name="VCOM" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Resistor" part="0.47_0603">
+      <description>Resistor</description>
+      <docs>https://industrial.panasonic.com/cdbs/www-data/pdf/RDN0000/AOA0000C313.pdf</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">0.47</field>
+        <field name="Footprint">SparkFun-Resistor:R_0603_1608Metric</field>
+        <field name="Datasheet">https://industrial.panasonic.com/cdbs/www-data/pdf/RDN0000/AOA0000C313.pdf</field>
+        <field name="PROD_ID">RES-20715</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SparkFun-Resistor" part="10k_0603">
+      <description>Resistor</description>
+      <docs>https://www.vishay.com/docs/20035/dcrcwe3.pdf</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">10k</field>
+        <field name="Footprint">SparkFun-Resistor:R_0603_1608Metric</field>
+        <field name="Datasheet">https://www.vishay.com/docs/20035/dcrcwe3.pdf</field>
+        <field name="PROD_ID">RES-00824</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="SparkFun-Aesthetic">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Aesthetic.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-Capacitor">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Capacitor.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-Coil">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Coil.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-Connector">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Connector.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-DiscreteSemi">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-DiscreteSemi.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-Display">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Display.kicad_sym</uri>
+    </library>
+    <library logical="SparkFun-Resistor">
+      <uri>C:/Users/phoen/Documents/SparkFun-KiCad-Libraries/Symbols/SparkFun-Resistor.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3.3V">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="J1" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="J2" pin="11" pinfunction="Pin_11" pintype="passive"/>
+      <node ref="L1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+      <node ref="U1" pin="15" pinfunction="VDDIO" pintype="power_in"/>
+      <node ref="U1" pin="16" pinfunction="VDD" pintype="power_in"/>
+    </net>
+    <net code="2" name="D{slash}~{C}">
+      <node ref="J1" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="J2" pin="10" pinfunction="Pin_10" pintype="passive"/>
+      <node ref="U1" pin="11" pinfunction="D/~{C}" pintype="input"/>
+    </net>
+    <net code="3" name="GND">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C10" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="C9" pin="2" pintype="passive"/>
+      <node ref="D1" pin="C" pinfunction="C" pintype="passive"/>
+      <node ref="J1" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="J2" pin="12" pinfunction="Pin_12" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="U1" pin="17" pinfunction="GND" pintype="power_out"/>
+      <node ref="U1" pin="8" pinfunction="BS" pintype="input"/>
+    </net>
+    <net code="4" name="Net-(C3-Pad2)">
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="D1" pin="A" pinfunction="A" pintype="passive"/>
+      <node ref="D2" pin="C" pinfunction="C" pintype="passive"/>
+    </net>
+    <net code="5" name="Net-(Q1-D)">
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="D3" pin="A" pinfunction="A" pintype="passive"/>
+      <node ref="L1" pin="2" pinfunction="2" pintype="passive"/>
+      <node ref="Q1" pin="3" pinfunction="D" pintype="passive"/>
+    </net>
+    <net code="6" name="Net-(Q1-G)">
+      <node ref="Q1" pin="1" pinfunction="G" pintype="input"/>
+      <node ref="U1" pin="2" pinfunction="GDR" pintype="output"/>
+    </net>
+    <net code="7" name="Net-(Q1-S)">
+      <node ref="Q1" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="U1" pin="3" pinfunction="RESE" pintype="input"/>
+    </net>
+    <net code="8" name="Net-(U1-VCOM)">
+      <node ref="C10" pin="1" pintype="passive"/>
+      <node ref="U1" pin="24" pinfunction="VCOM" pintype="power_in"/>
+    </net>
+    <net code="9" name="Net-(U1-VDDD)">
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="U1" pin="18" pinfunction="VDDD" pintype="power_in"/>
+    </net>
+    <net code="10" name="Net-(U1-VDH)">
+      <node ref="C8" pin="1" pintype="passive"/>
+      <node ref="U1" pin="20" pinfunction="VDH" pintype="power_in"/>
+    </net>
+    <net code="11" name="Net-(U1-VDHR)">
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="VDHR" pintype="power_in"/>
+    </net>
+    <net code="12" name="Net-(U1-VDL)">
+      <node ref="C9" pin="1" pintype="passive"/>
+      <node ref="U1" pin="22" pinfunction="VDL" pintype="power_in"/>
+    </net>
+    <net code="13" name="Net-(U1-VGH)">
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="D3" pin="C" pinfunction="C" pintype="passive"/>
+      <node ref="U1" pin="21" pinfunction="VGH" pintype="power_in"/>
+    </net>
+    <net code="14" name="Net-(U1-VGL)">
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="D2" pin="A" pinfunction="A" pintype="passive"/>
+      <node ref="U1" pin="23" pinfunction="VGL" pintype="power_in"/>
+    </net>
+    <net code="15" name="SCLK">
+      <node ref="J1" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="J2" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="U1" pin="13" pinfunction="SCLK" pintype="input"/>
+    </net>
+    <net code="16" name="SDIO">
+      <node ref="J1" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="J2" pin="9" pinfunction="Pin_9" pintype="passive"/>
+      <node ref="U1" pin="14" pinfunction="SDIO" pintype="bidirectional"/>
+    </net>
+    <net code="17" name="unconnected-(J2-Pin_1-Pad1)">
+      <node ref="J2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+    </net>
+    <net code="18" name="unconnected-(J2-Pin_2-Pad2)">
+      <node ref="J2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+    </net>
+    <net code="19" name="unconnected-(J2-Pin_3-Pad3)">
+      <node ref="J2" pin="3" pinfunction="Pin_3" pintype="passive"/>
+    </net>
+    <net code="20" name="unconnected-(J2-Pin_4-Pad4)">
+      <node ref="J2" pin="4" pinfunction="Pin_4" pintype="passive"/>
+    </net>
+    <net code="21" name="unconnected-(U1-NC-Pad1)">
+      <node ref="U1" pin="1" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="22" name="unconnected-(U1-NC-Pad4)">
+      <node ref="U1" pin="4" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="23" name="unconnected-(U1-NC-Pad6)">
+      <node ref="U1" pin="6" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="24" name="unconnected-(U1-NC-Pad7)">
+      <node ref="U1" pin="7" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="25" name="unconnected-(U1-NC-Pad19)">
+      <node ref="U1" pin="19" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="26" name="~{BUSY}">
+      <node ref="J1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="J2" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="U1" pin="9" pinfunction="~{BUSY}" pintype="output"/>
+    </net>
+    <net code="27" name="~{CS}">
+      <node ref="J1" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="J2" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="U1" pin="12" pinfunction="~{CS}" pintype="input"/>
+    </net>
+    <net code="28" name="~{RST}">
+      <node ref="J1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="U1" pin="10" pinfunction="~{RST}" pintype="input"/>
+    </net>
+  </nets>
+</export>

@@ -55,9 +55,7 @@ uint16_t getPPM25AQI(float ppm25) {
     breakpointHigh = 500;
     breakpointLow = 350.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
-              (ppm25 - breakpointLow) +
-          indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm25 - breakpointLow) + indexLow);
 }
 
 uint16_t getPPM10AQI(float ppm10) {
@@ -101,9 +99,7 @@ uint16_t getPPM10AQI(float ppm10) {
     breakpointHigh = 604;
     breakpointLow = 505;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
-              (ppm10 - breakpointLow) +
-          indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm10 - breakpointLow) + indexLow);
 }
 
 uint16_t getCOAQI(float CO) {
@@ -147,9 +143,7 @@ uint16_t getCOAQI(float CO) {
     breakpointHigh = 50.4;
     breakpointLow = 40.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
-              (CO - breakpointLow) +
-          indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow);
 }
 
 float aqiGetCompositeAQI(float ppm25, float ppm10, float CO) {
@@ -158,13 +152,13 @@ float aqiGetCompositeAQI(float ppm25, float ppm10, float CO) {
   float AQICO = getCOAQI(CO);
 
   if (AQI25 > AQI10 && AQI25 > AQICO) {
-    Serial.println("AQI Source: PPM 2.5");
+    // Serial.println("AQI Source: PPM 2.5");
     return AQI25;
   } else if (AQI10 > AQI25 && AQI10 > AQICO) {
-    Serial.println("AQI Source: PPM 10.0");
+    // Serial.println("AQI Source: PPM 10.0");
     return AQI10;
   } else {
-    Serial.println("AQI Source: CO");
+    // Serial.println("AQI Source: CO");
     return AQICO;
   }
 }

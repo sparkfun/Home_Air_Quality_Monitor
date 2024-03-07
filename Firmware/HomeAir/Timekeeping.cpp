@@ -1,6 +1,6 @@
 #include "Timekeeping.h"
 
-ESP32Time rtc(0); // create an instance with a specifed offset in seconds
+ESP32Time rtc(0);  // create an instance with a specifed offset in seconds
 bool timeZoneConfigured = false;
 bool timeConfigured = false;
 bool dateConfigured = false;

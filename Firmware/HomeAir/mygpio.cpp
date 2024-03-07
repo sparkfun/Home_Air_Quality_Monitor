@@ -16,7 +16,7 @@ void mygpioSensorReadTask(void *pvParameter) {
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       // Acquire mutex
       mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
-      xSemaphoreGive(rawDataMutex); // Release mutex
+      xSemaphoreGive(rawDataMutex);  // Release mutex
       // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
       //   Serial.print(rawDataArray[i]);
       //   Serial.println(sensorMap[i]);
@@ -38,7 +38,7 @@ void setupSENSensor() {
     errorToString(error, errorMessage, 256);
     Serial.println(errorMessage);
   } else {
-    error = sen5x.setTemperatureOffsetSimple(0); // No temp offset
+    error = sen5x.setTemperatureOffsetSimple(0);  // No temp offset
     error = sen5x.startMeasurement();
     Serial.println("SEN5x: Set up sensor successfully!");
     online.sen5x = true;
@@ -60,7 +60,7 @@ void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
     Serial.print("PAS CO2: pressure reference error: ");
     Serial.println(errorPtr);
   }
-  errorPtr = co2Sensor.startMeasure(5); // Start continous measurement with 5 second period
+  errorPtr = co2Sensor.startMeasure(5);  // Start continous measurement with 5 second period
   if (XENSIV_PASCO2_OK != errorPtr) {
     Serial.print("PAS CO2: startmeasure error: ");
     Serial.println(errorPtr);
@@ -72,14 +72,43 @@ void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
   }
 }
 
+void setupMQSensors() {
+  // Enable and configure onboard ADCs
+  // Both sensors are connected to ADC 1 with 10 channels
+  // analogReadResolution(12);
+  // analogSetAttenuation((adc_attenuation_t) 3); // 11db
+  if (adc_set_data_width(ADC_UNIT_BOTH, ADC_WIDTH_BIT_12) == ESP_OK) {
+    Serial.println("ADC1 & ADC2 Configured.");
+    online.ng = true;
+    online.co = true;
+  } else {
+    Serial.println("ADCs NOT configured!");
+  }
+  // if (adc2_config_width(ADC_WIDTH_BIT_12) == ESP_OK){
+  //   Serial.println("ADC2 Configured.");
+  //   online.co = true;
+  // } else {
+  //   Serial.println("ADC2 NOT configured")
+  // }
+}
+
 float readNGSensor() {
-  float reading = (3.3 * analogRead(pin_NGInput)) / 4095;
-  return 10.938 * exp(1.7742 * (reading * 3.3 / 4095));
+  // float reading = analogRead(pin_NGInput);
+  if (online.ng) {
+    int NGReading = analogRead(pin_NGInput);
+    // Serial.printf("\tNG: %d\n", NGReading);
+    return NGReading;
+  }
+  return -1;
 }
 
 float readCOSensor() {
-  float sensorVoltage = (3.3 * analogRead(pin_COInput)) / 4095;
-  return 3.027 * exp(1.0698 * sensorVoltage);
+  if (online.co) {
+    int COReading = analogRead(pin_COInput);
+    // Serial.printf("\tCO: %d\n", COReading);
+    return COReading;
+  }
+  return -1;
 }
 
 void readSENSensor(float *retArray, uint8_t arraySize) {
@@ -91,15 +120,14 @@ void readSENSensor(float *retArray, uint8_t arraySize) {
     error = sen5x.readMeasuredValues(retArray[PPM_1_0], retArray[PPM_2_5],
                                      retArray[PPM_4_0], retArray[PPM_10],
                                      retArray[HUMIDITY], retArray[TEMP],
-                                     retArray[VOC], unusedValue);
+                                     retArray[VOC], retArray[NOX]);
 
     if (error) {
       Serial.print("Error trying to execute readMeasuredValues(): ");
       errorToString(error, errorMessage, 256);
       Serial.println(errorMessage);
     }
-  }
-  else{
+  } else {
     Serial.println("SEN5x offline");
   }
 }
@@ -113,7 +141,7 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
         Serial.print("Error reading CO2 w/ error code:");
         Serial.println(errorPtr);
       }
-      delay(250);
+      delay(500);
     } while (co2PPM == 0);
     return co2PPM;
   }
@@ -132,15 +160,16 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   5: Humidity - SEN
   6: Temperature - SEN
   7: VOCs - SEN
-  8: CO - MQ7
-  9: NG - MQ4
-  10: AQI - Composite
+  8: NOX - SEN
+  9: CO - MQ7
+  10: NG - MQ4
+  11: AQI - Composite
   */
   // CO2
   ret_array[CO2_PPM] = readCO2PPM(co2Error, co2Sensor);
   // SEN
-  // Uses ret_array[1] through ret_array[7]
-  readSENSensor(ret_array, 7);
+  // Uses ret_array[1] through ret_array[8]
+  readSENSensor(ret_array, 8);
   // CO
   ret_array[CO] = readCOSensor();
   // Serial.print("CO ppm: ");
@@ -150,16 +179,23 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   // Serial.print("NG ppm: ");
   // Serial.println(ret_array[10]);
   ret_array[AQI] =
-      aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
+    aqiGetCompositeAQI(ret_array[PPM_2_5], ret_array[PPM_4_0], ret_array[CO]);
+
+  Serial.print("Measurements: ");
+  for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
+    Serial.printf("%f, ", ret_array[i]);
+  }
+  Serial.println();
 }
 
 void setupGPIO() {
   // Setup I2C
   Serial.println("Setting up GPIO...");
-  Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ_HZ); // Used for Sparkfun Thing
+  Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ_HZ);  // Used for Sparkfun Thing
   // Wire.setClock(I2C_FREQ_HZ);  // 400KHz
 
-  setupCO2Sensor(co2Error, co2Sensor); // Setup PASCO2 Sensor
+  setupCO2Sensor(co2Error, co2Sensor);  // Setup PASCO2 Sensor
   setupSENSensor();
+  setupMQSensors();
   Serial.println("Successfully set up GPIO.");
 }

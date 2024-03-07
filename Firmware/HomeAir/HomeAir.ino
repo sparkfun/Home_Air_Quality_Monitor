@@ -10,7 +10,7 @@
 
   The program uses BLE (Bluetooth Low-Energy) to interface with the accompanying
   mobile app and uses an RTOS to manage communication, sensor reading, storage,
-  and displaying live info on the screen.
+  and displaying live info on the epaper screen.
 */
 
 #include "HomeAir.h"
@@ -22,7 +22,7 @@ char BLEMessageBuffer[BLE_BUFFER_LENGTH];
 // Task handle definitions
 TaskHandle_t mygpioSensorReadTaskHandle;
 TaskHandle_t spiffsStorageTaskHandle, BLEServerCommunicationTaskHandle,
-    timekeepingSyncTaskHandle, screendriverRunScreenTaskHandle;
+  timekeepingSyncTaskHandle, screendriverRunScreenTaskHandle;
 // Flag Group definitions
 EventGroupHandle_t appStateFlagGroup;
 EventGroupHandle_t BLEStateFlagGroup;
@@ -35,9 +35,8 @@ void setup() {
   // Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
   Serial.write("Setting up...");
-  // setupPreferences();
+  setupPreferences();
   // setupTime();
-
   // Setup Flag Event Groups
   appStateFlagGroup = xEventGroupCreate();
   BLEStateFlagGroup = xEventGroupCreate();
@@ -47,56 +46,49 @@ void setup() {
   rawDataMutex = xSemaphoreCreateMutex();
 
   xTaskCreatePinnedToCore(
-      mygpioSensorReadTask,        /*Function to call*/
-      "Sensor Read Task",          /*Task name*/
-      10000,                       /*Stack size*/
-      NULL,                        /*Function parameters*/
-      5,                           /*Priority*/
-      &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
-      ARDUINO_AUX_CORE);           /*Core ID*/
+    mygpioSensorReadTask,        /*Function to call*/
+    "Sensor Read Task",          /*Task name*/
+    4096,                        /*Stack size*/
+    NULL,                        /*Function parameters*/
+    5,                           /*Priority*/
+    &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(
-      spiffsStorageTask,        /*Function to call*/
-      "SPIFFS Storage Task",    /*Task name*/
-      10000,                    /*Stack size*/
-      NULL,                     /*Function parameters*/
-      2,                        /*Priority*/
-      &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
-      ARDUINO_AUX_CORE);        /*Core ID*/
+    spiffsStorageTask,        /*Function to call*/
+    "SPIFFS Storage Task",    /*Task name*/
+    10000,                    /*Stack size*/
+    NULL,                     /*Function parameters*/
+    2,                        /*Priority*/
+    &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);        /*Core ID*/
 
   xTaskCreatePinnedToCore(
-      BLEServerCommunicationTask,        /*Function to call*/
-      "BLE Communication Task",          /*Task name*/
-      10000,                             /*Stack size*/
-      NULL,                              /*Function parameters*/
-      1,                                 /*Priority*/
-      &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
-      ARDUINO_PRIMARY_CORE);             /*Core ID*/
+    BLEServerCommunicationTask,        /*Function to call*/
+    "BLE Communication Task",          /*Task name*/
+    10000,                             /*Stack size*/
+    NULL,                              /*Function parameters*/
+    1,                                 /*Priority*/
+    &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
+    ARDUINO_PRIMARY_CORE);             /*Core ID*/
 
   xTaskCreatePinnedToCore(
-      timekeepingSyncTask,        /*Function to call*/
-      "Time Sync Task",           /*Task name*/
-      10000,                      /*Stack size*/
-      NULL,                       /*Function parameters*/
-      1,                          /*Priority*/
-      &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
-      ARDUINO_AUX_CORE);          /*Core ID*/
+    timekeepingSyncTask,        /*Function to call*/
+    "Time Sync Task",           /*Task name*/
+    1024,                       /*Stack size*/
+    NULL,                       /*Function parameters*/
+    1,                          /*Priority*/
+    &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);          /*Core ID*/
 
   xTaskCreatePinnedToCore(
-      screendriverRunScreenTask,        /*Function to call*/
-      "Epaper Update Task",             /*Task name*/
-      10000,                            /*Stack size*/
-      NULL,                             /*Function parameters*/
-      10,                               /*Priority*/
-      &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
-      ARDUINO_AUX_CORE);                /*Core ID*/
+    screendriverRunScreenTask,        /*Function to call*/
+    "Epaper Update Task",             /*Task name*/
+    10000,                            /*Stack size*/
+    NULL,                             /*Function parameters*/
+    10,                               /*Priority*/
+    &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
+    ARDUINO_AUX_CORE);                /*Core ID*/
 }
-// All loop functionality is completed with tasks defined in setup()
+// All loop functionality is completed with the tasks defined in setup()
 void loop() {}
-
-void setupPreferences() {
-  // Preferences is good for single KVP storage.
-  // We want to use SPIFFS for large storage
-  // bool status = preferences.begin("my_app", false);
-  // Currently not used, may be used for user customization options
-}

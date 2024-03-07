@@ -1,9 +1,12 @@
+#include "FS.h"
 #include "spiffs_helper.h"
 
 /* You only need to format SPIFFS the first time you run a
    test or else use the SPIFFS plugin to create a partition
    https://github.com/me-no-dev/arduino-esp32fs-plugin */
 #define FORMAT_SPIFFS_IF_FAILED true
+float otaDownloadPercentage;
+
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\r\n", dirname);
@@ -69,7 +72,7 @@ void writeFile(fs::FS &fs, const char *path, const char *message) {
 }
 
 void appendFile(fs::FS &fs, const char *path, const char *message) {
-  Serial.printf("Appending to file: %s\r\n", path);
+  // Serial.printf("Appending to file: %s\r\n", path);
 
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
@@ -195,6 +198,9 @@ void deleteAllFiles(fs::FS &fs) {
   Serial.println("Deleted all files in directory.");
 }
 
+void getFormattedMessageFromRawDataArray(char *dest, int size) {
+}
+
 float reducePrecision(float var) {
   // 37.66666 * 100 =3766.66
   // 3766.66 + .5 =3767.16    for rounding off value
@@ -204,15 +210,30 @@ float reducePrecision(float var) {
   return (float)value / 100;
 }
 
+void onProgressCallback(size_t progress, size_t total) {
+  float percentage = (progress / total) * 100;
+  Serial.println("Callback is hit!");
+  if (percentage > 5 && (int)percentage % 5 <= .1) {
+    Serial.printf("Progress: %f\n", percentage);
+  }
+  // if (progress / total > 0.05 && (progress / total) % 0.05 <= 0.001){
+  //   Serial.printf("Progress: %zu\n", (progress * 100 / total));
+  // }
+}
+
+
 void spiffsStorageTask(void *pvParameter) {
   char path[13] = { "/datalog.txt" };
   // std::string message;
   char message[512];
-  long epochLapTime = 0;
   File file, root;
   int lineLength = 0;
   int numPackets = 6;
   int insertPoint = 0;
+  int downloadIttr = 0;
+  int chrono = millis();
+  size_t writtenSize, prevSize = 0;
+  Update.onProgress(onProgressCallback);
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
@@ -254,12 +275,12 @@ void spiffsStorageTask(void *pvParameter) {
         //           std::to_string(rawDataArray[10]) + "\n";
         snprintf(
           message, 80,
-          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
+          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
           rtc.getEpoch(), rawDataArray[0], rawDataArray[1],
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
-          rawDataArray[10]);
-        Serial.print("Appending to file: ");
+          rawDataArray[10], rawDataArray[11]);
+        // Serial.print("Appending to file: ");
         // Serial.println(message.c_str());
         Serial.println(message);
         // appendLineToFile(SPIFFS, path, message.c_str());
@@ -317,29 +338,88 @@ void spiffsStorageTask(void *pvParameter) {
         BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-      // Download request/demand received
-      // Open a new file and read from the BLE buffer into it
-      File dest_file = SPIFFS.open("/dest_file");
-      if (!dest_file) {
-        Serial.println("Dest_file not opened correctly. Quitting Download state");
-        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_OTA_DOWNLOAD);
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING); //  Revert to normal operation on a failed upload
-        // We will signal something meaningful to the user here
-        continue;
+      // Init OTA download, and if successful begin writing to the partition
+      if (updateSize != 0) {
+        SPIFFS.remove("/dest_bin");  // Make room for new OTA
+        // Check for room in SPIFFS
+        Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
+        if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
+          // We have enough room to directly receive BLE data
+          Serial.println("Space for OTA exists in SPIFFS...");
+          chrono = millis();
+          file = SPIFFS.open("/dest_bin", "w");
+          if (!file) {
+            Serial.println("Error opening dest file.");
+
+          } else {
+            while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+              xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
+                                  BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
+              writtenSize += file.write((uint8_t *)&BLEMessageBuffer[0], 509);
+              otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
+              // Add setBits for done writing to ack in BLE
+              if (++downloadIttr % 5 == 0) {
+                Serial.printf("%.2f/sec\n", writtenSize - prevSize / (millis() - chrono));
+                prevSize = writtenSize;
+                Serial.printf("Download percentage: %.2f\n", otaDownloadPercentage);
+              }
+              xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
+              if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE) {
+                break;
+              }
+            }
+            // OTA Update has been received to SPIFFS
+            Serial.printf("Percentage written %f\n", file.size() / updateSize);
+            Serial.printf("File written: %zu\n", file.size());
+            Serial.printf("WrittenSize: %zu\n", writtenSize);
+
+            // Trim end of file from TRANSFER_COMPLETE to the END
+            int chrono = millis();
+            size_t endIndex = file.find("TRANSFER_COMPLETE");
+            Serial.printf("file.find() took %f ms\n", millis() - chrono);
+            Serial.printf("Found token at %zu\n", endIndex);
+            // BLEMessageBuffer.erase(endIndex, )
+
+            file.close();
+            Serial.println("Verifying new BIN...");
+            if (Update.begin(updateSize)) {
+              // Space exists for update in OTA partition
+              Serial.println("Writing file to OTA partition...");
+              file = SPIFFS.open("/dest_bin", "r");
+              writtenSize = Update.writeStream(file);
+              file.close();
+              if (writtenSize >= updateSize) {
+                Serial.println("Entire update file was written.");
+              } else {
+                Serial.println("Failure writing update file.");
+              }
+              if (Update.end(true)) {
+                Serial.println("OTA done!");
+                if (Update.isFinished()) {
+                  Serial.println("OTA Verified. Rebooting...");
+                  preferences.putBool("startingFromOTA", true);
+                  delay(3000);
+                  ESP.restart();
+                } else {
+                  Serial.println("Update not finished. Rebooting...");
+                  delay(3000);
+                  ESP.restart();
+                }
+              } else {
+                Serial.println("End failed. I don't know why. Rebooting...");
+                delay(5000);
+                ESP.restart();
+              }
+            }
+          }
+        } else {
+          // Not enough room in SPIFFS for update even after clearing previous OTA
+          Serial.println("No room for OTA in SPIFFS!");
+          delay(500);
+          Serial.println("Restarting...");
+          delay(5000);
+        }
       }
-      Serial.println("Dest_file opened");
-      while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-        // While downloading is true, read from buffer and store it
-        xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE, BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);  // Write_complete is set in BLE onWrite callback
-        // BLEMessageBuffer holds newest 512 bytes to append 
-        dest_file.print(BLEMessageBuffer);
-        Serial.print("Downloaded bytes: ");
-        Serial.println(BLEMessageBuffer);
-      }
-      // After DOWNLOADING has concluded, close the file we were appending to
-      Serial.print("Total downloaded file size: ");
-      Serial.println((uint32_t) dest_file.size());
-      dest_file.close();
     }
   }
 }

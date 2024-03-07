@@ -1,6 +1,7 @@
 #ifndef TIMEKEEPING_H
 #define TIMEKEEPING_H
 
+#include "HomeAir.h"
 #include "ESP32Time.h"
 #include "settings.h"
 #include "os_flags.h"
