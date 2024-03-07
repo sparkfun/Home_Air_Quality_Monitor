@@ -103,28 +103,105 @@ void updateSensorFrames() {
   deviceScreen.flush();
 }
 
+void drawDot(bool indicatorOn) {
+  if(preferences.getBool("dotEnabled")) {
+    uint8_t location = preferences.getUShort("dotLocation");
+    uint16_t dotColor = indicatorOn ? myColours.black : myColours.white;
+    if(location == 0) {
+      deviceScreen.circle(5, 5, preferences.getUShort("dotSize"), dotColor);
+    }
+    else if(location == 1) {
+      deviceScreen.circle(291, 5, preferences.getUShort("dotSize"), dotColor);
+    }
+    else if(location == 2) {
+      deviceScreen.circle(5, 147, preferences.getUShort("dotSize"), dotColor);
+    }
+    else if(location == 3) {
+      deviceScreen.circle(291, 147, preferences.getUShort("dotSize"), dotColor);
+    }
+    else {
+      Serial.println("Invalid refresh indicator dot location");
+    }
+  }
+  else {
+    Serial.println("Dot not enabled but drawDot was called");
+  }
+  return;
+}
+
+void drawClock(bool indicatorOn) {
+  uint8_t location = preferences.getUShort("clockLocation");
+  if(preferences.getBool("clockEnabled")) {
+    uint16_t clockColor = indicatorOn ? myColours.black : myColours.white;
+    if(location == 0) {
+      deviceScreen.drawText(5, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+    }
+    else if(location == 1) {
+      deviceScreen.drawText(230, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+    }
+    else if(location == 2) {
+      deviceScreen.drawText(5, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+    }
+    else if(location == 3) {
+      deviceScreen.drawText(230, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+    }
+    else {
+      Serial.println("Invalid refresh indicator clock location");
+    }
+  }
+  else {
+    Serial.println("Clock not enabled but drawClock was called");
+  }
+  return;
+}
+
 void firmwareUpdateScreen() {
   deviceScreen.firmwareUpdateScreen(otaDownloadPercentage);
 }
 
-void drawPairingScreen() {
+int drawPairingScreen(int state) {
+  if(state == 1) {
+    deviceScreen.drawText(25, 90, 3, "Pairing   ");
+  }
+  else if(state == 2) {
+    deviceScreen.drawText(25, 90, 3, "Pairing.  ");
+  }
+  else if(state == 3) {
+    deviceScreen.drawText(25, 90, 3, "Pairing.. ");
+  }
+  else if(state == 4) {
+    deviceScreen.drawText(25, 90, 3, "Pairing...");
+    state = 0;
+  }
+  else {
+    Serial.println("Invalid pairing state, resetting state");
+    state = 0;
+  }
+  state ++;
+  return state;
 }
 
-void drawScreen() {
+int drawScreen(int state) {
   // Sparkfun logo is drawn in epd setup function; first state drawn here is pairing screen
   if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
     // draw pairing screen
-    drawPairingScreen();
+    preferences.putUShort("refreshPeriod", 1);
+    state = drawPairingScreen(state);
+    return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
     // draw sensor screen
+    preferences.putUShort("refreshPeriod", preferences.getUShort("savedRefreshPeriod"));
     updateSensorFrames();
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
+    // set refresh time to 1 for update
+    preferences.putUShort("refreshPeriod", 1);
     firmwareUpdateScreen();
   } else {
     Serial.println("Unkown flag state in EPD");
-    return;
+    return 0;
   }
+  return 0;
   // myScreen.flush();
   // return;
 }
@@ -135,6 +212,10 @@ void screendriverRunScreenTask(void *pvParameter) {
 
   //Counter for burn-in prevention
   volatile int refreshCounter = 0;
+  volatile int screenUpdateCounter = 0;
+  volatile int indicatorCounter = 0;
+  volatile int pairingState = 0;
+  volatile bool refreshIndicatorOn = false;
   while (1) {
     {
       // Prologue
@@ -145,14 +226,35 @@ void screendriverRunScreenTask(void *pvParameter) {
       // Epilogue
       screendriverFlushWithChrono();
 
-      drawScreen();
-
       //Burn-in prevention code
+      if (refreshCounter == 0) deviceScreen.globalRefresh(preferences.getUShort("numRefreshCycles"));
       refreshCounter++;
-      refreshCounter %= epd_settings.cyclesBetweenFullRefresh;
-      if (refreshCounter == 0) deviceScreen.globalRefresh(epd_settings.numRefreshCycles);
+      refreshCounter %= preferences.getUShort("refreshPeriod");
 
-      vTaskDelay(preferences.getUShort("refreshPeriod") * 1000);
+      //Update screen
+      if (refreshCounter == 0) pairingState = drawScreen(pairingState);
+      screenUpdateCounter ++;
+      screenUpdateCounter %= preferences.getUShort("cyclesBetweenFullRefresh");
+
+      //Clock/dot toggle code
+      if (indicatorCounter == 0) {
+        if(preferences.getBool("dotEnabled")) {
+          drawDot(refreshIndicatorOn);
+          indicatorCounter = !indicatorCounter;
+        }
+        else if(preferences.getBool("clockEnabled") && preferences.getBool("dotEnabled")) {
+          drawClock(refreshIndicatorOn);
+        }
+        else if(preferences.getBool("clockEnabled") && !preferences.getBool("dotEnabled")) {
+          drawClock(refreshIndicatorOn);
+          indicatorCounter = !indicatorCounter;
+        }
+      }
+      indicatorCounter ++;
+      screenUpdateCounter %= preferences.getUShort("indicatorPeriod");
+
+      //Wait 1 second
+      vTaskDelay(1000);
     }
   }
 }
