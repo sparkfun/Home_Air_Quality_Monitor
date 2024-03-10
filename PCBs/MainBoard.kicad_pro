@@ -174,7 +174,10 @@
       "track_widths": [
         0.0,
         0.1524,
-        0.254
+        0.254,
+        0.3048,
+        0.4064,
+        0.508
       ],
       "via_dimensions": [
         {
@@ -441,7 +444,7 @@
         "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.254,
+        "track_width": 0.508,
         "via_diameter": 0.635,
         "via_drill": 0.3302,
         "wire_width": 6
@@ -455,15 +458,19 @@
     "netclass_patterns": [
       {
         "netclass": "Power",
-        "pattern": "12V"
+        "pattern": "+12V"
       },
       {
         "netclass": "Power",
-        "pattern": "5V-IN"
+        "pattern": "+5V"
       },
       {
         "netclass": "Power",
-        "pattern": "3.3VOUT"
+        "pattern": "+3.3V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "VBUS"
       }
     ]
   },

@@ -370,7 +370,7 @@ class hV_Screen_Buffer : protected hV_Font_Terminal
 
     virtual void updateFrameVal(uint8_t frameNumber, uint8_t sensor, String sensorReading);
 
-    virtual void drawText(int x, int y, int fontSize, String msg, String color = "black");
+    virtual void drawText(int x, int y, int fontSize, String msg, uint16_t color = myColours.black);
 
     virtual void clearNumDigit(uint8_t numDigit, uint16_t x_location, uint16_t y_location);
 

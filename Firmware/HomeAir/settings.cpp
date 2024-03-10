@@ -27,12 +27,20 @@ bool setupPreferences() {
       preferences.putBool("nightMode", false);
       preferences.putBool("clockEnabled", true);
       preferences.putBool("dotEnabled", true);
+      preferences.putUShort("dotSize", 2); //dot radius
       preferences.putUShort("clockLocation", 1);
       preferences.putUShort("dotLocation", 0);
+      preferences.putUShort("indicatorPeriod", 1);
       preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
       preferences.putUShort("frame2Sensor", 5);
       preferences.putUShort("refreshPeriod", 1); // Time in seconds
+<<<<<<< HEAD
+=======
+      preferences.putUShort("savedRefreshPeriod", preferences.getUShort("refreshPeriod")); //for state machine
+>>>>>>> 6218ce248702cd71345dd795dc0187979e6f5be9
       preferences.putBool("firstTimeSetupComplete", true);
+      preferences.putUShort("cyclesBetweenFullRefresh", 60);
+      preferences.putUShort("numRefreshCycles", 5);
     }
     if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");
