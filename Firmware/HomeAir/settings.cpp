@@ -31,7 +31,7 @@ bool setupPreferences() {
       preferences.putUShort("dotLocation", 0);
       preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
       preferences.putUShort("frame2Sensor", 5);
-      preferences.putUShort("refreshPeriod", 5); // Time in seconds
+      preferences.putUShort("refreshPeriod", 1); // Time in seconds
       preferences.putBool("firstTimeSetupComplete", true);
     }
     if (preferences.getBool("startingFromOTA")) {

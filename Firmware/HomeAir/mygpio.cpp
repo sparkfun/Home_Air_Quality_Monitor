@@ -13,6 +13,12 @@ void mygpioSensorReadTask(void *pvParameter) {
   while (1) {
     // Serial.print("Sensor Read from core ");
     // Serial.println(xPortGetCoreID());
+    if(!online.pasco2){
+      setupCO2Sensor(co2Error, co2Sensor);  // Setup PASCO2 Sensor
+    }
+    if(!online.sen5x){
+      setupSENSensor();
+    }
     if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
       // Acquire mutex
       mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
@@ -117,10 +123,17 @@ void readSENSensor(float *retArray, uint8_t arraySize) {
   float unusedValue = 0;
   // float tempArray[arraySize];
   if (online.sen5x) {
+    #ifdef USE_NOX
     error = sen5x.readMeasuredValues(retArray[PPM_1_0], retArray[PPM_2_5],
                                      retArray[PPM_4_0], retArray[PPM_10],
                                      retArray[HUMIDITY], retArray[TEMP],
                                      retArray[VOC], retArray[NOX]);
+    #else
+    error = sen5x.readMeasuredValues(retArray[PPM_1_0], retArray[PPM_2_5],
+                                     retArray[PPM_4_0], retArray[PPM_10],
+                                     retArray[HUMIDITY], retArray[TEMP],
+                                     retArray[VOC], unusedValue);
+    #endif
 
     if (error) {
       Serial.print("Error trying to execute readMeasuredValues(): ");
@@ -169,7 +182,11 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   ret_array[CO2_PPM] = readCO2PPM(co2Error, co2Sensor);
   // SEN
   // Uses ret_array[1] through ret_array[8]
+  #ifdef USE_NOX
   readSENSensor(ret_array, 8);
+  #else
+  readSENSensor(ret_array, 7);
+  #endif
   // CO
   ret_array[CO] = readCOSensor();
   // Serial.print("CO ppm: ");

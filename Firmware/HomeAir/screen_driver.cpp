@@ -6,6 +6,11 @@ Screen_EPD_EXT3_Fast deviceScreen(eScreen_EPD_EXT3_266_0C_Fast, myMfnBoard);
 
 
 void screendriverEpaperSetup() {
+  #ifdef TEST_BOARD
+    Serial.println("TEST_BOARD - TRUE");
+  #else
+    Serial.println("TEST_BOARD - FALSE");
+  #endif
   deviceScreen.begin();
   deviceScreen.clear();
   deviceScreen.regenerate();
@@ -15,6 +20,7 @@ void screendriverEpaperSetup() {
   deviceScreen.drawSparkfunLogo();
   deviceScreen.flush();
   vTaskDelay(1000 * epd_settings.logoTime);
+  deviceScreen.clear();
 }
 
 
@@ -45,18 +51,30 @@ void screendriverShowTime() {
   }
 }
 
+void screendriverShowParingScreen(){
+    deviceScreen.gText(50, 25, "Awaiting BLE connection...");
+    uint8_t macOut[8];
+    esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
+    if (espErr == ESP_OK) {
+    deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    }
 
+}
+
+nj6a2]
 //For debugging purposes
 void screendriverShowDetailedMeasurements() {
   if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
     deviceScreen.gText(5, 5, "CO2 PPM: " + String(rawDataArray[CO2_PPM]));
-    // deviceScreen.gText(5, 5, "Counter: " + String(i++));
     deviceScreen.gText(5, 20, "Temperature: " + String(rawDataArray[TEMP]));
     deviceScreen.gText(5, 35, "Humidity: " + String(rawDataArray[HUMIDITY]));
     deviceScreen.gText(5, 50, "CO (PPM): " + String(rawDataArray[CO]));
     deviceScreen.gText(5, 65, "CH4 (PPM): " + String(rawDataArray[NG]));
     deviceScreen.gText(5, 80, "AQI: " + String(rawDataArray[AQI]));
-    deviceScreen.gText(5, 120, "MAC: " + screendriverGetMacAddress());
+    deviceScreen.gText(5, 95, "PPM2.5: " + String(rawDataArray[PPM_2_5]));
+    deviceScreen.gText(5, 110, "VOC: " + String(rawDataArray[VOC]));
+    deviceScreen.gText(5, 125, "NOX: " + String(rawDataArray[NOX]));
+    deviceScreen.gText(5, 140, "MAC: " + screendriverGetMacAddress());
     xSemaphoreGive(rawDataMutex);
   }
 }
@@ -138,14 +156,15 @@ void screendriverRunScreenTask(void *pvParameter) {
   while (1) {
     {
       // Prologue
-      // deviceScreen.clear();
+      deviceScreen.clear();
       // Function Body
       screendriverShowTime();
-      screendriverShowDetailedMeasurements();
+      // screendriverShowDetailedMeasurements();
+      screendriverShowParingScreen();
       // Epilogue
       screendriverFlushWithChrono();
 
-      drawScreen();
+      // drawScreen();
 
       //Burn-in prevention code
       refreshCounter++;

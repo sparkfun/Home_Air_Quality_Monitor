@@ -15,6 +15,9 @@
 // HomeAir Files
 #include "HomeAir.h"
 
+#define USE_NOX
+
+
 /*
   0: CO2 PPM - PASCO2
   1: PPM 1.0 - SEN
@@ -28,6 +31,8 @@
   9: NG - MQ4
   10: AQI - Composite
   */
+#ifdef USE_NOX
+const uint8_t RAW_DATA_ARRAY_SIZE = 12;
 enum sensorMap {
   CO2_PPM = 0,
   PPM_1_0 = 1,
@@ -42,14 +47,29 @@ enum sensorMap {
   NG = 10,
   AQI = 11
 };
+#else
+const uint8_t RAW_DATA_ARRAY_SIZE = 11;
+enum sensorMap {
+  CO2_PPM = 0,
+  PPM_1_0 = 1,
+  PPM_2_5 = 2,
+  PPM_4_0 = 3,
+  PPM_10 = 4,
+  HUMIDITY = 5,
+  TEMP = 6,
+  VOC = 7,
+  CO = 8,
+  NG = 9,
+  AQI = 10
+};
+#endif
 
 
 const uint32_t I2C_FREQ_HZ = 100000;
-const uint8_t I2C_SDA_PIN = 17;
-const uint8_t I2C_SCL_PIN = 18;
+const uint8_t I2C_SDA_PIN = 8;
+const uint8_t I2C_SCL_PIN = 9;
 const uint8_t PERIODIC_MEAS_INTERVAL_IN_SECONDS = 10;
 const uint16_t PRESSURE_REFERENCE = 1000;
-const uint8_t RAW_DATA_ARRAY_SIZE = 12;
 // Standard GPIO Pin definitions
 const uint8_t pin_NGInput = 11;
 const uint8_t pin_COInput = 12;
@@ -61,6 +81,9 @@ const uint8_t pin_COInput = 12;
 void setupGPIO(void);
 void mygpioReadAllSensors(float *ret_array, uint16_t array_size);
 void mygpioSensorReadTask(void *pvParameter);
+void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr);
+void setupSENSensor(void);
+
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];
 extern SemaphoreHandle_t rawDataMutex;

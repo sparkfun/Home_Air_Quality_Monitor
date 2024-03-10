@@ -15,6 +15,7 @@
 #include "src/EPDDriver/src/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
+// #define TEST_BOARD 1
 
 const pins_t myMfnBoard{
   // .panelBusy = 45, //"BUSY<Red
@@ -35,15 +36,26 @@ const pins_t myMfnBoard{
   // .flashCS = 38, //"FCSM", Purple breadboard jumper
   // .panelCS = 11 //"ECSM", Grey breadboard jumper
 
-
+#ifdef TEST_BOARD
+  .panelBusy = 38,   //"BUSY", Red breadboard jumper
+  .panelDC = 40,     //"D/C", Orange breadboard jumper
+  .panelReset = 39,  //"RST", Yellow breadboard jumper
+  .panelMISO = 48,   //"MISO", Green breadboard jumper
+  .panelMOSI = 41,   //"MOSI", Blue breadboard jumper
+  .panelSCK = 42,    //"SCK", Brown breadboard jumper
+  .flashCS = 37,     //"FCSM", Purple breadboard jumper
+  .panelCS = 48,     //"ECSM", Grey breadboard jumper
+#else
   .panelBusy = 41,   //"BUSY", Red breadboard jumper
   .panelDC = 40,     //"D/C", Orange breadboard jumper
   .panelReset = 39,  //"RST", Yellow breadboard jumper
-  .panelMISO = 38,   //"MISO", Green breadboard jumper
+  .panelMISO = NOT_CONNECTED,   //"MISO", Green breadboard jumper
   .panelMOSI = 37,   //"MOSI", Blue breadboard jumper
   .panelSCK = 42,    //"SCK", Brown breadboard jumper
   .flashCS = 36,     //"FCSM", Purple breadboard jumper
-  .panelCS = 35,     //"ECSM", Grey breadboard jumper
+  .panelCS = NOT_CONNECTED,     //"ECSM", Grey breadboard jumper
+#endif
+
 };
 
 void screendriverEpaperSetup();

@@ -6,6 +6,7 @@
    https://github.com/me-no-dev/arduino-esp32fs-plugin */
 #define FORMAT_SPIFFS_IF_FAILED true
 float otaDownloadPercentage;
+float downloadRate;
 
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
@@ -247,9 +248,6 @@ void spiffsStorageTask(void *pvParameter) {
         Serial.println("Waiting for time config...");
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
-      // sprintf(path, "/%04d-%02d-%02d %02d:%02d:%02d.txt", rtc.getYear(),
-      //         rtc.getMonth() + 1, rtc.getDay(), rtc.getHour(),
-      //         rtc.getMinute(), rtc.getSecond());
       Serial.printf("Set path to: %s", path);
       // SPIFFS.remove(path);  // Don't cull on boot
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_SETUP);
@@ -257,22 +255,7 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
       // Write data to SPIFFS
       if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-        // Acquire mutex
-        // Function body
         xSemaphoreGive(rawDataMutex);  // Release mutex
-
-        // message = std::to_string((float) rtc.getEpoch()) + "," +
-        //           std::to_string(reducePrecision(rawDataArray[0])) + "," +
-        //           std::to_string(rawDataArray[1]) + "," +
-        //           std::to_string(rawDataArray[2]) + "," +
-        //           std::to_string(rawDataArray[3]) + "," +
-        //           std::to_string(rawDataArray[4]) + "," +
-        //           std::to_string(rawDataArray[5]) + "," +
-        //           std::to_string(rawDataArray[6]) + "," +
-        //           std::to_string(rawDataArray[7]) + "," +
-        //           std::to_string(rawDataArray[8]) + "," +
-        //           std::to_string(rawDataArray[9]) + "," +
-        //           std::to_string(rawDataArray[10]) + "\n";
         snprintf(
           message, 80,
           "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
@@ -280,12 +263,8 @@ void spiffsStorageTask(void *pvParameter) {
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
           rawDataArray[10], rawDataArray[11]);
-        // Serial.print("Appending to file: ");
-        // Serial.println(message.c_str());
         Serial.println(message);
-        // appendLineToFile(SPIFFS, path, message.c_str());
         appendLineToFile(SPIFFS, path, message);
-
         xSemaphoreGive(rawDataMutex);  // Release mutex
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
@@ -304,10 +283,6 @@ void spiffsStorageTask(void *pvParameter) {
         }
         BLEMessageBuffer[insertPoint] = 0;  // Bam
         insertPoint = 0;
-        // Read single log from storage
-        // file.readBytes(&BLEMessageBuffer[0], 55);
-        // Serial.print("Read string from storage: ");
-        // Serial.println(BLEMessageBuffer);
         // Notify BLE comm task of complete buffer
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY);
         xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER,
@@ -341,7 +316,6 @@ void spiffsStorageTask(void *pvParameter) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
         SPIFFS.remove("/dest_bin");  // Make room for new OTA
-        // Check for room in SPIFFS
         Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
         if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
           // We have enough room to directly receive BLE data
@@ -350,7 +324,6 @@ void spiffsStorageTask(void *pvParameter) {
           file = SPIFFS.open("/dest_bin", "w");
           if (!file) {
             Serial.println("Error opening dest file.");
-
           } else {
             while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
@@ -359,8 +332,10 @@ void spiffsStorageTask(void *pvParameter) {
               otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
               // Add setBits for done writing to ack in BLE
               if (++downloadIttr % 5 == 0) {
-                Serial.printf("%.2f/sec\n", writtenSize - prevSize / (millis() - chrono));
+                downloadRate = (float)(writtenSize - prevSize) / (millis() - chrono);
                 prevSize = writtenSize;
+                chrono =  millis();
+                Serial.printf("%.2fKB/sec\n", downloadRate);
                 Serial.printf("Download percentage: %.2f\n", otaDownloadPercentage);
               }
               xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
@@ -378,7 +353,6 @@ void spiffsStorageTask(void *pvParameter) {
             size_t endIndex = file.find("TRANSFER_COMPLETE");
             Serial.printf("file.find() took %f ms\n", millis() - chrono);
             Serial.printf("Found token at %zu\n", endIndex);
-            // BLEMessageBuffer.erase(endIndex, )
 
             file.close();
             Serial.println("Verifying new BIN...");
