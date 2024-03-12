@@ -49,11 +49,11 @@ const pins_t myMfnBoard{
   .panelBusy = 41,   //"BUSY", Red breadboard jumper
   .panelDC = 40,     //"D/C", Orange breadboard jumper
   .panelReset = 39,  //"RST", Yellow breadboard jumper
-  .panelMISO = NOT_CONNECTED,   //"MISO", Green breadboard jumper
+  .panelMISO = 14,   //NOT NEEDED //"MISO", Green breadboard jumper
   .panelMOSI = 37,   //"MOSI", Blue breadboard jumper
   .panelSCK = 42,    //"SCK", Brown breadboard jumper
   .flashCS = 36,     //"FCSM", Purple breadboard jumper
-  .panelCS = NOT_CONNECTED,     //"ECSM", Grey breadboard jumper
+  .panelCS = 15,     //"ECSM", Grey breadboard jumper
 #endif
 
 };

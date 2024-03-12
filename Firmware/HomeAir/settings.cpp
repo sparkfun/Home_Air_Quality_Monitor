@@ -34,10 +34,7 @@ bool setupPreferences() {
       preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
       preferences.putUShort("frame2Sensor", 5);
       preferences.putUShort("refreshPeriod", 1); // Time in seconds
-<<<<<<< HEAD
-=======
       preferences.putUShort("savedRefreshPeriod", preferences.getUShort("refreshPeriod")); //for state machine
->>>>>>> 6218ce248702cd71345dd795dc0187979e6f5be9
       preferences.putBool("firstTimeSetupComplete", true);
       preferences.putUShort("cyclesBetweenFullRefresh", 60);
       preferences.putUShort("numRefreshCycles", 5);
