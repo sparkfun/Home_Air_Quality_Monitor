@@ -6,10 +6,10 @@ Screen_EPD_EXT3_Fast deviceScreen(eScreen_EPD_EXT3_266_0C_Fast, myMfnBoard);
 
 
 void screendriverEpaperSetup() {
-  #ifdef TEST_BOARD
-    Serial.println("TEST_BOARD - TRUE");
+  #ifdef HOMEAIR_BOARD
+    Serial.println("HOMEAIR_BOARD - TRUE");
   #else
-    Serial.println("TEST_BOARD - FALSE");
+    Serial.println("HOMEAIR_BOARD - FALSE");
   #endif
   deviceScreen.begin();
   deviceScreen.clear();
@@ -226,6 +226,7 @@ int drawScreen(int state) {
 void screendriverRunScreenTask(void *pvParameter) {
   screendriverPrintMacAddress();
   screendriverEpaperSetup();
+  
 
   //Counter for burn-in prevention
   volatile int refreshCounter = 0;
@@ -235,26 +236,35 @@ void screendriverRunScreenTask(void *pvParameter) {
   volatile bool refreshIndicatorOn = false;
   while (1) {
     {
-      // Prologue
-      deviceScreen.clear();
-      // Function Body
-      screendriverShowTime();
-      // screendriverShowDetailedMeasurements();
-      screendriverShowParingScreen();
-      // Epilogue
-      screendriverFlushWithChrono();
-      // drawScreen();
+      // // Prologue
+      // deviceScreen.clear();
+      // // Function Body
+      // screendriverShowTime();
+      // // screendriverShowDetailedMeasurements();
+      // screendriverShowParingScreen();
+      // // Epilogue
+      // screendriverFlushWithChrono();
+      // // drawScreen();
+
+      screendriverShowDetailedMeasurements();
 
 
       //Burn-in prevention code
-      if (refreshCounter == 0) deviceScreen.globalRefresh(preferences.getUShort("numRefreshCycles"));
+      if (refreshCounter == 0)
+      {
+        deviceScreen.globalRefresh(preferences.getUShort("numRefreshCycles"));
+        // refreshCounter %= preferences.getUShort("refreshPeriod"); // This is also throwing a div-by-zero!
+        refreshCounter = 0;
+      } 
       refreshCounter++;
-      refreshCounter %= preferences.getUShort("refreshPeriod");
-
       //Update screen
-      if (refreshCounter == 0) pairingState = drawScreen(pairingState);
+      if (refreshCounter == 0)
+      {
+        pairingState = drawScreen(pairingState);
+        screenUpdateCounter = 0;
+      } 
       screenUpdateCounter ++;
-      screenUpdateCounter %= preferences.getUShort("cyclesBetweenFullRefresh");
+      // screenUpdateCounter %= preferences.getUShort("cyclesBetweenFullRefresh"); // THIS WAS GIVING DIV BY ZERO
 
       //Clock/dot toggle code
       if (indicatorCounter == 0) {

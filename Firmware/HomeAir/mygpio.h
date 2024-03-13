@@ -66,8 +66,13 @@ enum sensorMap {
 
 
 const uint32_t I2C_FREQ_HZ = 100000;
+#ifdef HOMEAIR_BOARD
 const uint8_t I2C_SDA_PIN = 8;
 const uint8_t I2C_SCL_PIN = 9;
+#else
+const uint8_t I2C_SDA_PIN = 17;
+const uint8_t I2C_SCL_PIN = 18;
+#endif
 const uint8_t PERIODIC_MEAS_INTERVAL_IN_SECONDS = 10;
 const uint16_t PRESSURE_REFERENCE = 1000;
 // Standard GPIO Pin definitions
