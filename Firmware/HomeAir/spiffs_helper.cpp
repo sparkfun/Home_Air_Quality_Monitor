@@ -213,13 +213,10 @@ float reducePrecision(float var) {
 
 void onProgressCallback(size_t progress, size_t total) {
   float percentage = (progress / total) * 100;
-  Serial.println("Callback is hit!");
-  if (percentage > 5 && (int)percentage % 5 <= .1) {
+  // Serial.println("Callback is hit!");
+  if (percentage > 5 && (int)percentage % 5 <= 1) {
     Serial.printf("Progress: %f\n", percentage);
   }
-  // if (progress / total > 0.05 && (progress / total) % 0.05 <= 0.001){
-  //   Serial.printf("Progress: %zu\n", (progress * 100 / total));
-  // }
 }
 
 
@@ -301,9 +298,6 @@ void spiffsStorageTask(void *pvParameter) {
                          APP_FLAG_DONE_TRANSMITTING);  // set DONE_TRANSMITTING
                                                        // to send end of message
       Serial.println("set DONE_TRANSMITTING flag");
-      // xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE); // Set
-      // READ_COMPLETE to advance BLE comm task Serial.println("set read
-      // complete flag");
       xEventGroupSetBits(
         appStateFlagGroup,
         APP_FLAG_RUNNING);  // set RUNNING to return to normal operation

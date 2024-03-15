@@ -7,7 +7,5 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("Im alive!");
-  int myVal = 1/0;
-  Serial.println(myVal);
   delay(1000);
 }

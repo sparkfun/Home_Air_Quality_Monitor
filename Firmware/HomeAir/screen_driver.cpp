@@ -57,6 +57,9 @@ void screendriverShowParingScreen(){
     deviceScreen.gText(50, 25, "Awaiting BLE connection...");
     if (espErr == ESP_OK) {
       deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    } else {
+      Serial.println("unable to get mac address");
+      deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
     }
 
 }
@@ -245,8 +248,19 @@ void screendriverRunScreenTask(void *pvParameter) {
       // // Epilogue
       // screendriverFlushWithChrono();
       // // drawScreen();
+      deviceScreen.clear();
 
-      screendriverShowDetailedMeasurements();
+      if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP){
+        screendriverShowParingScreen();
+        screendriverFlushWithChrono();
+      } else {
+        screendriverShowDetailedMeasurements();
+        screendriverShowTime();
+        screendriverFlushWithChrono();
+      }
+
+      
+
 
 
       //Burn-in prevention code
