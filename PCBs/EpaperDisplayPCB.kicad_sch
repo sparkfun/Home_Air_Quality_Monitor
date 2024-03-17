@@ -100,6 +100,99 @@
 				)
 			)
 		)
+		(symbol "SparkFun-Aesthetic:Fiducial_3mm"
+			(pin_names
+				(offset 0.5)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "FID"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "Fiducial_3mm"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Footprint" "SparkFun-Aesthetic:Fiducial_0.5mm_Mask1mm"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Fiducial Marker"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "fiducial marker"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Fiducial*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Fiducial_3mm_1_1"
+				(circle
+					(center 0 0)
+					(radius 1.5)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(text "x"
+					(at 0 0.254 0)
+					(effects
+						(font
+							(size 2.5 2.5)
+							(bold yes)
+						)
+					)
+				)
+			)
+		)
 		(symbol "SparkFun-Aesthetic:OSHW_Logo"
 			(pin_names
 				(offset 1.016)
@@ -6305,7 +6398,7 @@
 	)
 	(text "Fiducials"
 		(exclude_from_sim no)
-		(at 232.41 109.22 0)
+		(at 194.31 121.92 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6350,6 +6443,17 @@
 			(justify left bottom)
 		)
 		(uuid "c07449a5-7ebc-4efe-9284-cd55cca2f0cc")
+	)
+	(text "Stencil Fiducials"
+		(exclude_from_sim no)
+		(at 220.726 121.92 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f349452c-a4d7-4cb5-9034-139943f61ac2")
 	)
 	(global_label "~{RST}"
 		(shape input)
@@ -7102,6 +7206,70 @@
 		)
 	)
 	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 224.79 124.46 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0b63a409-7aba-45ca-ad00-e024576714d7")
+		(property "Reference" "FID5"
+			(at 224.79 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 224.79 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 224.79 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 224.79 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 224.79 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "SparkFun-PowerSymbol:+3.3V")
 		(at 223.52 77.47 0)
 		(unit 1)
@@ -7173,6 +7341,70 @@
 			(project "ePaper"
 				(path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
 					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 222.25 128.27 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "186a9ef8-c774-4065-bcd5-3ef0c4c28842")
+		(property "Reference" "FID6"
+			(at 222.25 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 222.25 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 222.25 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 222.25 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 222.25 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID6")
 					(unit 1)
 				)
 			)
@@ -7468,6 +7700,134 @@
 			(project "ePaper"
 				(path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
 					(reference "C8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 228.6 124.46 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "230f3685-2141-41dd-bef8-eaea21540c18")
+		(property "Reference" "FID11"
+			(at 228.6 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 228.6 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 228.6 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 228.6 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 228.6 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 232.41 124.46 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2a21e346-589e-4140-8db5-895919d3a35d")
+		(property "Reference" "FID12"
+			(at 232.41 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 232.41 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 232.41 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 232.41 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 232.41 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID12")
 					(unit 1)
 				)
 			)
@@ -8161,7 +8521,7 @@
 	)
 	(symbol
 		(lib_id "SparkFun-Aesthetic:Fiducial_0.5mm")
-		(at 236.22 113.03 0)
+		(at 198.12 125.73 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8170,7 +8530,7 @@
 		(fields_autoplaced yes)
 		(uuid "4eae0638-ba03-4e4e-9321-980e30cc7591")
 		(property "Reference" "FID1"
-			(at 236.22 110.49 0)
+			(at 198.12 123.19 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8179,7 +8539,7 @@
 			)
 		)
 		(property "Value" "Fiducial_0.5mm"
-			(at 236.22 115.57 0)
+			(at 198.12 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8188,7 +8548,7 @@
 			)
 		)
 		(property "Footprint" "SparkFun-Aesthetic:Fiducial_0.5mm_Mask1mm"
-			(at 236.22 118.11 0)
+			(at 198.12 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8197,7 +8557,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 236.22 116.84 0)
+			(at 198.12 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8206,7 +8566,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 236.22 113.03 0)
+			(at 198.12 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8747,6 +9107,70 @@
 		)
 	)
 	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 234.95 128.27 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6d0f013a-1d60-4d83-8cbb-ce7a308c6fd8")
+		(property "Reference" "FID13"
+			(at 234.95 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 234.95 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 234.95 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 234.95 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 234.95 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "SparkFun-PowerSymbol:+3.3V")
 		(at 53.34 152.4 0)
 		(unit 1)
@@ -8820,7 +9244,7 @@
 	)
 	(symbol
 		(lib_id "SparkFun-Aesthetic:Fiducial_0.5mm")
-		(at 236.22 120.65 0)
+		(at 198.12 133.35 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8829,7 +9253,7 @@
 		(fields_autoplaced yes)
 		(uuid "6e93468f-1065-4f6c-a41c-65e7abd61ad1")
 		(property "Reference" "FID3"
-			(at 236.22 118.11 0)
+			(at 198.12 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8838,7 +9262,7 @@
 			)
 		)
 		(property "Value" "Fiducial_0.5mm"
-			(at 236.22 123.19 0)
+			(at 198.12 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8847,7 +9271,7 @@
 			)
 		)
 		(property "Footprint" "SparkFun-Aesthetic:Fiducial_0.5mm_Mask1mm"
-			(at 236.22 125.73 0)
+			(at 198.12 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8856,7 +9280,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 236.22 124.46 0)
+			(at 198.12 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8865,7 +9289,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 236.22 120.65 0)
+			(at 198.12 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9109,6 +9533,70 @@
 			(project "ePaper"
 				(path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
 					(reference "#PWR017")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 226.06 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "756e774b-99af-4d46-9b32-598dc4cdbd48")
+		(property "Reference" "FID9"
+			(at 226.06 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 226.06 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 226.06 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 226.06 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 226.06 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID9")
 					(unit 1)
 				)
 			)
@@ -9707,6 +10195,70 @@
 		)
 	)
 	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 234.95 135.89 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8ab262bb-39bb-40f9-9c6a-9b49b5119eba")
+		(property "Reference" "FID15"
+			(at 234.95 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 234.95 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 234.95 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 234.95 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 234.95 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "SparkFun-DiscreteSemi:D_Schottky_0.5A_40V_0.42V")
 		(at 80.01 85.09 0)
 		(unit 1)
@@ -9813,7 +10365,7 @@
 	)
 	(symbol
 		(lib_id "SparkFun-Aesthetic:Fiducial_0.5mm")
-		(at 236.22 116.84 0)
+		(at 198.12 129.54 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9822,7 +10374,7 @@
 		(fields_autoplaced yes)
 		(uuid "8e42d619-66d5-4522-9687-006ae6ad437c")
 		(property "Reference" "FID2"
-			(at 236.22 114.3 0)
+			(at 198.12 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9831,7 +10383,7 @@
 			)
 		)
 		(property "Value" "Fiducial_0.5mm"
-			(at 236.22 119.38 0)
+			(at 198.12 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9840,7 +10392,7 @@
 			)
 		)
 		(property "Footprint" "SparkFun-Aesthetic:Fiducial_0.5mm_Mask1mm"
-			(at 236.22 121.92 0)
+			(at 198.12 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9849,7 +10401,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 236.22 120.65 0)
+			(at 198.12 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9858,7 +10410,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 236.22 116.84 0)
+			(at 198.12 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10019,6 +10571,134 @@
 			(project "MainBoard"
 				(path "/70111962-74ad-442f-8642-d12c4115fcfb"
 					(reference "#PWR060")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 234.95 132.08 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a2034357-3c86-426d-af0d-6e636809ba8c")
+		(property "Reference" "FID14"
+			(at 234.95 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 234.95 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 234.95 137.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 234.95 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 234.95 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 231.14 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ad7da6c7-ebf1-451c-9015-831970db2841")
+		(property "Reference" "FID10"
+			(at 231.14 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 231.14 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 231.14 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 231.14 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 231.14 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID10")
 					(unit 1)
 				)
 			)
@@ -11064,7 +11744,7 @@
 	)
 	(symbol
 		(lib_id "SparkFun-Aesthetic:Fiducial_0.5mm")
-		(at 236.22 124.46 0)
+		(at 198.12 137.16 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11073,7 +11753,7 @@
 		(fields_autoplaced yes)
 		(uuid "da109f78-2a8f-4054-89e1-7c1ec2de5bcc")
 		(property "Reference" "FID4"
-			(at 236.22 121.92 0)
+			(at 198.12 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11082,7 +11762,7 @@
 			)
 		)
 		(property "Value" "Fiducial_0.5mm"
-			(at 236.22 127 0)
+			(at 198.12 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11091,7 +11771,7 @@
 			)
 		)
 		(property "Footprint" "SparkFun-Aesthetic:Fiducial_0.5mm_Mask1mm"
-			(at 236.22 129.54 0)
+			(at 198.12 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11100,7 +11780,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 236.22 128.27 0)
+			(at 198.12 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11109,7 +11789,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 236.22 124.46 0)
+			(at 198.12 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11230,6 +11910,134 @@
 			(project "ePaper"
 				(path "/e3dd3ae4-244d-4cba-9cca-5d2abf83f29a"
 					(reference "C2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 222.25 132.08 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "de7a30e6-3062-4069-ae34-1c88e2fe4a7d")
+		(property "Reference" "FID7"
+			(at 222.25 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 222.25 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 222.25 137.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 222.25 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 222.25 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "SparkFun-Aesthetic:Fiducial_3mm")
+		(at 222.25 135.89 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e19292a8-c292-4de8-878c-3b924d8908ad")
+		(property "Reference" "FID8"
+			(at 222.25 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "Fiducial_3mm"
+			(at 222.25 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "SparkFun-Aesthetic:Fiducial_1.5mm_Mask3mm"
+			(at 222.25 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 222.25 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fiducial Marker"
+			(at 222.25 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "EpaperDisplayPCB"
+				(path "/1b2581ed-fa85-411c-9c1e-f1b1b4e6f491"
+					(reference "FID8")
 					(unit 1)
 				)
 			)
