@@ -436,7 +436,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       print("KAZAM sent");
 
       await Future.delayed(Duration(seconds: 2));
-      
+
       await _waitForAck();
       print("ACK received");
 
@@ -481,48 +481,49 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     _sendData("DONE!");
   }
 
-
-  Future<void> _waitForAck({Duration timeout = const Duration(seconds: 10)}) async {
-  // Check if the characteristic is set
-  if (readCharacteristic == null) {
-    print("Read characteristic is not set.");
-    return;
-  }
-
-  // Use a Completer to wait for the 'a' character
-  Completer<void> ackCompleter = Completer();
-
-  // Subscribe to characteristic changes
-  final subscription = writeCharacteristic!.value.listen((value) {
-    String receivedData = String.fromCharCodes(value);
-    print("Received Data: $receivedData");
-
-    // Complete the completer if 'a' is received
-    if (receivedData.contains('a')) {
-      if (!ackCompleter.isCompleted) {
-        ackCompleter.complete();
-      }
+  Future<void> _waitForAck(
+      {Duration timeout = const Duration(seconds: 10)}) async {
+    // Check if the characteristic is set
+    if (readCharacteristic == null) {
+      print("Read characteristic is not set.");
+      return;
     }
-  });
 
-  // Wait for either the 'a' character or the timeout
-  try {
-    await Future.any([
-      ackCompleter.future,
-      Future.delayed(timeout, () {
-        // If the timeout completes first, throw a TimeoutException
+    // Use a Completer to wait for the 'a' character
+    Completer<void> ackCompleter = Completer();
+
+    // Subscribe to characteristic changes
+    final subscription = writeCharacteristic!.value.listen((value) {
+      String receivedData = String.fromCharCodes(value);
+      print("Received Data: $receivedData");
+
+      // Complete the completer if 'a' is received
+      if (receivedData.contains('a')) {
         if (!ackCompleter.isCompleted) {
-          ackCompleter.completeError(TimeoutException("Did not receive 'a' in the allotted time: $timeout"));
+          ackCompleter.complete();
         }
-      })
-    ]);
-    print("Received 'a'. Acknowledgement complete.");
-  } catch (e) {
-    print(e);// Rethrow the exception to be handled by the caller
-  } finally {
-    await subscription.cancel();
+      }
+    });
+
+    // Wait for either the 'a' character or the timeout
+    try {
+      await Future.any([
+        ackCompleter.future,
+        Future.delayed(timeout, () {
+          // If the timeout completes first, throw a TimeoutException
+          if (!ackCompleter.isCompleted) {
+            ackCompleter.completeError(TimeoutException(
+                "Did not receive 'a' in the allotted time: $timeout"));
+          }
+        })
+      ]);
+      print("Received 'a'. Acknowledgement complete.");
+    } catch (e) {
+      print(e); // Rethrow the exception to be handled by the caller
+    } finally {
+      await subscription.cancel();
+    }
   }
-}
 
   Future<bool> checkBinFileAvailability() async {
     try {
@@ -536,6 +537,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
   }
 
   Widget build(BuildContext context) {
+    final BluetoothController controller = Get.find<BluetoothController>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Device Details'),
@@ -551,17 +553,17 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
             Text('Device ID: ${widget.device.id.id}',
                 style: TextStyle(fontSize: 20)),
             SizedBox(height: 24),
-            GetBuilder<BluetoothController>(
-              builder: (controller) {
-                return Text(
-                  controller.isSubscribed ? "Subscribed" : "Not Subscribed",
+            Obx(() => Text(
+                  controller.isSubscribed.value
+                      ? "Subscribed"
+                      : "Not Subscribed",
                   style: TextStyle(
                     fontSize: 20,
-                    color: controller.isSubscribed ? Colors.green : Colors.red,
+                    color: controller.isSubscribed.value
+                        ? Colors.green
+                        : Colors.red,
                   ),
-                );
-              },
-            ),
+                )),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(

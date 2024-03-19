@@ -48,11 +48,25 @@ class _MyHomePageState extends State<MyHomePage> {
     _startAutoRefresh();
   }
 
-    @override
+  @override
   void dispose() {
     _autoRefreshTimer?.cancel();
     super.dispose();
   }
+
+    Future<void> _onPullToRefresh() async {
+    final BluetoothController bluetoothController = Get.find<BluetoothController>();
+
+    // Send the UPDAT command if subscribed and a device is connected
+    if (bluetoothController.isSubscribed.value && bluetoothController.connectedDevice != null) {
+      await bluetoothController.sendData(bluetoothController.connectedDevice!, "UPDAT");
+      //await Future.delayed(Duration(seconds: 1)); // Wait for the command to take effect
+    }
+
+    // Fetch the latest data after sending the UPDAT command
+    await _fetchLatestData();
+  }
+
 
   Future<void> _fetchLatestData() async {
     DataPacket? latestPacket = await DatabaseService.instance.getLastPacket();
@@ -68,13 +82,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ng = latestPacket.ng;
         ppm2_5 = latestPacket.ppm2_5;
         ppm10_0 = latestPacket.ppm10_0;
-
       });
     }
     _showRefreshedMessage();
   }
 
-    void _showRefreshedMessage() {
+
+
+  void _showRefreshedMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Refreshed"),
@@ -92,10 +107,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //final BluetoothController bluetoothController = Get.find<BluetoothController>();
+    final BluetoothController bluetoothController =
+        Get.find<BluetoothController>();
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _fetchLatestData,
+        onRefresh: _onPullToRefresh,
         child: SingleChildScrollView(
           physics: AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -107,12 +123,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Row(
                   children: [
                     Text(
-                      'Welcome, User',
+                      'Welcome',
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     Spacer(),
-
+                              Obx(() => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                          Icons.circle,
+                                          color: bluetoothController.isSubscribed.value ? Colors.green : Colors.red,
+                                        ),
+                              )),
                     IconButton(
                         onPressed: () {
                           Navigator.push(
@@ -151,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ListTile(
-                      title: Text('AQI: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
+                      title: Text('Air Quality Index: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       subtitle: Text('The Air Quality is Normal'),
@@ -186,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: Card(
                   child: ListTile(
-                    title: Text('${temp?.toStringAsFixed(1) ?? 'N/A'}°C',
+                    title: Text('Temperature: ${temp?.toStringAsFixed(1) ?? 'N/A'}°C',
                         style: TextStyle(fontSize: 20)),
                     trailing: Icon(Icons.wb_sunny, size: 40),
                   ),
@@ -210,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               Icon(Icons.cloud),
                               Text(
-                                  'CO2 ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
+                                  'Carbon Dioxide: ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
                             ],
                           ),
                         ),
@@ -254,7 +276,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('CO: ${co?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text('Carbon Monoxide: ${co?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 15)),
                             Icon(Icons.cloud_circle),
                           ],
                         ),
@@ -275,7 +298,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('VOC: ${voc?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text('VOC: ${voc?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 18)),
                             Icon(Icons.heat_pump_rounded),
                           ],
                         ),
@@ -302,7 +326,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('PPM 2.5: ${ppm2_5?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text(
+                                'PPM 2.5: ${ppm2_5?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -323,7 +349,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('PPM 10.0: ${ppm10_0?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text(
+                                'PPM 10.0: ${ppm10_0?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -348,7 +376,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Nox: ${nox?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text('Nox: ${nox?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -361,14 +390,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MethanePage()),
+                          MaterialPageRoute(
+                              builder: (context) => MethanePage()),
                         );
                       },
                       child: Card(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Methane: ${ng?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text('Methane: ${ng?.toStringAsFixed(1) ?? 'N/A'}',
+                                style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
@@ -386,9 +417,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: Card(
                   child: ListTile(
-                    title: Text(
-                        'Graphs',
-                        style: TextStyle(fontSize: 20)),
+                    title: Text('Graphs', style: TextStyle(fontSize: 20)),
                     trailing: Icon(Icons.auto_graph, size: 40),
                   ),
                 ),

@@ -146,7 +146,7 @@ class ScanningPage extends StatelessWidget {
 class BluetoothController extends GetxController {
   BluetoothDevice? connectedDevice;
   List<BluetoothService>? bluetoothServices;
-  bool isSubscribed = false;
+  RxBool isSubscribed = false.obs;
   Timer? _updatTimer;
 
   void showGlobalSnackBar(String message) {
@@ -184,7 +184,7 @@ class BluetoothController extends GetxController {
   void disconnectFromDevice(BuildContext context) async {
     if (connectedDevice != null) {
       await connectedDevice!.disconnect();
-      isSubscribed = false; // Reset subscription status
+      isSubscribed.value = false; // Reset subscription status
       _updatTimer?.cancel(); // Stop sending "UPDAT"
       update(); // Update UI
       Get.back(); // Navigate back to the previous screen
@@ -277,11 +277,11 @@ class BluetoothController extends GetxController {
 
       // Send current time to ESP32
       await _sendTimeToEsp32(device);
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(milliseconds: 250));
 
       // Send 'TGMT=-7' command
-      await _sendData(device, 'TGMT=-7');
-      await Future.delayed(Duration(seconds: 1));
+      await sendData(device, 'TGMT=-7');
+      await Future.delayed(Duration(milliseconds: 250));
 
       // Proceed with discovering services and subscribing to the characteristic
       var services = await device.discoverServices();
@@ -293,7 +293,7 @@ class BluetoothController extends GetxController {
               String receivedData = String.fromCharCodes(value);
               _processDataPacket(receivedData);
             });
-            isSubscribed = true;
+            isSubscribed.value = true;
             update(); // Notify listeners about the change
             print("Subscribed to characteristic: ${characteristic.uuid}");
             break; // Exit the loop once subscribed
@@ -301,22 +301,22 @@ class BluetoothController extends GetxController {
         }
       }
 
-      _sendData(device, "READ!");
+      sendData(device, "READ!");
 
       _updatTimer?.cancel(); // Cancel any existing timer
       _updatTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
-        await _sendData(device, "UPDAT");
+        await sendData(device, "UPDAT");
         print("Sent UPDAT");
       });
     } catch (e) {
       print("Error in subscription process: $e");
-      isSubscribed = false;
+      isSubscribed.value = false;
       update(); // Notify listeners about the change
     }
   }
 
   // Helper method to send data to the ESP32
-  Future<void> _sendData(BluetoothDevice device, String data) async {
+  Future<void> sendData(BluetoothDevice device, String data) async {
     var services = await device.discoverServices();
     for (var service in services) {
       var characteristic = service.characteristics.firstWhereOrNull(
@@ -333,7 +333,7 @@ class BluetoothController extends GetxController {
   // Assumes _sendTimeToEsp32 is similar to _sendData but specifically for sending the current time
   Future<void> _sendTimeToEsp32(BluetoothDevice device) async {
     int epochTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    await _sendData(device, "TIME=$epochTime");
+    await sendData(device, "TIME=$epochTime");
   }
 
   Future<void> requestMtuSize(BluetoothDevice device, int requestedMtu) async {
