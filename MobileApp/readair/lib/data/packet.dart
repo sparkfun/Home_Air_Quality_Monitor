@@ -80,7 +80,7 @@ class DataPacket {
       humid: map['humidity'],
       temp: map['temperature'],
       voc: map['voc'],
-      nox: map['nox'],
+      nox: map['nox'] ?? 0.0,
       co: map['co'],
       ng: map['ng'],
       aqi: map['aqi'],

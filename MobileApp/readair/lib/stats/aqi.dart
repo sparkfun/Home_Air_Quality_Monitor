@@ -191,7 +191,7 @@ class _AQIPageState extends State<AQIPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(

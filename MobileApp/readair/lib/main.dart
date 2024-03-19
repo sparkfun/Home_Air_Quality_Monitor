@@ -10,20 +10,22 @@ import 'dart:io';
 
 import 'package:readair/homescreen/home.dart';
 
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 void main() {
   Get.put(BluetoothController());
+  Get.put(ThemeController());
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final ThemeController themeController = Get.find();
+
     return GetMaterialApp(
       title: 'ReadAIR',
       scaffoldMessengerKey: scaffoldMessengerKey,
@@ -31,14 +33,27 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.redAccent, brightness: Brightness.dark),
+      ),
+      themeMode: themeController.isDarkMode.value
+          ? ThemeMode.dark
+          : ThemeMode.light, // Use themeMode to switch themes
       home: MyHomePage(title: 'ReadAIR App v0.01'),
-      //home: MyHomePage(title: 'ReadAIR App v0.01', data: DatabaseService.instance.getLastPacket(),),
-      // navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
 }
 
+class ThemeController extends GetxController {
+  var isDarkMode = false.obs;
 
+  void toggleTheme() {
+    isDarkMode.value = !isDarkMode.value;
+    Get.changeThemeMode(isDarkMode.value ? ThemeMode.dark : ThemeMode.light);
+  }
+}
 
 class BluetoothAdapterStateObserver extends NavigatorObserver {
   StreamSubscription<BluetoothAdapterState>? blueState;

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/data/packet.dart';
 import 'package:readair/settings/settings.dart';
@@ -33,13 +36,22 @@ class _MyHomePageState extends State<MyHomePage> {
   double? ppm4_0;
   double? ppm10_0;
   double? voc;
+  double? nox;
   double? ng;
   double? co;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     _fetchLatestData();
+    _startAutoRefresh();
+  }
+
+    @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchLatestData() async {
@@ -52,16 +64,35 @@ class _MyHomePageState extends State<MyHomePage> {
         co = latestPacket.co;
         humid = latestPacket.humid;
         voc = latestPacket.voc;
+        nox = latestPacket.nox;
         ng = latestPacket.ng;
         ppm2_5 = latestPacket.ppm2_5;
         ppm10_0 = latestPacket.ppm10_0;
 
       });
     }
+    _showRefreshedMessage();
+  }
+
+    void _showRefreshedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Refreshed"),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _startAutoRefresh() {
+    _autoRefreshTimer?.cancel(); // Cancel any existing timer
+    _autoRefreshTimer = Timer.periodic(Duration(seconds: 40), (timer) {
+      _fetchLatestData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    //final BluetoothController bluetoothController = Get.find<BluetoothController>();
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _fetchLatestData,
@@ -81,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     Spacer(),
+
                     IconButton(
                         onPressed: () {
                           Navigator.push(
@@ -316,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Nox: ${aqi?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
+                            Text('Nox: ${nox?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),

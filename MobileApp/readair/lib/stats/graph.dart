@@ -89,29 +89,33 @@ class _GraphWidgetState extends State<GraphWidget> {
                     interval: yInterval, // Y-Axis interval
                   ),
                 ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 20,
-                    getTitlesWidget: (value, meta) {
-                      // Display only 5 labels on X-Axis
-                      if (value % (points.length / 4) == 0 ||
-                          value == points.length - 1) {
-                        final DateTime date =
-                            DateTime.fromMillisecondsSinceEpoch(
-                                points[value.toInt()].epoch * 1000);
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Text(DateFormat('MM/dd').format(date),
-                              style: TextStyle(fontSize: 10)),
-                        );
-                      } else {
-                        return Container();
-                      }
-                    },
-                    interval: 1, // To show every point's label
-                  ),
-                ),
+bottomTitles: AxisTitles(
+  sideTitles: SideTitles(
+    showTitles: true,
+    reservedSize: 20,
+    getTitlesWidget: (value, meta) {
+      if (points.isNotEmpty) {
+        // Ensure the index is within the valid range
+        final int index = value.toInt();
+        final int originalIndex = points.length - 1 - index;
+        if (originalIndex >= 0 && originalIndex < points.length) {
+          if (index % (points.length / 4) == 0 || index == points.length - 1) {
+            final DateTime date = DateTime.fromMillisecondsSinceEpoch(
+                points[originalIndex].epoch * 1000);
+            return Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Text(DateFormat('MM/dd').format(date),
+                  style: TextStyle(fontSize: 10)),
+            );
+          }
+        }
+      }
+      return Container();
+    },
+    interval: 1, // To show every point's label
+  ),
+),
+
                 topTitles: AxisTitles(
                   // Hide top titles
                   sideTitles: SideTitles(showTitles: false),
@@ -173,14 +177,26 @@ class _GraphWidgetState extends State<GraphWidget> {
             ),
           ),
         ),
-        SizedBox(height: 20,)
+        SizedBox(
+          height: 20,
+        )
       ],
     );
   }
 
+  // List<FlSpot> _createSpots(List<DataPoint> points) {
+  //   return List.generate(points.length,
+  //       (index) => FlSpot(index.toDouble(), points[index].measurement));
+  // }
+
   List<FlSpot> _createSpots(List<DataPoint> points) {
-    return List.generate(points.length,
-        (index) => FlSpot(index.toDouble(), points[index].measurement));
+    // Reverse the list to have the newest data at the end
+    final reversedPoints = List<DataPoint>.from(points.reversed);
+
+    return List.generate(reversedPoints.length, (index) {
+      // Use the index as the x-value, keeping the reversed order
+      return FlSpot(index.toDouble(), reversedPoints[index].measurement);
+    });
   }
 
   List<DataPoint> _filterDataPoints(
