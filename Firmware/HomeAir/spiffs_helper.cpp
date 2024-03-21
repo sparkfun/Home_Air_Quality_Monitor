@@ -260,9 +260,10 @@ void spiffsStorageTask(void *pvParameter) {
           rawDataArray[2], rawDataArray[3], rawDataArray[4], rawDataArray[5],
           rawDataArray[6], rawDataArray[7], rawDataArray[8], rawDataArray[9],
           rawDataArray[10], rawDataArray[11]);
+          
+        xSemaphoreGive(rawDataMutex);  // Release mutex
         Serial.println(message);
         appendLineToFile(SPIFFS, path, message);
-        xSemaphoreGive(rawDataMutex);  // Release mutex
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {

@@ -11,6 +11,7 @@ struct struct_online {
   bool pasco2 = false;
   bool ng = false;
   bool co = false;
+  bool pref = false;
 };
 
 // struct display_settings{

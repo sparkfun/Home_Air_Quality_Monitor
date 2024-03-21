@@ -21,8 +21,10 @@ bool setupPreferences() {
   // We want to use SPIFFS for large storage
   bool status = preferences.begin("HomeAirSettings", false);
   if (status) {
+    online.pref = true;
+    Serial.println("Preferences started successfully!");
     if (!preferences.getBool("firstTimeSetupComplete")) {
-      Serial.println("Preferences started successfully!");
+      Serial.println("Performing first time setup...");
       preferences.putBool("wallMounted", false);
       preferences.putBool("nightMode", false);
       preferences.putBool("clockEnabled", true);
@@ -33,12 +35,16 @@ bool setupPreferences() {
       preferences.putUShort("indicatorPeriod", 1);
       preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
       preferences.putUShort("frame2Sensor", 5);
-      preferences.putUShort("refreshPeriod", 1); // Time in seconds
+      preferences.putUShort("refreshPeriod", 3); // Time in seconds
       preferences.putUShort("savedRefreshPeriod", preferences.getUShort("refreshPeriod")); //for state machine
       preferences.putBool("firstTimeSetupComplete", true);
       preferences.putUShort("cyclesBetweenFullRefresh", 60);
       preferences.putUShort("numRefreshCycles", 5);
+      preferences.putBool("restoreFromBackupTime", true);
+    } else {
+      Serial.println("Not performing first time setup...");
     }
+
     if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");
       Serial.printf("Version number: %d", VERSION_NUMBER);

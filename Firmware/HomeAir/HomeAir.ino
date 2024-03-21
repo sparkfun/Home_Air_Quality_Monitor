@@ -75,7 +75,7 @@ void setup() {
   xTaskCreatePinnedToCore(
     timekeepingSyncTask,        /*Function to call*/
     "Time Sync Task",           /*Task name*/
-    1024,                       /*Stack size*/
+    4192,                       /*Stack size*/
     NULL,                       /*Function parameters*/
     1,                          /*Priority*/
     &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/

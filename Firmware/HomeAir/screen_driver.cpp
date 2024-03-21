@@ -38,6 +38,19 @@ String screendriverGetMacAddress() {
   }
 }
 
+String screendriverGetMacAddressLastFour() {
+  uint8_t macOut[8];
+  esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
+  if (espErr == ESP_OK) {
+    char strOut[19];
+    snprintf(strOut, 19, "%02hhx%02hhx", macOut[4], macOut[5]);
+    return String(strOut);
+  } else {
+    Serial.println("Mac address failed to be read");
+    return "";
+  }
+}
+
 void screendriverPrintMacAddress() {
   Serial.println("MAC Address: " + screendriverGetMacAddress());
 }
@@ -55,12 +68,14 @@ void screendriverShowParingScreen(){
     uint8_t macOut[8];
     esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
     deviceScreen.gText(50, 25, "Awaiting BLE connection...");
-    if (espErr == ESP_OK) {
-      deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
-    } else {
-      Serial.println("unable to get mac address");
-      deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
-    }
+    deviceScreen.gText(50, 50, "HomeAir" + screendriverGetMacAddressLastFour());
+
+    // if (espErr == ESP_OK) {
+    //   deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    // } else {
+    //   Serial.println("unable to get mac address");
+    //   deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
+    // }
 
 }
 
