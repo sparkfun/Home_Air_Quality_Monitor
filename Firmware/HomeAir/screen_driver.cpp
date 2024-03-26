@@ -11,15 +11,22 @@ void screendriverEpaperSetup() {
   #else
     Serial.println("HOMEAIR_BOARD - FALSE");
   #endif
+  Serial.println("Setting up EPD");
+  setupPreferences();
   deviceScreen.begin();
+  // if(!deviceScreen.begin()) Serial.println("Error initiating EPD");
   deviceScreen.clear();
-  deviceScreen.regenerate();
-  deviceScreen.setOrientation(3);       // Left-hand rotated Landscape
+  // deviceScreen.regenerate();
+  deviceScreen.globalRefresh(2);
+  deviceScreen.setOrientation(2);       // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST);  // Set Flush Mode
   deviceScreen.selectFont(1);
   deviceScreen.drawSparkfunLogo();
+  Serial.println("Drew Sparkfun logo");
   deviceScreen.flush();
-  vTaskDelay(1000 * epd_settings.logoTime);
+  // vTaskDelay(3000);
+  vTaskDelay(1000 * preferences.getUShort("logoTime"));
+  deviceScreen.setOrientation(3);
   deviceScreen.clear();
 }
 
@@ -104,38 +111,86 @@ void screendriverFlushWithChrono() {
 }
 
 
-void globalRefresh() {
-  if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-    deviceScreen.regenerate();
-  }
-}
+// void globalRefresh() {
+//   if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
+//     deviceScreen.regenerate();
+//   }
+// }
 
+void rotateFrames() {
+  // CO2_PPM = 0,
+  // PPM_1_0 = 1,// PPM_2_5 = 2,// PPM_4_0 = 3,// PPM_10 = 4,
+  // HUMIDITY = 5, // TEMP = 6,
+  // VOC = 7,
+
+  // CO = 8,
+  // NG = 9,
+  // AQI = 10
+  // NOX
+  if(preferences.getUShort("frame1Sensor") == CO2_PPM) preferences.putUShort("frame1Sensor", PPM_2_5);
+  else if(preferences.getUShort("frame1Sensor") == PPM_2_5) preferences.putUShort("frame1Sensor", HUMIDITY);
+  else if(preferences.getUShort("frame1Sensor") == HUMIDITY) preferences.putUShort("frame1Sensor", VOC);
+  else preferences.putUShort("frame1Sensor", CO2_PPM);
+
+  if(preferences.getUShort("frame2Sensor") == CO) preferences.putUShort("frame2Sensor", NG);
+  else if(preferences.getUShort("frame2Sensor") == NG) preferences.putUShort("frame2Sensor", AQI);
+
+  // #ifdef USE_NOX
+  // else if(preferences.getUShort("frame2Sensor") == AQI) preferences.putUShort("frame2Sensor", NOX);
+  // #endif
+
+  else preferences.putUShort("frame2Sensor", CO);
+}
 
 void updateSensorFrames() {
   if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-    deviceScreen.drawSensorFrame(preferences.getUShort("frame1Sensor"), 0);
-    deviceScreen.drawSensorFrame(preferences.getUShort("frame2Sensor"), 1);
+    deviceScreen.clear();
+    // deviceScreen.drawSensorFrame(preferences.getUShort("frame1Sensor"), 0);
+    // deviceScreen.drawSensorFrame(preferences.getUShort("frame2Sensor"), 1);
     for (int i = 0; i < 2; i++) {
 
-      uint8_t currentSensor;
+      short currentSensor;
 
       if (i == 0) currentSensor = preferences.getUShort("frame1Sensor");
       else currentSensor = preferences.getUShort("frame2Sensor");
 
-      if (currentSensor == mySensor.temperature || currentSensor == mySensor.humidity) {
-        deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[5]));
-        deviceScreen.updateFrameVal(i, mySensor.temperature, String(rawDataArray[6]));
-      } else if (currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.humidity, String(rawDataArray[HUMIDITY]));
-      else if (currentSensor == mySensor.co) deviceScreen.updateFrameVal(i, mySensor.co, String(rawDataArray[CO]));
-      else if (currentSensor == mySensor.ch4) deviceScreen.updateFrameVal(i, mySensor.ch4, String(rawDataArray[NG]));
-      else if (currentSensor == mySensor.co2) deviceScreen.updateFrameVal(i, mySensor.co2, String(rawDataArray[CO2_PPM]));
-      else if (currentSensor == mySensor.voc) deviceScreen.updateFrameVal(i, mySensor.voc, String(rawDataArray[VOC]));
-      else if (currentSensor == mySensor.aqi) deviceScreen.updateFrameVal(i, mySensor.aqi, String(rawDataArray[AQI]));
-      else if (currentSensor == mySensor.particles) deviceScreen.updateFrameVal(i, mySensor.particles, String(rawDataArray[PPM_2_5]));
+      if (currentSensor == TEMP || currentSensor == HUMIDITY) {
+        deviceScreen.drawSensorFrame(mySensor.temperature, i);
+        deviceScreen.updateFrameVal(i, mySensor.humidity, rawDataArray[HUMIDITY]);
+        deviceScreen.updateFrameVal(i, mySensor.temperature, rawDataArray[TEMP]);
+      }
+      else if (currentSensor == CO) {
+        deviceScreen.drawSensorFrame(mySensor.co, i);
+        deviceScreen.updateFrameVal(i, mySensor.co, rawDataArray[CO]);
+      }
+      else if (currentSensor == NG) {
+        deviceScreen.drawSensorFrame(mySensor.ch4, i);
+        deviceScreen.updateFrameVal(i, mySensor.ch4, rawDataArray[NG]);
+      }
+      else if (currentSensor == CO2_PPM) {
+        deviceScreen.drawSensorFrame(mySensor.co2, i);
+        deviceScreen.updateFrameVal(i, mySensor.co2, rawDataArray[CO2_PPM]);
+      }
+      else if (currentSensor == VOC) {
+        deviceScreen.drawSensorFrame(mySensor.voc, i);
+        deviceScreen.updateFrameVal(i, mySensor.voc, rawDataArray[VOC]);
+      }
+      else if (currentSensor == AQI) {
+        deviceScreen.drawSensorFrame(mySensor.aqi, i);
+        deviceScreen.updateFrameVal(i, mySensor.aqi, rawDataArray[AQI]);
+      }
+      else if (currentSensor == PPM_2_5) {
+        deviceScreen.drawSensorFrame(mySensor.particles, i);
+        deviceScreen.updateFrameVal(i, mySensor.particles, rawDataArray[PPM_2_5]);
+      }
+      // else deviceScreen.updateFrameVal(i, currentSensor, String(rawDataArray[currentSensor]));
     }
     xSemaphoreGive(rawDataMutex);
   }
-  deviceScreen.flush();
+  #ifdef ROTATE_FRAMES
+    rotateFrames();
+  #endif
+  // deviceScreen.flush();
 }
 
 void drawDot(bool indicatorOn) {
@@ -155,38 +210,37 @@ void drawDot(bool indicatorOn) {
       deviceScreen.circle(291, 147, preferences.getUShort("dotSize"), dotColor);
     }
     else {
-      Serial.println("Invalid refresh indicator dot location");
+      Serial.println("Warning: Invalid refresh indicator dot location");
     }
   }
   else {
-    Serial.println("Dot not enabled but drawDot was called");
+    Serial.println("Warning: Dot not enabled but drawDot was called");
   }
   return;
 }
 
 void drawClock(bool indicatorOn) {
   uint8_t location = preferences.getUShort("clockLocation");
+  uint16_t clockColor = myColours.white;
   if(preferences.getBool("clockEnabled")) {
-    uint16_t clockColor = indicatorOn ? myColours.black : myColours.white;
-    if(location == 0) {
-      deviceScreen.drawText(5, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
-    }
-    else if(location == 1) {
-      deviceScreen.drawText(230, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
-    }
-    else if(location == 2) {
-      deviceScreen.drawText(5, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
-    }
-    else if(location == 3) {
-      deviceScreen.drawText(230, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
-    }
-    else {
-      Serial.println("Invalid refresh indicator clock location");
-    }
+    clockColor = indicatorOn ? myColours.black : myColours.white;
+  }
+  if(location == 0) {
+    deviceScreen.drawText(5, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+  }
+  else if(location == 1) {
+    deviceScreen.drawText(230, 5, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+  }
+  else if(location == 2) {
+    deviceScreen.drawText(5, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
+  }
+  else if(location == 3) {
+    deviceScreen.drawText(230, 139, 1, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()), clockColor);
   }
   else {
-    Serial.println("Clock not enabled but drawClock was called");
+    Serial.println("Warning: Invalid refresh indicator clock location");
   }
+
   return;
 }
 
@@ -195,21 +249,22 @@ void firmwareUpdateScreen() {
 }
 
 int drawPairingScreen(int state) {
+  deviceScreen.clear();
+  // if(state == 1) {
+  //   deviceScreen.drawText(25, 90, 3, "Pairing   ");
+  // }
   if(state == 1) {
-    deviceScreen.drawText(25, 90, 3, "Pairing   ");
+    deviceScreen.drawText(25, 90, 3, "Waiting to connect.  ");
   }
   else if(state == 2) {
-    deviceScreen.drawText(25, 90, 3, "Pairing.  ");
+    deviceScreen.drawText(25, 90, 3, "Waiting to connect.. ");
   }
   else if(state == 3) {
-    deviceScreen.drawText(25, 90, 3, "Pairing.. ");
-  }
-  else if(state == 4) {
-    deviceScreen.drawText(25, 90, 3, "Pairing...");
+    deviceScreen.drawText(25, 90, 3, "Waiting to connect...");
     state = 0;
   }
   else {
-    Serial.println("Invalid pairing state, resetting state");
+    Serial.println("Warning: Invalid pairing state, resetting state to 0");
     state = 0;
   }
   state ++;
@@ -217,25 +272,28 @@ int drawPairingScreen(int state) {
 }
 
 int drawScreen(int state) {
+  Serial.println("Ran drawScreen");
   // Sparkfun logo is drawn in epd setup function; first state drawn here is pairing screen
   if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
     // draw pairing screen
-    preferences.putUShort("refreshPeriod", 1);
-    state = drawPairingScreen(state);
+    #ifdef SHOW_READINGS_WITHOUT_CONNECTION
+      updateSensorFrames();
+    #else
+      state = drawPairingScreen(state);
+    #endif 
+    deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
     // draw sensor screen
-    preferences.putUShort("refreshPeriod", preferences.getUShort("savedRefreshPeriod"));
+    // preferences.putUShort("refreshPeriod", preferences.getUShort("savedRefreshPeriod"));
     updateSensorFrames();
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
-    // set refresh time to 1 for update
-    preferences.putUShort("refreshPeriod", 1);
     firmwareUpdateScreen();
   } else {
-    Serial.println("Unkown flag state in EPD");
-    return 0;
+    Serial.println("Warning: Unkown flag state in EPD");
   }
+  deviceScreen.flush();
   return 0;
   // myScreen.flush();
   // return;
@@ -245,55 +303,65 @@ void screendriverRunScreenTask(void *pvParameter) {
   screendriverPrintMacAddress();
   screendriverEpaperSetup();
   
-
-  //Counter for burn-in prevention
-  volatile int refreshCounter = 0;
-  volatile int screenUpdateCounter = 0;
-  volatile int indicatorCounter = 0;
-  volatile int pairingState = 0;
+  volatile int refreshCounter = 1;
+  volatile int fullRefreshCounter = 1;
+  volatile int indicatorCounter = 1;
+  volatile int pairingState = 1;
   volatile bool refreshIndicatorOn = false;
+
+  // variables for div-by-zero error check/prevention
+  volatile short refreshFreq = 1;
+  volatile short fullRefreshFreq = 1;
+  volatile short indicatorFreq = 1;
   while (1) {
     {
-      // // Prologue
-      // deviceScreen.clear();
-      // // Function Body
-      // screendriverShowTime();
-      // // screendriverShowDetailedMeasurements();
-      // screendriverShowParingScreen();
-      // // Epilogue
-      // screendriverFlushWithChrono();
-      // // drawScreen();
-      deviceScreen.clear();
+      // Serial.print("EPD task loop ran, refreshFreq: "); 
+      // Serial.print(refreshFreq);
+      // Serial.print(", fullRefreshFreq: ");
+      // Serial.print(fullRefreshFreq);
+      // Serial.print(", indicatorFreq: ");
+      // Serial.print(indicatorFreq);
+      // Serial.print(", fullRefreshCounter: ");
+      // Serial.println(fullRefreshCounter);
 
-      if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP){
-        screendriverShowParingScreen();
-        screendriverFlushWithChrono();
-      } else {
-        screendriverShowDetailedMeasurements();
-        screendriverShowTime();
-        screendriverFlushWithChrono();
+      fullRefreshFreq = preferences.getUShort("burninPeriod");
+      if(fullRefreshFreq < 1) {
+        fullRefreshFreq = 1;
+        Serial.println("Warning: fullRefreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
       }
 
+      refreshFreq = preferences.getUShort("refreshPeriod");
+      if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) refreshFreq = 1;
+      if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) refreshFreq = 1;
+      if(refreshFreq < 1) {
+        refreshFreq = 1;
+        Serial.println("Warning: refreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
+      }
+
+      indicatorFreq = preferences.getUShort("indicatorPeriod");
+      if(indicatorFreq < 1) {
+        indicatorFreq = 1;
+        Serial.println("Warning: indicatorPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
+      }
       
-
-
+      
+      deviceScreen.clear();
 
       //Burn-in prevention code
-      if (refreshCounter == 0)
+      if (fullRefreshCounter == 0)
       {
-        deviceScreen.globalRefresh(preferences.getUShort("numRefreshCycles"));
-        // refreshCounter %= preferences.getUShort("refreshPeriod"); // This is also throwing a div-by-zero!
-        refreshCounter = 0;
+        //refreshing device screen
+        deviceScreen.globalRefresh(2);
+        pairingState = drawScreen(pairingState);
+        // refreshCounter = 0;
       } 
-      refreshCounter++;
+
       //Update screen
       if (refreshCounter == 0)
       {
         pairingState = drawScreen(pairingState);
-        screenUpdateCounter = 0;
+        // screenUpdateCounter = 0;
       } 
-      screenUpdateCounter ++;
-      // screenUpdateCounter %= preferences.getUShort("cyclesBetweenFullRefresh"); // THIS WAS GIVING DIV BY ZERO
 
       //Clock/dot toggle code
       if (indicatorCounter == 0) {
@@ -308,9 +376,19 @@ void screendriverRunScreenTask(void *pvParameter) {
           drawClock(refreshIndicatorOn);
           indicatorCounter = !indicatorCounter;
         }
+        else {
+          drawDot(false);
+        }
       }
+
       indicatorCounter ++;
-      screenUpdateCounter %= preferences.getUShort("indicatorPeriod");
+      indicatorCounter %= indicatorFreq;
+
+      refreshCounter++;
+      refreshCounter %= refreshFreq;
+
+      fullRefreshCounter++;
+      fullRefreshCounter %= fullRefreshFreq;
 
       //Wait 1 second
       vTaskDelay(1000);

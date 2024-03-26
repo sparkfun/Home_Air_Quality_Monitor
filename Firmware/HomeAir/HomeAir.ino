@@ -34,8 +34,8 @@ Preferences preferences;
 void setup() {
   // Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
-  Serial.write("Setting up...");
-  setupPreferences();
+  Serial.write("Setting up main tasks...");
+  // setupPreferences();
   // setupTime();
   // Setup Flag Event Groups
   appStateFlagGroup = xEventGroupCreate();

@@ -15,7 +15,10 @@
 #include "src/EPDDriver/src/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
-#define HOMEAIR_BOARD 1
+// #define HOMEAIR_BOARD 1
+
+#define SHOW_READINGS_WITHOUT_CONNECTION 1
+#define ROTATE_FRAMES 1
 
 const pins_t myMfnBoard{
   // .panelBusy = 45, //"BUSY<Red

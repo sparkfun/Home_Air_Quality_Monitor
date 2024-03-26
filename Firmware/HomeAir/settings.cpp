@@ -17,13 +17,14 @@ struct display_settings epd_settings;
 // };
 
 bool setupPreferences() {
+  Serial.println("PREFERENCES SET UP");
   // Preferences is good for single KVP storage.
   // We want to use SPIFFS for large storage
   bool status = preferences.begin("HomeAirSettings", false);
-  if (status) {
-    online.pref = true;
-    Serial.println("Preferences started successfully!");
-    if (!preferences.getBool("firstTimeSetupComplete")) {
+  // if (status) {
+    // online.pref = true;
+    // Serial.println("Preferences started successfully!");
+    // if (!preferences.getBool("firstTimeSetupComplete")) {
       Serial.println("Performing first time setup...");
       preferences.putBool("wallMounted", false);
       preferences.putBool("nightMode", false);
@@ -32,18 +33,22 @@ bool setupPreferences() {
       preferences.putUShort("dotSize", 2); //dot radius
       preferences.putUShort("clockLocation", 1);
       preferences.putUShort("dotLocation", 0);
-      preferences.putUShort("indicatorPeriod", 1);
-      preferences.putUShort("frame1Sensor", 1);  // Use enum for reading those out more clearly?
-      preferences.putUShort("frame2Sensor", 5);
-      preferences.putUShort("refreshPeriod", 3); // Time in seconds
-      preferences.putUShort("savedRefreshPeriod", preferences.getUShort("refreshPeriod")); //for state machine
-      preferences.putBool("firstTimeSetupComplete", true);
-      preferences.putUShort("cyclesBetweenFullRefresh", 60);
+
+      preferences.putUShort("frame1Sensor", CO); 
+      preferences.putUShort("frame2Sensor", AQI);
+
+      preferences.putUShort("logoTime", 1);
+      preferences.putUShort("refreshPeriod", 5); // Time in seconds
+      preferences.putUShort("burninPeriod", 60);
+      preferences.putUShort("indicatorPeriod", 4);
+
       preferences.putUShort("numRefreshCycles", 5);
+      preferences.putBool("firstTimeSetupComplete", true);
       preferences.putBool("restoreFromBackupTime", true);
-    } else {
-      Serial.println("Not performing first time setup...");
-    }
+    // } 
+    // else {
+    //   Serial.println("Not performing first time setup...");
+    // }
 
     if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");
@@ -53,7 +58,7 @@ bool setupPreferences() {
     }
 
     return true;
-  }
+  // }
   Serial.println("Error occured in starting preferences.");
   return false;
 }

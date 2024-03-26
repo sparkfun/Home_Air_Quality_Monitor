@@ -349,7 +349,7 @@ class hV_Screen_Buffer : protected hV_Font_Terminal
 
     virtual void drawDigitBig(uint8_t number, uint16_t x_location, uint16_t y_location);
 
-    virtual void drawNumBig(String number, uint16_t x_location, uint16_t y_location);
+    virtual void drawNumBig(String number, uint16_t x_location, uint16_t y_location, uint8_t maxDigits = 3);
 
     virtual void partialScreenBitmap(uint16_t x_location, uint16_t y_location, uint8_t *bitmap, uint16_t width, uint16_t height, uint16_t highColor = myColours.white, uint16_t lowColor = myColours.black);
 
@@ -368,7 +368,7 @@ class hV_Screen_Buffer : protected hV_Font_Terminal
 
     virtual void drawSensorFrame(uint8_t sensor, uint8_t frameNumber);
 
-    virtual void updateFrameVal(uint8_t frameNumber, uint8_t sensor, String sensorReading);
+    virtual void updateFrameVal(uint8_t frameNumber, uint8_t sensor, float sensorReading);
 
     virtual void drawText(int x, int y, int fontSize, String msg, uint16_t color = myColours.black);
 
