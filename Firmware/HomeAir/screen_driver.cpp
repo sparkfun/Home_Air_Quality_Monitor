@@ -18,7 +18,7 @@ void screendriverEpaperSetup() {
   deviceScreen.clear();
   // deviceScreen.regenerate();
   deviceScreen.globalRefresh(2);
-  deviceScreen.setOrientation(2);       // Left-hand rotated Landscape
+  deviceScreen.setOrientation(0);       // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST);  // Set Flush Mode
   deviceScreen.selectFont(1);
   deviceScreen.drawSparkfunLogo();
@@ -26,7 +26,7 @@ void screendriverEpaperSetup() {
   deviceScreen.flush();
   // vTaskDelay(3000);
   vTaskDelay(1000 * preferences.getUShort("logoTime"));
-  deviceScreen.setOrientation(3);
+  deviceScreen.setOrientation(1);
   deviceScreen.clear();
 }
 

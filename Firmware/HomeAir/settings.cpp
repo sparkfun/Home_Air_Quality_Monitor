@@ -38,7 +38,7 @@ bool setupPreferences() {
       preferences.putUShort("frame2Sensor", AQI);
 
       preferences.putUShort("logoTime", 1);
-      preferences.putUShort("refreshPeriod", 5); // Time in seconds
+      preferences.putUShort("refreshPeriod", 10); // Time in seconds
       preferences.putUShort("burninPeriod", 60);
       preferences.putUShort("indicatorPeriod", 4);
 
