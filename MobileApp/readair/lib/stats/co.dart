@@ -61,7 +61,7 @@ class _COPageState extends State<COPage> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("CO"),
+        title: Text("Carbon Monoxide (ppm)"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -73,13 +73,13 @@ class _COPageState extends State<COPage> {
                 Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
-                    'Current CO value',
+                    'Current value',
                     style: TextStyle(fontSize: 20, color: Colors.black),
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Average CO value', style: TextStyle(fontSize: 20)),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
                 ),
               ],
             ),
@@ -94,7 +94,7 @@ class _COPageState extends State<COPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$currentValue (ppm)',
+                          Text('$currentValue',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -107,7 +107,7 @@ class _COPageState extends State<COPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$averageOverTwoFourHour (ppm)',
+                          Text('$averageOverTwoFourHour',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -252,7 +252,7 @@ class _COPageState extends State<COPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max (ppm)',
+                          Text('$max',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -265,7 +265,7 @@ class _COPageState extends State<COPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min (ppm)',
+                          Text('$min',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -284,7 +284,7 @@ class _COPageState extends State<COPage> {
               padding: EdgeInsets.all(6.0),
               child: ListTile(
                 title: Center(
-                    child: Text('Carbom Monoxide (ppm)',
+                    child: Text('Carbon Monoxide (ppm)',
                         style: TextStyle(fontSize: 31))),
               ),
             ),

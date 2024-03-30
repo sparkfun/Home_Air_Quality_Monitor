@@ -181,15 +181,17 @@ class BluetoothController extends GetxController {
     }
   }
 
-  void disconnectFromDevice(BuildContext context) async {
-    if (connectedDevice != null) {
-      await connectedDevice!.disconnect();
-      isSubscribed.value = false; // Reset subscription status
-      _updatTimer?.cancel(); // Stop sending "UPDAT"
-      update(); // Update UI
-      Get.back(); // Navigate back to the previous screen
-    }
+void disconnectFromDevice(BuildContext context) async {
+  if (connectedDevice != null) {
+    await sendData(connectedDevice!, 'DISC!');
+    await connectedDevice!.disconnect();
+    isSubscribed.value = false; // Reset subscription status
+    _updatTimer?.cancel(); // Stop sending "UPDAT"
+    update(); // Update UI
+    Get.back(); // Navigate back to the previous screen
   }
+}
+
 
   Future<void> discoverServices() async {
     if (connectedDevice != null) {

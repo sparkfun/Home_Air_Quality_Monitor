@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/main.dart';
 import 'package:readair/settings/display.dart';
 
@@ -11,6 +12,7 @@ class CustomizePage extends StatefulWidget {
 class _CustomizePageState extends State<CustomizePage> {
   @override
   Widget build(BuildContext context) {
+    final BluetoothController bluetoothController = Get.find();
     final ThemeController themeController = Get.find();
 
     return Scaffold(
@@ -30,16 +32,23 @@ class _CustomizePageState extends State<CustomizePage> {
                   themeController.toggleTheme();
                 },
               )),
-                          Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to DisplayPage when the button is pressed
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (bluetoothController.isSubscribed.value) {
                   Get.to(() => DisplayPage());
-                },
-                child: Text('Go to Display Page'),
-              ),
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Please connect and subscribe to a device first."),
+                    ),
+                  );
+                }
+              },
+              child: Text('Go to Display Page'),
             ),
+          ),
         ],
       ),
     );

@@ -178,7 +178,7 @@ class _AQIPageState extends State<AQIPage> {
                       child: Text('${AQIcurrentValue ?? "N/A"}',
                           style: TextStyle(fontSize: 50))),
                   textColor: Colors.white70,
-
+                  
                   //trailing: Icon(Icons.wb_sunny, size: 40),
                 ),
               ),
