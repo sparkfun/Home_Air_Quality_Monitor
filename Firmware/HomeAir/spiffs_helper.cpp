@@ -252,7 +252,6 @@ void spiffsStorageTask(void *pvParameter) {
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
       // Write data to SPIFFS
       if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-        xSemaphoreGive(rawDataMutex);  // Release mutex
         snprintf(
           message, 80,
           "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
@@ -274,6 +273,7 @@ void spiffsStorageTask(void *pvParameter) {
           lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[insertPoint],
                                            BLE_BUFFER_LENGTH);
           if (lineLength < 2) {
+            Serial.println("Empty message received and broke spiffs helper.");
             break;
           }
           insertPoint += lineLength;
@@ -324,7 +324,10 @@ void spiffsStorageTask(void *pvParameter) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
                                   BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
               writtenSize += file.write((uint8_t *)&BLEMessageBuffer[0], 509);
-              otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
+              if(xSemaphoreTake(otaDownloadPercentageMutex, portMAX_DELAY)){
+                otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
+                xSemaphoreGive(otaDownloadPercentageMutex);
+              }
               // Add setBits for done writing to ack in BLE
               if (++downloadIttr % 5 == 0) {
                 downloadRate = (float)(writtenSize - prevSize) / (millis() - chrono);

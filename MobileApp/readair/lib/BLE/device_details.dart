@@ -426,17 +426,16 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     return byteData.buffer.asUint8List();
   }
 
-Future<void> sendAssetFile() async {
-  try {
-    List<int> fileBytes = await loadBinFile();
-    Uint8List uint8list = Uint8List.fromList(fileBytes);
-    File tempFile = File.fromRawPath(uint8list);
-    await sendFileInChunks(tempFile);
-  } catch (e) {
-    _showMessage("Error loading asset file: $e");
+  Future<void> sendAssetFile() async {
+    try {
+      List<int> fileBytes = await loadBinFile();
+      Uint8List uint8list = Uint8List.fromList(fileBytes);
+      File tempFile = File.fromRawPath(uint8list);
+      await sendFileInChunks(tempFile);
+    } catch (e) {
+      _showMessage("Error loading asset file: $e");
+    }
   }
-}
-
 
   Future<void> pickAndSendFile() async {
     FilePickerResult? result = await FilePicker.platform

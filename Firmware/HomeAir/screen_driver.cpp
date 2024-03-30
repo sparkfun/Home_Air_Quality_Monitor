@@ -11,6 +11,9 @@ void screendriverEpaperSetup() {
   #else
     Serial.println("HOMEAIR_BOARD - FALSE");
   #endif
+  #ifdef ANTON_BOARD
+    Serial.println("Anton board!");
+  #endif
   Serial.println("Setting up EPD");
   setupPreferences();
   deviceScreen.begin();
@@ -50,7 +53,7 @@ String screendriverGetMacAddressLastFour() {
   esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
   if (espErr == ESP_OK) {
     char strOut[19];
-    snprintf(strOut, 19, "%02hhx%02hhx", macOut[4], macOut[5]);
+    snprintf(strOut, 19, "%02hhX%02hhX", macOut[4], macOut[5]);
     return String(strOut);
   } else {
     Serial.println("Mac address failed to be read");
@@ -75,7 +78,7 @@ void screendriverShowParingScreen(){
     uint8_t macOut[8];
     esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
     deviceScreen.gText(50, 25, "Awaiting BLE connection...");
-    deviceScreen.gText(50, 50, "HomeAir" + screendriverGetMacAddressLastFour());
+    deviceScreen.gText(50, 50, "HomeAir-" + screendriverGetMacAddressLastFour());
 
     // if (espErr == ESP_OK) {
     //   deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
@@ -245,7 +248,12 @@ void drawClock(bool indicatorOn) {
 }
 
 void firmwareUpdateScreen() {
-  deviceScreen.firmwareUpdateScreen(otaDownloadPercentage);
+  if(xSemaphoreTake(otaDownloadPercentageMutex, portMAX_DELAY)){
+      deviceScreen.firmwareUpdateScreen(otaDownloadPercentage);
+      xSemaphoreGive(otaDownloadPercentageMutex);
+    } else {
+      Serial.println("Couldn't acquire otaProgress semaphore!");
+    }
 }
 
 int drawPairingScreen(int state) {
@@ -253,6 +261,7 @@ int drawPairingScreen(int state) {
   // if(state == 1) {
   //   deviceScreen.drawText(25, 90, 3, "Pairing   ");
   // }
+  deviceScreen.drawText(70, 50, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
   if(state == 1) {
     deviceScreen.drawText(25, 90, 3, "Waiting to connect.  ");
   }

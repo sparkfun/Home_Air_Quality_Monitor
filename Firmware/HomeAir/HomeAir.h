@@ -32,9 +32,12 @@ extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
   screendriverRunScreenTaskHandle;
 
 extern Preferences preferences;
+extern SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
 
-#define VERSION_NUMBER 200
+
+#define VERSION_NUMBER 201
 #define FORMAT_SPIFFS_IF_FAILED false
+#define TEN_KiB 10 * 1024
 
 #if CONFIG_FREERTOS_UNICORE
 #define ARDUINO_RUNNING_CORE 0

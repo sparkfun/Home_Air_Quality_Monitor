@@ -27,7 +27,7 @@ TaskHandle_t spiffsStorageTaskHandle, BLEServerCommunicationTaskHandle,
 EventGroupHandle_t appStateFlagGroup;
 EventGroupHandle_t BLEStateFlagGroup;
 // Mutex creation
-SemaphoreHandle_t rawDataMutex;
+SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
 // Preferences object creation
 Preferences preferences;
 
@@ -44,31 +44,32 @@ void setup() {
 
   // Setup Mutexes
   rawDataMutex = xSemaphoreCreateMutex();
+  otaDownloadPercentageMutex = xSemaphoreCreateMutex();
 
   xTaskCreatePinnedToCore(
     mygpioSensorReadTask,        /*Function to call*/
     "Sensor Read Task",          /*Task name*/
     4096,                        /*Stack size*/
     NULL,                        /*Function parameters*/
-    5,                           /*Priority*/
+    4,                           /*Priority*/
     &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(
     spiffsStorageTask,        /*Function to call*/
     "SPIFFS Storage Task",    /*Task name*/
-    10000,                    /*Stack size*/
+    TEN_KiB,                    /*Stack size*/
     NULL,                     /*Function parameters*/
-    2,                        /*Priority*/
+    5,                        /*Priority*/
     &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);        /*Core ID*/
+    ARDUINO_PRIMARY_CORE);        /*Core ID*/
 
   xTaskCreatePinnedToCore(
     BLEServerCommunicationTask,        /*Function to call*/
     "BLE Communication Task",          /*Task name*/
-    10000,                             /*Stack size*/
+    TEN_KiB,                             /*Stack size*/
     NULL,                              /*Function parameters*/
-    1,                                 /*Priority*/
+    10,                                 /*Priority*/
     &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_PRIMARY_CORE);             /*Core ID*/
 
@@ -77,16 +78,16 @@ void setup() {
     "Time Sync Task",           /*Task name*/
     4192,                       /*Stack size*/
     NULL,                       /*Function parameters*/
-    1,                          /*Priority*/
+    2,                          /*Priority*/
     &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);          /*Core ID*/
 
   xTaskCreatePinnedToCore(
     screendriverRunScreenTask,        /*Function to call*/
     "Epaper Update Task",             /*Task name*/
-    10000,                            /*Stack size*/
+    TEN_KiB,                            /*Stack size*/
     NULL,                             /*Function parameters*/
-    10,                               /*Priority*/
+    1,                               /*Priority*/
     &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);                /*Core ID*/
 }

@@ -66,7 +66,7 @@ enum sensorMap {
 
 
 const uint32_t I2C_FREQ_HZ = 100000;
-#ifdef HOMEAIR_BOARD
+#if  defined(HOMEAIR_BOARD) || defined(ANTON_BOARD)
 const uint8_t I2C_SDA_PIN = 8;
 const uint8_t I2C_SCL_PIN = 9;
 #else
@@ -91,6 +91,5 @@ void setupSENSensor(void);
 
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];
-extern SemaphoreHandle_t rawDataMutex;
 
 #endif

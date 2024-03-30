@@ -72,6 +72,9 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
           // Acquire mutex
           Serial.println("UPDAT recieved!");
+          if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD){
+            return;
+          }
           mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
           char message[90];
           int charsWritten = snprintf(
@@ -232,7 +235,7 @@ void BLEServerSetAdvertisingName() {
   char retArr[14];
   esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
   if (espErr == ESP_OK) {
-    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhx%02hhx", macOut[4],
+    snprintf(retArr, sizeof(retArr), "HomeAir-%02hhX%02hhX", macOut[4],
              macOut[5]);
     Serial.printf("Setting MAC to %s\n", retArr);
     NimBLEDevice::init(retArr);
