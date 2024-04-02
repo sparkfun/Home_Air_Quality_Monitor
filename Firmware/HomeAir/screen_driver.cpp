@@ -300,7 +300,8 @@ int drawScreen(int state) {
     // draw update screen
     firmwareUpdateScreen();
   } else {
-    Serial.println("Warning: Unkown flag state in EPD");
+    Serial.println("Warning: Unkown flag state in EPD, reverting to displaying sensor data");
+    updateSensorFrames();
   }
   deviceScreen.flush();
   return 0;
@@ -340,8 +341,12 @@ void screendriverRunScreenTask(void *pvParameter) {
       }
 
       refreshFreq = preferences.getUShort("refreshPeriod");
+
+      #ifdef ADJUST_REFRESH_RATE
       if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) refreshFreq = 1;
       if(xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) refreshFreq = 1;
+      #endif 
+
       if(refreshFreq < 1) {
         refreshFreq = 1;
         Serial.println("Warning: refreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
