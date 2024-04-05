@@ -13,5 +13,3 @@ The firmware will upload 11 datapoints to the application. They are stored in th
 10: AQI - Computed onboard using PPM 2.5 and other values
 
 Data size calculations can be found on this spreadsheet: https://docs.google.com/spreadsheets/d/1_EFeLgpe8HF9_ko5QajpB0fkfWvWioJkB7S2AnPqzwQ/edit?usp=sharing
-
-
