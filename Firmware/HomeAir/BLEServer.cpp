@@ -29,12 +29,12 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
     if (value.length() > 0) {
 
-      // Serial.println("*********");
-      // Serial.print("New value: ");
-      // for (int i = 0; i < value.length(); i++)
-      //   Serial.print(value[i]);
-      // Serial.println();
-      // Serial.println("*********");
+      Serial.println("*********");
+      Serial.print("New value: ");
+      for (int i = 0; i < value.length(); i++)
+        Serial.print(value[i]);
+      Serial.println();
+      Serial.println("*********");
       // Example : TIME=1699143542
       // Epoch time is guaranteed to be 10 digits
       std::string BLEMessageType = value.substr(0, 5);
@@ -132,6 +132,13 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
+
+      } else if (BLEMessageType == "DISC!"){
+        
+        xEventGroupClearBits(appStateFlagGroup, APP_FLAG_ALL);
+        xEventGroupClearBits(BLEStateFlagGroup, BLE_FLAG_ALL);
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
+        Serial.println("Client disconnected!\nResuming normal operation");
       } else if (value.substr(0, 3) == "EPD") {
         int messageValue = stoi(value.substr(5, value.length() - 5));
         Serial.printf("Received EPD config type: %s\n", BLEMessageType);
@@ -191,8 +198,8 @@ void BLEServerCommunicationTask(void *pvParameter) {
   EventBits_t BLEStatus;
   while (1) {
     while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {
-      // Serial.print("Current number of clients: ");
-      // Serial.println(pSensorCharacteristic->getSubscribedCount());
+      Serial.print("Current number of clients: ");
+      Serial.println(pSensorCharacteristic->getSubscribedCount());
       BLEStatus = xEventGroupWaitBits(
         BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE,
         BLE_FLAG_FILE_EXISTS | BLE_FLAG_FILE_DONE, false, 600000);
@@ -215,7 +222,7 @@ void BLEServerCommunicationTask(void *pvParameter) {
       // Serial.println("Waiting for data to be read...");
       // printCurrentBLEFlagStatus();
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
-                          BLE_FLAG_READ_COMPLETE, false, 600000);
+                          BLE_FLAG_READ_COMPLETE, false, ONE_MIN_MS);
       xEventGroupSetBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER);
       // Serial.println("Buffer read!");
     }

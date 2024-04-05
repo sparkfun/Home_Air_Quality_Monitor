@@ -30,14 +30,26 @@ void printCurrentBLEFlagStatus() {
 // #define APP_FLAG_IDLE (1 << 4)
 // #define APP_FLAG_PUSH_BUFFER (1 << 5)
 // #define APP_FLAG_DONE_TRANSMITTING (1 << 6)
+
+struct AppFlag {
+  int flag;
+  const char *name;
+};
+
+// Array of all flags
+AppFlag appFlags[] = {{APP_FLAG_SETUP, "app_setup"},
+                      {APP_FLAG_RUNNING, "app_running"},
+                      {APP_FLAG_TRANSMITTING, "app_transmitting"},
+                      {APP_FLAG_IDLE, "app_idle"},
+                      {APP_FLAG_PUSH_BUFFER, "app_push_buffer"},
+                      {APP_FLAG_DONE_TRANSMITTING, "app_done_transmitting"},
+                      {APP_FLAG_OTA_DOWNLOAD, "app_ota_download"},
+                      {APP_FLAG_FACTORY_ROLLBACK, "app_factory_rollback"}};
+
 void printCurrentAppFlagStatus() {
   int appStatus = xEventGroupGetBits(appStateFlagGroup);
-  Serial.printf("app_setup: %d\n", (int)appStatus & APP_FLAG_SETUP);
-  Serial.printf("app_running: %d\n", (int)appStatus & APP_FLAG_RUNNING);
-  Serial.printf("app_transmitting: %d\n",
-                (int)appStatus & APP_FLAG_TRANSMITTING);
-  Serial.printf("app_idle: %d\n", (int)appStatus & APP_FLAG_IDLE);
-  Serial.printf("app_push_buffer: %d\n", (int)appStatus & APP_FLAG_PUSH_BUFFER);
-  Serial.printf("app_done_transmitting: %d\n",
-                (int)appStatus & APP_FLAG_DONE_TRANSMITTING);
+  // Iterate through each flag and print its status
+  for (const auto &flag : appFlags) {
+    Serial.printf("%s: %d\n", flag.name, (int)appStatus & flag.flag);
+  }
 }

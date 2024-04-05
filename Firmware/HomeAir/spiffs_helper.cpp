@@ -89,7 +89,7 @@ void appendFile(fs::FS &fs, const char *path, const char *message) {
 }
 
 void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
-  Serial.printf("Appending to file: %s\r\n", path);
+  // Serial.printf("Appending to file: %s\r\n", path);
 
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
@@ -104,7 +104,7 @@ void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
     } else {
       // Current char is \n
       file.print(message[i]);
-      Serial.println("Message Appended");
+      // Serial.println("Message Appended");
       break;
     }
   }
@@ -245,7 +245,7 @@ void spiffsStorageTask(void *pvParameter) {
         Serial.println("Waiting for time config...");
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
-      Serial.printf("Set path to: %s", path);
+      Serial.printf("Set path to: %s\n", path);
       // SPIFFS.remove(path);  // Don't cull on boot
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_SETUP);
       xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
@@ -261,7 +261,7 @@ void spiffsStorageTask(void *pvParameter) {
           rawDataArray[10], rawDataArray[11]);
           
         xSemaphoreGive(rawDataMutex);  // Release mutex
-        Serial.println(message);
+        // Serial.print(message);
         appendLineToFile(SPIFFS, path, message);
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
@@ -324,11 +324,10 @@ void spiffsStorageTask(void *pvParameter) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
                                   BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
               writtenSize += file.write((uint8_t *)&BLEMessageBuffer[0], 509);
-              if(xSemaphoreTake(otaDownloadPercentageMutex, portMAX_DELAY)){
+              if(xSemaphoreTake(otaDownloadPercentageMutex, 0)){
                 otaDownloadPercentage = ((float)writtenSize / (float)updateSize) * 100;
                 xSemaphoreGive(otaDownloadPercentageMutex);
               }
-              // Add setBits for done writing to ack in BLE
               if (++downloadIttr % 5 == 0) {
                 downloadRate = (float)(writtenSize - prevSize) / (millis() - chrono);
                 prevSize = writtenSize;
@@ -336,6 +335,7 @@ void spiffsStorageTask(void *pvParameter) {
                 Serial.printf("%.2fKB/sec\n", downloadRate);
                 Serial.printf("Download percentage: %.2f\n", otaDownloadPercentage);
               }
+              // Add setBits for done writing to ack in BLE
               xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
               if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE) {
                 break;

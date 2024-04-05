@@ -1,3 +1,4 @@
+#include "projdefs.h"
 #include "mygpio.h"
 
 // Sensor object definitions
@@ -10,26 +11,46 @@ float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
 void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
+  uint16_t sensorReadLoop = 0;
   while (1) {
     // Serial.print("Sensor Read from core ");
     // Serial.println(xPortGetCoreID());
-    if(!online.pasco2){
-      setupCO2Sensor(co2Error, co2Sensor);  // Setup PASCO2 Sensor
-    }
-    if(!online.sen5x){
-      setupSENSensor();
-    }
-    if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-      // Acquire mutex
-      mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
-      xSemaphoreGive(rawDataMutex);  // Release mutex
-      // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
-      //   Serial.print(rawDataArray[i]);
-      //   Serial.println(sensorMap[i]);
-      // }
+    sensorReadLoop++;
+    if(sensorReadLoop >= SENSOR_READ_PERIOD_SEC){
+      sensorReadLoop = 0; // Reset counter
+      if(!online.pasco2){
+      setupCO2Sensor(co2Error, co2Sensor);  // Attempt to setup PASCO2 Sensor
+      }
+      if(!online.sen5x){
+        setupSENSensor();                   // Attempt to setup SEN55
+      }
+      if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
+        // Acquire mutex
+        mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+        xSemaphoreGive(rawDataMutex);  // Release mutex
+        // for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
+        //   Serial.print(rawDataArray[i]);
+        //   Serial.println(sensorMap[i]);
+        // }
+      }
     }
 
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    if(!digitalRead(GPIO0_PIN) && xTimerIsTimerActive(gpio0Timer) == pdFALSE){
+      // Button has been pressed the the timer hasn't been started yet
+      if(xTimerStart(gpio0Timer, 0) == pdFALSE)
+        Serial.println("GPIO0 Timer not started");
+      else
+        Serial.println("GPIO0 Timer started!");
+    }
+
+    if(digitalRead(GPIO0_PIN) && xTimerIsTimerActive(gpio0Timer) == pdTRUE){
+      // Button was released while timer was active - kill timer
+      if(xTimerStop(gpio0Timer, 0) == pdTRUE){
+        Serial.println("Stopped timer");
+      }
+    }
+    
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
@@ -112,7 +133,17 @@ float readCOSensor() {
   if (online.co) {
     int COReading = analogRead(pin_COInput);
     // Serial.printf("\tCO: %d\n", COReading);
-    return COReading;
+    if(COReading > 0 && COReading < 500){
+      return 0; // Background levels
+    } else if (COReading > 500 && COReading < 650){
+      return 1; // Low reading
+    } else if (COReading > 650 && COReading < 800){
+      return 2; // Medium
+    } else if (COReading > 800 && COReading < 950){
+      return 3; // High
+    } else {
+     return COReading;
+    }
   }
   return -1;
 }
@@ -151,8 +182,10 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
     do {
       errorPtr = co2Sensor.getCO2(co2PPM);
       if (errorPtr != 0) {
-        Serial.print("Error reading CO2 w/ error code:");
-        Serial.println(errorPtr);
+        if(errorPtr != 7 || errorPtr != 1){
+          Serial.print("Error reading CO2 w/ error code:");
+          Serial.println(errorPtr);
+        }
       }
       delay(500);
     } while (co2PPM == 0);
@@ -205,14 +238,41 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
   Serial.println();
 }
 
+// void GPIO0_ISR(){
+//   BaseType_t xHigherPriorityTaskWoken, xResult;
+//   /* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
+//   xHigherPriorityTaskWoken = pdFALSE;
+
+//   if(digitalRead(GPIO0_PIN) == 1){
+//     xResult = xEventGroupSetBitsFromISR(appStateFlagGroup, APP_FLAG_GPIO0_PRESSED, &xHigherPriorityTaskWoken);
+//     if(xResult != pdFAIL)
+//       Serial.println("GPIO0 Pressed");
+//     else
+//       Serial.println("Failed to set bit on GPIO0 Press");
+//   } else {
+//     xResult = xEventGroupSetBitsFromISR(appStateFlagGroup, APP_FLAG_GPIO0_RELEASED, &xHigherPriorityTaskWoken);
+//     if(xResult != pdFAIL)
+//       Serial.println("GPIO0 Released");
+//     else
+//       Serial.println("Failed to set bit on GPIO0 Release");
+//   }
+// }
+
+void GPIO0_timercb(){
+  Serial.println("Timer expired!");
+  xEventGroupSetBits(appStateFlagGroup, APP_FLAG_FACTORY_ROLLBACK);
+}
+
 void setupGPIO() {
   // Setup I2C
   Serial.println("Setting up GPIO...");
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ_HZ);  // Used for Sparkfun Thing
   // Wire.setClock(I2C_FREQ_HZ);  // 400KHz
-
   setupCO2Sensor(co2Error, co2Sensor);  // Setup PASCO2 Sensor
   setupSENSensor();
   setupMQSensors();
+  pinMode(GPIO0_PIN, INPUT_PULLUP);
+  // attachInterrupt(digitalPinToInterrupt(GPIO0_PIN), GPIO0_ISR, RISING | FALLING);
+
   Serial.println("Successfully set up GPIO.");
 }

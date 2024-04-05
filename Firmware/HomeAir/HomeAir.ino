@@ -28,6 +28,8 @@ EventGroupHandle_t appStateFlagGroup;
 EventGroupHandle_t BLEStateFlagGroup;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
+// Timer creation
+TimerHandle_t  gpio0Timer;
 // Preferences object creation
 Preferences preferences;
 
@@ -46,6 +48,15 @@ void setup() {
   rawDataMutex = xSemaphoreCreateMutex();
   otaDownloadPercentageMutex = xSemaphoreCreateMutex();
 
+  // Setup Timers
+  gpio0Timer = xTimerCreate(
+    "GPIO0 timer",
+    GPIO0_RESET_TIME_MS / portTICK_RATE_MS,
+    pdFALSE,
+    (void *)1,
+    (TimerCallbackFunction_t )GPIO0_timercb
+  );
+
   xTaskCreatePinnedToCore(
     mygpioSensorReadTask,        /*Function to call*/
     "Sensor Read Task",          /*Task name*/
@@ -58,18 +69,18 @@ void setup() {
   xTaskCreatePinnedToCore(
     spiffsStorageTask,        /*Function to call*/
     "SPIFFS Storage Task",    /*Task name*/
-    TEN_KiB,                    /*Stack size*/
+    TEN_KiB,                  /*Stack size*/
     NULL,                     /*Function parameters*/
     5,                        /*Priority*/
     &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_PRIMARY_CORE);        /*Core ID*/
+    ARDUINO_PRIMARY_CORE);    /*Core ID*/
 
   xTaskCreatePinnedToCore(
     BLEServerCommunicationTask,        /*Function to call*/
     "BLE Communication Task",          /*Task name*/
-    TEN_KiB,                             /*Stack size*/
+    TEN_KiB,                           /*Stack size*/
     NULL,                              /*Function parameters*/
-    10,                                 /*Priority*/
+    10,                                /*Priority*/
     &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_PRIMARY_CORE);             /*Core ID*/
 
@@ -85,9 +96,9 @@ void setup() {
   xTaskCreatePinnedToCore(
     screendriverRunScreenTask,        /*Function to call*/
     "Epaper Update Task",             /*Task name*/
-    TEN_KiB,                            /*Stack size*/
+    TEN_KiB,                          /*Stack size*/
     NULL,                             /*Function parameters*/
-    1,                               /*Priority*/
+    1,                                /*Priority*/
     &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
     ARDUINO_AUX_CORE);                /*Core ID*/
 }

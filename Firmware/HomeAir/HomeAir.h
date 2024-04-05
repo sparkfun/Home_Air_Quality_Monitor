@@ -26,6 +26,7 @@
 #include "freertos/task.h"
 #include <Preferences.h>
 #include "esp_ota_ops.h"
+#include "esp_timer.h"
 
 extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
   BLEServerCommunicationTaskHandle, timekeepingSyncTaskHandle,
@@ -33,7 +34,7 @@ extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
 
 extern Preferences preferences;
 extern SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
-
+extern TimerHandle_t  gpio0Timer;
 
 #define VERSION_NUMBER 201
 #define FORMAT_SPIFFS_IF_FAILED false

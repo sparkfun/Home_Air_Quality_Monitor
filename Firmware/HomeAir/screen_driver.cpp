@@ -248,11 +248,11 @@ void drawClock(bool indicatorOn) {
 }
 
 void firmwareUpdateScreen() {
-  if(xSemaphoreTake(otaDownloadPercentageMutex, portMAX_DELAY)){
+  if(xSemaphoreTake(otaDownloadPercentageMutex, 0)){
       deviceScreen.firmwareUpdateScreen(otaDownloadPercentage);
       xSemaphoreGive(otaDownloadPercentageMutex);
     } else {
-      Serial.println("Couldn't acquire otaProgress semaphore!");
+      Serial.println("Couldn't acquire otaProgress mutex!");
     }
 }
 
@@ -292,7 +292,7 @@ int drawScreen(int state) {
     #endif 
     deviceScreen.flush();
     return state;
-  } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_RUNNING) {
+  } else if (xEventGroupGetBits(appStateFlagGroup) & (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
     // draw sensor screen
     // preferences.putUShort("refreshPeriod", preferences.getUShort("savedRefreshPeriod"));
     updateSensorFrames();
@@ -302,6 +302,7 @@ int drawScreen(int state) {
   } else {
     Serial.println("Warning: Unkown flag state in EPD, reverting to displaying sensor data");
     updateSensorFrames();
+    printCurrentAppFlagStatus();
   }
   deviceScreen.flush();
   return 0;

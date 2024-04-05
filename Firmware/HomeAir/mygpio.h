@@ -16,8 +16,11 @@
 #include "HomeAir.h"
 
 #define USE_NOX
+#define SENSOR_READ_PERIOD_SEC 15
+#define GPIO0_RESET_TIME_SEC 10
+#define GPIO0_RESET_TIME_MS GPIO0_RESET_TIME_SEC * 1000
 
-
+#define GPIO0_PIN 0
 /*
   0: CO2 PPM - PASCO2
   1: PPM 1.0 - SEN
@@ -88,6 +91,7 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size);
 void mygpioSensorReadTask(void *pvParameter);
 void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr);
 void setupSENSensor(void);
+void GPIO0_timercb();
 
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];

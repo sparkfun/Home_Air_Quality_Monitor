@@ -16,7 +16,7 @@
 // Pin defns for breadboard
 
 // #define HOMEAIR_BOARD 1
-// #define ANTON_BOARD 1
+#define ANTON_BOARD 1
 
 #define SHOW_READINGS_WITHOUT_CONNECTION 1
 #define ROTATE_FRAMES 1
