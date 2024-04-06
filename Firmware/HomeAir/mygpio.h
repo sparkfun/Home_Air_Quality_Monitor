@@ -3,24 +3,27 @@
 // Non-standard data types
 #include <float16.h>
 // ESP32 Built-ins
+#include "driver/adc.h"
 #include "driver/gpio.h"
 #include "driver/i2c.h"
-#include <Arduino.h>
-#include "driver/adc.h"
 #include "esp32-hal-adc.h"
+#include <Arduino.h>
+
 
 // Vendor Libraries
-#include <pas-co2-ino.hpp>      // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.2
-#include <SensirionI2CSen5x.h>  // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
+#include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
+#include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.2
+
 // HomeAir Files
 #include "HomeAir.h"
 
 #define USE_NOX
 #define SENSOR_READ_PERIOD_SEC 15
-#define GPIO0_RESET_TIME_SEC 10
+#define GPIO0_RESET_TIME_SEC 5
 #define GPIO0_RESET_TIME_MS GPIO0_RESET_TIME_SEC * 1000
 
 #define GPIO0_PIN 0
+#define DBG_LED 34 // On-board LED for debugging
 /*
   0: CO2 PPM - PASCO2
   1: PPM 1.0 - SEN
@@ -67,9 +70,8 @@ enum sensorMap {
 };
 #endif
 
-
 const uint32_t I2C_FREQ_HZ = 100000;
-#if  defined(HOMEAIR_BOARD) || defined(ANTON_BOARD)
+#if defined(HOMEAIR_BOARD) || defined(ANTON_BOARD)
 const uint8_t I2C_SDA_PIN = 8;
 const uint8_t I2C_SCL_PIN = 9;
 #else
@@ -92,7 +94,6 @@ void mygpioSensorReadTask(void *pvParameter);
 void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr);
 void setupSENSensor(void);
 void GPIO0_timercb();
-
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];
 

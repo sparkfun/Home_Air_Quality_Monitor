@@ -55,7 +55,9 @@ uint16_t getPPM25AQI(float ppm25) {
     breakpointHigh = 500;
     breakpointLow = 350.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm25 - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (ppm25 - breakpointLow) +
+          indexLow);
 }
 
 uint16_t getPPM10AQI(float ppm10) {
@@ -99,7 +101,9 @@ uint16_t getPPM10AQI(float ppm10) {
     breakpointHigh = 604;
     breakpointLow = 505;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (ppm10 - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (ppm10 - breakpointLow) +
+          indexLow);
 }
 
 uint16_t getCOAQI(float CO) {
@@ -107,7 +111,7 @@ uint16_t getCOAQI(float CO) {
   float indexHigh, indexLow;
   float breakpointHigh, breakpointLow;
 
-  if (CO > 0 && CO < 4.4) {
+  if (CO >= 0 && CO < 4.4) {
     indexHigh = 50;
     indexLow = 0;
     breakpointHigh = 4.4;
@@ -143,22 +147,26 @@ uint16_t getCOAQI(float CO) {
     breakpointHigh = 50.4;
     breakpointLow = 40.5;
   }
-  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * (CO - breakpointLow) + indexLow);
+  return (((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+              (CO - breakpointLow) +
+          indexLow);
 }
 
 float aqiGetCompositeAQI(float ppm25, float ppm10, float CO) {
   float AQI25 = getPPM25AQI(ppm25);
   float AQI10 = getPPM10AQI(ppm10);
-  float AQICO = getCOAQI(CO);
+  // float AQICO = getCOAQI(CO);
 
-  if (AQI25 > AQI10 && AQI25 > AQICO) {
-    // Serial.println("AQI Source: PPM 2.5");
-    return AQI25;
-  } else if (AQI10 > AQI25 && AQI10 > AQICO) {
-    // Serial.println("AQI Source: PPM 10.0");
-    return AQI10;
-  } else {
-    // Serial.println("AQI Source: CO");
-    return AQICO;
-  }
+  return (AQI25 >= AQI10) ? AQI25 : AQI10;
+
+  // if (AQI25 > AQI10 && AQI25 > AQICO) {
+  //   // Serial.println("AQI Source: PPM 2.5");
+  //   return AQI25;
+  // } else if (AQI10 > AQI25 && AQI10 > AQICO) {
+  //   // Serial.println("AQI Source: PPM 10.0");
+  //   return AQI10;
+  // } else {
+  //   // Serial.println("AQI Source: CO");
+  //   return AQICO;
+  // }
 }

@@ -18,7 +18,7 @@
 // #define HOMEAIR_BOARD 1
 #define ANTON_BOARD 1
 
-#define SHOW_READINGS_WITHOUT_CONNECTION 1
+// #define SHOW_READINGS_WITHOUT_CONNECTION 1
 #define ROTATE_FRAMES 1
 #define ADJUST_REFRESH_RATE 1 //if enabled then refresh rate will be set to 1 second when pairing or updating
 

@@ -22,22 +22,23 @@ char BLEMessageBuffer[BLE_BUFFER_LENGTH];
 // Task handle definitions
 TaskHandle_t mygpioSensorReadTaskHandle;
 TaskHandle_t spiffsStorageTaskHandle, BLEServerCommunicationTaskHandle,
-  timekeepingSyncTaskHandle, screendriverRunScreenTaskHandle;
+    timekeepingSyncTaskHandle, screendriverRunScreenTaskHandle;
 // Flag Group definitions
 EventGroupHandle_t appStateFlagGroup;
 EventGroupHandle_t BLEStateFlagGroup;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
 // Timer creation
-TimerHandle_t  gpio0Timer;
+TimerHandle_t gpio0Timer;
 // Preferences object creation
 Preferences preferences;
 
 void setup() {
   // Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
-  Serial.write("Setting up main tasks...");
-  // setupPreferences();
+  Serial.println("Setting up main tasks...");
+  setupPreferences();
+  delay(1000);
   // setupTime();
   // Setup Flag Event Groups
   appStateFlagGroup = xEventGroupCreate();
@@ -49,58 +50,54 @@ void setup() {
   otaDownloadPercentageMutex = xSemaphoreCreateMutex();
 
   // Setup Timers
-  gpio0Timer = xTimerCreate(
-    "GPIO0 timer",
-    GPIO0_RESET_TIME_MS / portTICK_RATE_MS,
-    pdFALSE,
-    (void *)1,
-    (TimerCallbackFunction_t )GPIO0_timercb
-  );
+  gpio0Timer =
+      xTimerCreate("GPIO0 timer", GPIO0_RESET_TIME_MS / portTICK_RATE_MS,
+                   pdFALSE, (void *)1, (TimerCallbackFunction_t)GPIO0_timercb);
 
   xTaskCreatePinnedToCore(
-    mygpioSensorReadTask,        /*Function to call*/
-    "Sensor Read Task",          /*Task name*/
-    4096,                        /*Stack size*/
-    NULL,                        /*Function parameters*/
-    4,                           /*Priority*/
-    &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);           /*Core ID*/
+      mygpioSensorReadTask,        /*Function to call*/
+      "Sensor Read Task",          /*Task name*/
+      4096,                        /*Stack size*/
+      NULL,                        /*Function parameters*/
+      4,                           /*Priority*/
+      &mygpioSensorReadTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);           /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    spiffsStorageTask,        /*Function to call*/
-    "SPIFFS Storage Task",    /*Task name*/
-    TEN_KiB,                  /*Stack size*/
-    NULL,                     /*Function parameters*/
-    5,                        /*Priority*/
-    &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_PRIMARY_CORE);    /*Core ID*/
+      spiffsStorageTask,        /*Function to call*/
+      "SPIFFS Storage Task",    /*Task name*/
+      10 * TEN_KiB,                  /*Stack size*/
+      NULL,                     /*Function parameters*/
+      5,                        /*Priority*/
+      &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_PRIMARY_CORE);    /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    BLEServerCommunicationTask,        /*Function to call*/
-    "BLE Communication Task",          /*Task name*/
-    TEN_KiB,                           /*Stack size*/
-    NULL,                              /*Function parameters*/
-    10,                                /*Priority*/
-    &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_PRIMARY_CORE);             /*Core ID*/
+      BLEServerCommunicationTask,        /*Function to call*/
+      "BLE Communication Task",          /*Task name*/
+      TEN_KiB,                           /*Stack size*/
+      NULL,                              /*Function parameters*/
+      10,                                /*Priority*/
+      &BLEServerCommunicationTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_PRIMARY_CORE);             /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    timekeepingSyncTask,        /*Function to call*/
-    "Time Sync Task",           /*Task name*/
-    4192,                       /*Stack size*/
-    NULL,                       /*Function parameters*/
-    2,                          /*Priority*/
-    &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);          /*Core ID*/
+      timekeepingSyncTask,        /*Function to call*/
+      "Time Sync Task",           /*Task name*/
+      4192,                       /*Stack size*/
+      NULL,                       /*Function parameters*/
+      2,                          /*Priority*/
+      &timekeepingSyncTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);          /*Core ID*/
 
   xTaskCreatePinnedToCore(
-    screendriverRunScreenTask,        /*Function to call*/
-    "Epaper Update Task",             /*Task name*/
-    TEN_KiB,                          /*Stack size*/
-    NULL,                             /*Function parameters*/
-    1,                                /*Priority*/
-    &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
-    ARDUINO_AUX_CORE);                /*Core ID*/
+      screendriverRunScreenTask,        /*Function to call*/
+      "Epaper Update Task",             /*Task name*/
+      TEN_KiB,                          /*Stack size*/
+      NULL,                             /*Function parameters*/
+      1,                                /*Priority*/
+      &screendriverRunScreenTaskHandle, /*ptr to global TaskHandle_t*/
+      ARDUINO_AUX_CORE);                /*Core ID*/
 }
 // All loop functionality is completed with the tasks defined in setup()
 void loop() {}
