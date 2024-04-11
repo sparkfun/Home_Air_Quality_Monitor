@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_ble_peripheral
   share_plus
   url_launcher_windows
 )
