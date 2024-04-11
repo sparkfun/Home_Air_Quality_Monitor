@@ -2,26 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class TempPage extends StatefulWidget {
   @override
   State<TempPage> createState() => _TempPageState();
 }
 
 class _TempPageState extends State<TempPage> {
-  final Random _random = Random();
   bool isCelsius = true; // Default unit is Celsius
+  double? currentTemp;
+  double? averageTemp;
+  double? maxTemp;
+  double? minTemp;
+  List<FlSpot> tempSpots = [];
 
-  List<FlSpot> generateRandomData() {
-    return List.generate(
-        10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
+  @override
+  void initState() {
+    super.initState();
+    fetchTempData();
   }
 
-  // Fixed values for testing only, in Fahrenheit
-  int currentValue = 32;
-  int averageOverTwoFourHour = 43;
-  int max = 67;
-  int min = 22;
 
+  Future<void> fetchTempData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      currentTemp = lastTwentyFourHourPackets.first.temp;
+
+      double totalTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce((a, b) => a + b);
+      averageTemp = totalTemp / lastTwentyFourHourPackets.length;
+
+      maxTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce(max);
+      minTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce(min);
+
+      tempSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.temp)).toList();
+    }
+
+    setState(() {});
+  }
   // Convert Fahrenheit to Celsius
   double fahrenheitToCelsius(int fahrenheit) {
     return (fahrenheit - 32) * 5 / 9;
@@ -57,11 +77,6 @@ class _TempPageState extends State<TempPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> data = generateRandomData();
-    double displayCurrentValue = isCelsius ? fahrenheitToCelsius(currentValue) : currentValue.toDouble();
-    double displayAverage = isCelsius ? fahrenheitToCelsius(averageOverTwoFourHour) : averageOverTwoFourHour.toDouble();
-    double displayMax = isCelsius ? fahrenheitToCelsius(max) : max.toDouble();
-    double displayMin = isCelsius ? fahrenheitToCelsius(min) : min.toDouble();
 
     return Scaffold(
       appBar: AppBar(
@@ -92,40 +107,77 @@ class _TempPageState extends State<TempPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: TEMPColor(displayCurrentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('${displayCurrentValue.toStringAsFixed(1)}${isCelsius ? '°C' : '°F'}',
-                          style: TextStyle(fontSize: 60, color: Colors.white))),
+           const SizedBox(height: 10), //Spacing between the "boxes"
+             const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(currentTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${currentTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(averageTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${averageTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                  child: Text(
-                    'The Temperature is ${TEMPmessage(displayCurrentValue)}',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                ),
+                    child: Text('Temperature is ${TEMPmessage(currentTemp?.toDouble() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
+
             const Divider(
               thickness: 3,
               indent: 20,
               endIndent: 20,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                '24 Hour Temperature Graph',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+
+            const Padding(
+              padding: EdgeInsets.all(6.0),
+              child: ListTile(
+                title: Center(
+                    child:
+                        Text('24 Hour Span', style: TextStyle(fontSize: 30))),
               ),
             ),
             Padding(
@@ -161,7 +213,7 @@ class _TempPageState extends State<TempPage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: tempSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         color: Colors.blue,
@@ -172,45 +224,55 @@ class _TempPageState extends State<TempPage> {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: TEMPColor(displayAverage),
-                child: ListTile(
-                  title: Center(
-                    child: Text(
-                      'Avg: ${displayAverage.toStringAsFixed(1)}${isCelsius ? '°C' : '°F'}',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Card(
-                  color: TEMPColor(displayMax),
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Max: ${displayMax.toStringAsFixed(1)}${isCelsius ? '°C' : '°F'}',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Maximum',
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
-                Card(
-                  color: TEMPColor(displayMin),
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Min: ${displayMin.toStringAsFixed(1)}${isCelsius ? '°C' : '°F'}',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Minimum', style: TextStyle(fontSize: 25)),
                 ),
               ],
             ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(maxTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${maxTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(minTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${minTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+
                         const Divider(
               thickness: 3,
               indent: 20,
@@ -234,7 +296,7 @@ class _TempPageState extends State<TempPage> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Extremely Cold',
+                      child: Text('Very Cold',
                           style: TextStyle(fontSize: 28, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
@@ -282,7 +344,7 @@ class _TempPageState extends State<TempPage> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Moderate',
+                      child: Text('Comfortable',
                           style: TextStyle(fontSize: 30, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
@@ -306,7 +368,7 @@ class _TempPageState extends State<TempPage> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Moderately Warm',
+                      child: Text('Warm',
                           style: TextStyle(fontSize: 30, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),

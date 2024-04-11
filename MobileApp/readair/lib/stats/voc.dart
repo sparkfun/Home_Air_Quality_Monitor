@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class VOCPage extends StatefulWidget {
   @override
   State<VOCPage> createState() => _VOCPageState();
@@ -16,12 +18,37 @@ class _VOCPageState extends State<VOCPage> {
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
-  //fixed values for testing only
-  int currentValue = 55; //The Current Value
-  int averageOverTwoFourHour = 43; //Average over past 24 hours
-  int max = 121; //Maximum value over past 24 hours
-  int min = 22; //Minimum value over past 24 hours
 
+  double? current;
+  double? average;
+  double? maxVal;
+  double? minVal;
+  List<FlSpot> valSpots = [];
+
+      @override
+  void initState() {
+    super.initState();
+    fetchValData();
+  }
+
+    Future<void> fetchValData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      current = lastTwentyFourHourPackets.first.voc;
+
+      double totalVal = lastTwentyFourHourPackets.map((packet) => packet.voc).reduce((a, b) => a + b);
+      average = totalVal / lastTwentyFourHourPackets.length;
+
+      maxVal = lastTwentyFourHourPackets.map((packet) => packet.voc).reduce(max);
+      minVal = lastTwentyFourHourPackets.map((packet) => packet.voc).reduce(min);
+
+      valSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.voc)).toList();
+    }
+
+    setState(() {});
+  }
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
     if (value <= 220) {
@@ -61,31 +88,67 @@ class _VOCPageState extends State<VOCPage> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("VOC"),
+        title: Text("Volatile Organic Compounds (ppb)"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(currentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$currentValue (ppb)',
-                          style: TextStyle(fontSize: 60))),
-                  textColor: Colors.white70,
+              const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(current?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${current?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(average?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${average?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('VOC is ${message(currentValue)}',
-                        style: TextStyle(fontSize: 25))),
+                    child: Text('VOC is ${message(current?.toInt() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
@@ -103,7 +166,6 @@ class _VOCPageState extends State<VOCPage> {
                         Text('24 Hour Span', style: TextStyle(fontSize: 30))),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -136,7 +198,7 @@ class _VOCPageState extends State<VOCPage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: valSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -149,32 +211,10 @@ class _VOCPageState extends State<VOCPage> {
               ),
             ),
 
-            const Divider(
+           const Divider(
               thickness: 3,
               indent: 20,
               endIndent: 20,
-            ),
-
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(averageOverTwoFourHour),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$averageOverTwoFourHour (ppb)',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                ),
-              ),
             ),
 
             const Row(
@@ -184,7 +224,7 @@ class _VOCPageState extends State<VOCPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -200,26 +240,26 @@ class _VOCPageState extends State<VOCPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(max),
+                      color: CoordinatedColor(maxVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max (ppb)',
+                          Text('${maxVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 40, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(min),
+                      color: CoordinatedColor(minVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min (ppb)',
+                          Text('${minVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 40, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),

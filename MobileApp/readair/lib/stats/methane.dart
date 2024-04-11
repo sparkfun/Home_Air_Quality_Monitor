@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class MethanePage extends StatefulWidget {
   @override
   State<MethanePage> createState() => _MethanePageState();
@@ -16,11 +18,36 @@ class _MethanePageState extends State<MethanePage> {
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
-  //fixed values for testing only
-  int currentValue = 40; //The Current Value
-  int averageOverTwoFourHour = 94; //Average over past 24 hours
-  int max = 114; //Maximum value over past 24 hours
-  int min = 27; //Minimum value over past 24 hours
+  double? current;
+  double? average;
+  double? maxVal;
+  double? minVal;
+  List<FlSpot> valSpots = [];
+
+      @override
+  void initState() {
+    super.initState();
+    fetchValData();
+  }
+
+    Future<void> fetchValData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      current = lastTwentyFourHourPackets.first.ng;
+
+      double totalVal = lastTwentyFourHourPackets.map((packet) => packet.ng).reduce((a, b) => a + b);
+      average = totalVal / lastTwentyFourHourPackets.length;
+
+      maxVal = lastTwentyFourHourPackets.map((packet) => packet.ng).reduce(max);
+      minVal = lastTwentyFourHourPackets.map((packet) => packet.ng).reduce(min);
+
+      valSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.ng)).toList();
+    }
+
+    setState(() {});
+  }
 
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
@@ -61,31 +88,67 @@ class _MethanePageState extends State<MethanePage> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Methane"),
+        title: Text("Methane (ppm)"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(currentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$currentValue (ppm)',
-                          style: TextStyle(fontSize: 58))),
-                  textColor: Colors.white70,
+              const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(current?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${current?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(average?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${average?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('Methane is ${message(currentValue)}',
-                        style: TextStyle(fontSize: 25))),
+                    child: Text('Methane is ${message(current?.toInt() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
@@ -136,7 +199,7 @@ class _MethanePageState extends State<MethanePage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: valSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -155,28 +218,6 @@ class _MethanePageState extends State<MethanePage> {
               endIndent: 20,
             ),
 
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(averageOverTwoFourHour),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$averageOverTwoFourHour (ppm)',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                ),
-              ),
-            ),
-
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -184,7 +225,7 @@ class _MethanePageState extends State<MethanePage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -200,26 +241,26 @@ class _MethanePageState extends State<MethanePage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(max),
+                      color: CoordinatedColor(maxVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max (ppm)',
+                          Text('${maxVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 30, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(min),
+                      color: CoordinatedColor(minVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min (ppm)',
+                          Text('${minVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 30, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),

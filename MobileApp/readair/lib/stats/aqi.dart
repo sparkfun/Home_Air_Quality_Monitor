@@ -17,12 +17,13 @@ class AQIPage extends StatefulWidget {
 }
 
 class _AQIPageState extends State<AQIPage> {
-    List<DataPacket> packets = [];
+  List<DataPacket> packets = [];
   final Random _random = Random();
 
   int? AQIcurrentValue;
   int? AQImax;
   int? AQImin;
+  double? averageOverTwoFourHour;  // Variable to hold the average
   List<FlSpot> aqiSpots = [];
 
   @override
@@ -40,16 +41,21 @@ class _AQIPageState extends State<AQIPage> {
       });
     }
 
-    // Fetch the last 5 AQI measurements
-    List<DataPacket> lastFivePackets =
-        await DatabaseService.instance.getLastFivePackets();
-    aqiSpots = List.generate(
-      lastFivePackets.length,
-      (index) => FlSpot(index.toDouble(), lastFivePackets[index].aqi),
-    ).reversed.toList();
+    // Fetch the AQI measurements for the last 24 hours
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+    
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      double totalAqi = lastTwentyFourHourPackets.map((packet) => packet.aqi).reduce((a, b) => a + b);
+      averageOverTwoFourHour = totalAqi / lastTwentyFourHourPackets.length;
+    }
 
-    AQImax = lastFivePackets.map((packet) => packet.aqi.toInt()).reduce(max);
-    AQImin = lastFivePackets.map((packet) => packet.aqi.toInt()).reduce(min);
+    aqiSpots = lastTwentyFourHourPackets.map((packet) => FlSpot(
+      lastTwentyFourHourPackets.indexOf(packet).toDouble(), packet.aqi)
+    ).toList();
+
+    AQImax = lastTwentyFourHourPackets.map((packet) => packet.aqi.toInt()).reduce(max);
+    AQImin = lastTwentyFourHourPackets.map((packet) => packet.aqi.toInt()).reduce(min);
 
     setState(() {});
   }
@@ -110,43 +116,69 @@ class _AQIPageState extends State<AQIPage> {
         child: Column(
           children: [
             const SizedBox(height: 10), //Spacing between the "boxes"
-
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIcurrentValue ?? 0),
-                child: ListTile(
-                  title: Center(
-                      child: Text('AQI', style: TextStyle(fontSize: 25))),
-                  subtitle: Center(
-                      child: Text('${AQIcurrentValue ?? "N/A"}', style: TextStyle(fontSize: 60))),
-                  textColor: Colors.white70,
-
-                  //trailing: Icon(Icons.wb_sunny, size: 40),
+             const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: AQIColor(averageOverTwoFourHour?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${AQIcurrentValue?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: AQIColor(averageOverTwoFourHour?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('$averageOverTwoFourHour',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('The AQI is ${AQImessage(AQIcurrentValue ?? 0)}',
-                        style: TextStyle(fontSize: 25))),
-
-                //trailing: Icon(Icons.wb_sunny, size: 40),
+                    child: Text('Air Quality Index is ${AQImessage(AQIcurrentValue?.toInt() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
-            //SizedBox(height: 10), //spacing beween the "boxes"
             const Divider(
               thickness: 3,
               indent: 20,
               endIndent: 20,
             ),
-            // add more stuff here!!
-            //const SizedBox(height: 2), //Spacing between the "boxes"
 
             GraphWidget(title: "Air Quality Index Over Time", dataPoints: dataPoints),
 
@@ -154,34 +186,6 @@ class _AQIPageState extends State<AQIPage> {
               thickness: 3,
               indent: 20,
               endIndent: 20,
-            ),
-
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
-
-            const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                //IF STATEMENT! Change color with Quality of Air
-                color: AQIColor(AQIcurrentValue ?? 0),
-                child: ListTile(
-                  title: const Center(
-                      child: Text('AQI', style: TextStyle(fontSize: 20)),),
-                  subtitle: Center(
-                      child: Text('${AQIcurrentValue ?? "N/A"}',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                  
-                  //trailing: Icon(Icons.wb_sunny, size: 40),
-                ),
-              ),
             ),
 
             const Row(

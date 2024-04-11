@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class HumidPage extends StatefulWidget {
   @override
   State<HumidPage> createState() => _HumidPageState();
@@ -16,11 +18,36 @@ class _HumidPageState extends State<HumidPage> {
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
-  //fixed values for testing only
-  int currentValue = 55; //The Current Value
-  int averageOverTwoFourHour = 43; //Average over past 24 hours
-  int max = 67; //Maximum value over past 24 hours
-  int min = 22; //Minimum value over past 24 hours
+  double? current;
+  double? average;
+  double? maxVal;
+  double? minVal;
+  List<FlSpot> valSpots = [];
+
+      @override
+  void initState() {
+    super.initState();
+    fetchHumidData();
+  }
+
+    Future<void> fetchHumidData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      current = lastTwentyFourHourPackets.first.humid;
+
+      double totalVal = lastTwentyFourHourPackets.map((packet) => packet.humid).reduce((a, b) => a + b);
+      average = totalVal / lastTwentyFourHourPackets.length;
+
+      maxVal = lastTwentyFourHourPackets.map((packet) => packet.humid).reduce(max);
+      minVal = lastTwentyFourHourPackets.map((packet) => packet.humid).reduce(min);
+
+      valSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.humid)).toList();
+    }
+
+    setState(() {});
+  }
 
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
@@ -61,7 +88,7 @@ class _HumidPageState extends State<HumidPage> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Humidity"),
+        title: Text("Humidity (%)"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -74,7 +101,7 @@ class _HumidPageState extends State<HumidPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Current Humidity',
-                    style: TextStyle(fontSize: 20, color: Colors.black),
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
                 Padding(
@@ -90,11 +117,11 @@ class _HumidPageState extends State<HumidPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(currentValue),
+                      color: CoordinatedColor(current?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$currentValue%',
+                          Text('${current?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -103,11 +130,11 @@ class _HumidPageState extends State<HumidPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(averageOverTwoFourHour),
+                      color: CoordinatedColor(average?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$averageOverTwoFourHour%',
+                          Text('${average?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -132,7 +159,7 @@ class _HumidPageState extends State<HumidPage> {
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('The Humidity is ${message(currentValue)}',
+                    child: Text('The Humidity is ${message(current?.toInt() ?? 0)}',
                         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
@@ -184,7 +211,7 @@ class _HumidPageState extends State<HumidPage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: valSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -232,7 +259,7 @@ class _HumidPageState extends State<HumidPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -248,11 +275,11 @@ class _HumidPageState extends State<HumidPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(max),
+                      color: CoordinatedColor(maxVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max%',
+                          Text('${maxVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 50, color: Colors.white70)),
                         ],
@@ -261,11 +288,11 @@ class _HumidPageState extends State<HumidPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(min),
+                      color: CoordinatedColor(minVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min%',
+                          Text('${minVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 50, color: Colors.white70)),
                         ],

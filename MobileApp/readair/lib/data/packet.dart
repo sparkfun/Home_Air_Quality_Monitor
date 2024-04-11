@@ -299,4 +299,21 @@ class DatabaseService {
     }
     return null;
   }
+
+  Future<List<DataPacket>> getPacketsForLastHours(int hours) async {
+  final db = await database;
+  final int now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  final int hoursAgo = now - (hours * 3600); // 3600 seconds in an hour
+
+  final List<Map<String, dynamic>> maps = await db.query(
+    'data_packets',
+    where: 'epochTime > ?',
+    whereArgs: [hoursAgo],
+    orderBy: 'epochTime DESC'
+  );
+
+  return maps.map((map) => DataPacket.fromMap(map)).toList();
 }
+}
+
+

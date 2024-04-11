@@ -3,10 +3,30 @@ import 'package:get/get.dart';
 import 'package:readair/BLE/ble_setup.dart';
 import 'package:readair/main.dart';
 import 'package:readair/settings/display.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomizePage extends StatefulWidget {
   @override
   State<CustomizePage> createState() => _CustomizePageState();
+}
+
+class DebugController extends GetxController {
+  RxBool isDebug = false.obs;
+
+  void toggleDebugMode() {
+    isDebug.value = !isDebug.value;
+    saveDebugPreference(); // Save the preference when toggling
+  }
+
+  Future<void> loadDebugPreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    isDebug.value = prefs.getBool('debugMode') ?? false;
+  }
+
+  Future<void> saveDebugPreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('debugMode', isDebug.value);
+  }
 }
 
 class _CustomizePageState extends State<CustomizePage> {
@@ -14,6 +34,7 @@ class _CustomizePageState extends State<CustomizePage> {
   Widget build(BuildContext context) {
     final BluetoothController bluetoothController = Get.find();
     final ThemeController themeController = Get.find();
+    final DebugController debugController = Get.find<DebugController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -32,6 +53,13 @@ class _CustomizePageState extends State<CustomizePage> {
                   themeController.toggleTheme();
                 },
               )),
+          Obx(() => SwitchListTile(
+                title: Text("Debug Mode"),
+                value: debugController.isDebug.value,
+                onChanged: (bool value) {
+                  debugController.toggleDebugMode();
+                },
+              )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
@@ -41,7 +69,8 @@ class _CustomizePageState extends State<CustomizePage> {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("Please connect and subscribe to a device first."),
+                      content: Text(
+                          "Please connect and subscribe to a device first."),
                     ),
                   );
                 }

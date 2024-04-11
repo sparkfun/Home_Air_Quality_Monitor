@@ -54,19 +54,21 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-    Future<void> _onPullToRefresh() async {
-    final BluetoothController bluetoothController = Get.find<BluetoothController>();
+  Future<void> _onPullToRefresh() async {
+    final BluetoothController bluetoothController =
+        Get.find<BluetoothController>();
 
     // Send the UPDAT command if subscribed and a device is connected
-    if (bluetoothController.isSubscribed.value && bluetoothController.connectedDevice != null) {
-      await bluetoothController.sendData(bluetoothController.connectedDevice!, "UPDAT");
+    if (bluetoothController.isSubscribed.value &&
+        bluetoothController.connectedDevice != null) {
+      await bluetoothController.sendData(
+          bluetoothController.connectedDevice!, "UPDAT");
       //await Future.delayed(Duration(seconds: 1)); // Wait for the command to take effect
     }
 
     // Fetch the latest data after sending the UPDAT command
     await _fetchLatestData();
   }
-
 
   Future<void> _fetchLatestData() async {
     DataPacket? latestPacket = await DatabaseService.instance.getLastPacket();
@@ -86,8 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     _showRefreshedMessage();
   }
-
-
 
   void _showRefreshedMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -123,18 +123,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Row(
                   children: [
                     Text(
-                      'Welcome',
+                      'Welcome v1.1',
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     Spacer(),
-                              Obx(() => Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                          Icons.circle,
-                                          color: bluetoothController.isSubscribed.value ? Colors.green : Colors.red,
-                                        ),
-                              )),
+                    Obx(() => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.bluetooth_connected,
+                            color: bluetoothController.isSubscribed.value
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        )),
                     IconButton(
                         onPressed: () {
                           Navigator.push(
@@ -162,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 endIndent: 20,
               ),
               SizedBox(height: 10),
-              GestureDetector(
+                            GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -170,34 +172,51 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
                 child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      title: Text('Air Quality Index: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      subtitle: Text('The Air Quality is Normal'),
-                      trailing: Container(
-                        width: 80,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: LinearProgressIndicator(
-                                value: 0.6, // Example value
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.orange),
-                                backgroundColor: Colors.grey[300],
-                              ),
-                            ),
-                            SizedBox(width: 5),
-                            Text('medium', style: TextStyle(fontSize: 10)),
-                          ],
-                        ),
-                      ),
-                    ),
+                  child: ListTile(
+                    title: Text(
+                        'Air Quality Index: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.air, size: 40),
                   ),
                 ),
               ),
+              // GestureDetector(
+              //   onTap: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => AQIPage()),
+              //     );
+              //   },
+              //   child: Card(
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(8.0),
+              //       child: ListTile(
+              //         title: Text(
+              //             'Air Quality Index: ${aqi?.toStringAsFixed(1) ?? 'N/A'}',
+              //             style: TextStyle(
+              //                 fontSize: 20, fontWeight: FontWeight.bold)),
+              //         subtitle: Text('The Air Quality is Normal'),
+              //         trailing: Container(
+              //           width: 80,
+              //           child: Row(
+              //             children: [
+              //               Expanded(
+              //                 child: LinearProgressIndicator(
+              //                   value: 0.6, // Example value
+              //                   valueColor: AlwaysStoppedAnimation<Color>(
+              //                       Colors.orange),
+              //                   backgroundColor: Colors.grey[300],
+              //                 ),
+              //               ),
+              //               SizedBox(width: 5),
+              //               Text('medium', style: TextStyle(fontSize: 10)),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
@@ -208,38 +227,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: Card(
                   child: ListTile(
-                    title: Text('Temperature: ${temp?.toStringAsFixed(1) ?? 'N/A'}°C',
+                    title: Text(
+                        'Temperature: ${temp?.toStringAsFixed(1) ?? 'N/A'}°C',
                         style: TextStyle(fontSize: 20)),
                     trailing: Icon(Icons.wb_sunny, size: 40),
                   ),
                 ),
               ),
               SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => CO2Page()),
-                        );
-                      },
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            children: [
-                              Icon(Icons.cloud),
-                              Text(
-                                  'Carbon Dioxide: ${co2?.toStringAsFixed(1) ?? 'N/A'} PPM'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CO2Page()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text(
+                        'Carbon Dioxide: ${co2?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.cloud, size: 40),
                   ),
-                ],
+                ),
               ),
               SizedBox(height: 10),
               GestureDetector(
@@ -252,162 +262,93 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Card(
                   child: ListTile(
                     title: Text(
-                        '${humid?.toStringAsFixed(1) ?? 'N/A'}% Humidity',
+                        'Humidity: ${humid?.toStringAsFixed(1) ?? 'N/A'}% ',
                         style: TextStyle(fontSize: 20)),
                     trailing: Icon(Icons.water_drop, size: 40),
                   ),
                 ),
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 100,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => COPage()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Carbon Monoxide: ${co?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 15)),
-                            Icon(Icons.cloud_circle),
-                          ],
-                        ),
-                      ),
-                    ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => COPage()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text(
+                        'Carbon Monoxide: ${co?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.cloud_circle, size: 40),
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 100,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => VOCPage()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('VOC: ${voc?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 18)),
-                            Icon(Icons.heat_pump_rounded),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 70,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ppm2p5Page()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                                'PPM 2.5: ${ppm2_5?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 18)),
-                          ],
-                        ),
-                      ),
-                    ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => VOCPage()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text('Volatile Organic Compounds: ${voc?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 16)),
+                    trailing: Icon(Icons.heat_pump_rounded, size: 40),
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 70,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ppm10p0Page()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                                'PPM 10.0: ${ppm10_0?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 18)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 70,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => NOxPage()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Nox: ${nox?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 18)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    height: 70,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MethanePage()),
-                        );
-                      },
-                      child: Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Methane: ${ng?.toStringAsFixed(1) ?? 'N/A'}',
-                                style: TextStyle(fontSize: 18)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NOxPage()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text('Nitorgen Oxides: ${nox?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.gas_meter, size: 40),
+                  ),
+                ),
+              ),
+                            SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MethanePage()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text('Methane: ${ng?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.mail_lock, size: 40),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ppm2p5Page()),
+                  );
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text('Particulate Matter: ${ppm2_5?.toStringAsFixed(1) ?? 'N/A'}', style: TextStyle(fontSize: 20)),
+                    trailing: Icon(Icons.circle, size: 40),
+                  ),
+                ),
+              ),
+                            SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
                   Navigator.push(

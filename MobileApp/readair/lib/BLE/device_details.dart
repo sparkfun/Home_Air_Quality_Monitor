@@ -430,7 +430,39 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
     return byteData.buffer.asUint8List();
   }
 
+  // Future<void> sendFirmwareUpdate() async {
+  //   try {
+  //     await _sendData('KAZAM');
+  //     print("KAZAM sent");
+
+  //     await Future.delayed(Duration(seconds: 2));
+
+  //     await _waitForAck();
+  //     print("ACK received");
+
+  //     await Future.delayed(Duration(seconds: 2));
+
+  //     List<int> fileBytes = await loadBinFile();
+  //     int fileSize = fileBytes.length;
+
+  //     //Send the size of the update binary file
+  //     await _sendData("SIZE=${fileSize.toString()}");
+
+  //     await Future.delayed(Duration(seconds: 1));
+
+  //     await _sendFileInChunks(fileBytes, 509);
+  //   } catch (e) {
+  //     _showMessage("Error during firmware update: $e");
+  //     print("Error during firmware update: $e");
+  //   }
+  // }
+
   Future<void> sendFirmwareUpdate() async {
+    final BluetoothController bluetoothController =
+        Get.find<BluetoothController>();
+    bluetoothController
+        .startOtaUpdate(); // Indicate that OTA update is starting
+
     try {
       await _sendData('KAZAM');
       print("KAZAM sent");
@@ -451,12 +483,19 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
       await Future.delayed(Duration(seconds: 1));
 
       await _sendFileInChunks(fileBytes, 509);
+
+      _showMessage("OTA Update Completed. Disconnecting...");
+      await Future.delayed(Duration(seconds: 2));
+
     } catch (e) {
       _showMessage("Error during firmware update: $e");
       print("Error during firmware update: $e");
+    } finally {
+      bluetoothController
+          .finishOtaUpdate(); // Indicate that OTA update has finished
+          bluetoothController.disconnectFromDevice(context); 
     }
   }
-//
 
   Future<void> _sendFileInChunks(List<int> fileBytes, int chunkSize) async {
     int bytesTransferred = 0;

@@ -4,33 +4,56 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class CO2Page extends StatefulWidget {
   @override
   State<CO2Page> createState() => _CO2PageState();
 }
 
+
 class _CO2PageState extends State<CO2Page> {
-  final Random _random = Random();
-  List<FlSpot> generateRandomData() {
-    return List.generate(
-        10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
+
+  double? current;
+  double? average;
+  double? maxCO2;
+  double? minCO2;
+  List<FlSpot> valSpots = [];
+
+    @override
+  void initState() {
+    super.initState();
+    fetchco2Data();
   }
 
-  //fixed values for testing only
-  int currentValue = 10001; //The Current Value
-  int averageOverTwoFourHour = 12000; //Average over past 24 hours
-  int max = 13000; //Maximum value over past 24 hours
-  int min = 5000; //Minimum value over past 24 hours
+    Future<void> fetchco2Data() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      current = lastTwentyFourHourPackets.first.co2;
+
+      double totalco2 = lastTwentyFourHourPackets.map((packet) => packet.co2).reduce((a, b) => a + b);
+      average = totalco2 / lastTwentyFourHourPackets.length;
+
+      maxCO2 = lastTwentyFourHourPackets.map((packet) => packet.co2).reduce(max);
+      minCO2 = lastTwentyFourHourPackets.map((packet) => packet.co2).reduce(min);
+
+      valSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.co2)).toList();
+    }
+
+    setState(() {});
+  }
 
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
-    if (value <= 10000) {
+    if (value <= 400) {
       return Color.fromARGB(255, 48, 133, 56);
-    } else if (value > 10000 && value <= 12500) {
+    } else if (value > 400 && value <= 1000) {
       return Color.fromARGB(255, 229, 193, 13);
-    } else if (value > 12500 && value <= 20000) {
+    } else if (value > 1000 && value <= 2000) {
       return Color.fromARGB(255, 229, 114, 13);
-    } else if (value > 20000 && value <= 35000) {
+    } else if (value > 2000 && value <= 5000) {
       return Color.fromARGB(255, 217, 19, 4);
     } else {
       return Color.fromARGB(255, 121, 0, 0);
@@ -39,13 +62,13 @@ class _CO2PageState extends State<CO2Page> {
 
   String message(int value) {
     //Displays message below current value
-    if (value <= 10000) {
+    if (value <= 400) {
       return "Good";
-    } else if (value > 10000 && value <= 12500) {
+    } else if (value > 400 && value <= 1000) {
       return "Moderate";
-    } else if (value > 12500 && value <= 20000) {
+    } else if (value > 1000 && value <= 2000) {
       return "Bad";
-    } else if (value > 20000 && value <= 35000) {
+    } else if (value > 2000 && value <= 5000) {
       return "Unhealthy";
     } else {
       return "Dangerous";
@@ -54,38 +77,72 @@ class _CO2PageState extends State<CO2Page> {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> data = generateRandomData();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("CO2"),
+        title: Text("Carbon Dioxide (ppm)"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(currentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$currentValue (ppm)',
-                          style: TextStyle(fontSize: 58))),
-                  textColor: Colors.white70,
+              const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(current?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${current?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: CoordinatedColor(average?.toInt() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${average?.toStringAsFixed(1) ?? '-'}',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('Carbon Dioxide is ${message(currentValue)}',
-                        style: TextStyle(fontSize: 25))),
+                    child: Text('Carbon Dioxide is ${message(current?.toInt() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
@@ -136,7 +193,7 @@ class _CO2PageState extends State<CO2Page> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: valSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -155,28 +212,6 @@ class _CO2PageState extends State<CO2Page> {
               endIndent: 20,
             ),
 
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: CoordinatedColor(averageOverTwoFourHour),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$averageOverTwoFourHour (ppm)',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                ),
-              ),
-            ),
-
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -184,7 +219,7 @@ class _CO2PageState extends State<CO2Page> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -200,26 +235,26 @@ class _CO2PageState extends State<CO2Page> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(max),
+                      color: CoordinatedColor(maxCO2?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max (ppm)',
+                          Text('${maxCO2?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 30, color: Colors.white70)),
+                                  fontSize: 38, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(min),
+                      color: CoordinatedColor(minCO2?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min (ppm)',
+                          Text('${minCO2?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 30, color: Colors.white70)),
+                                  fontSize: 38, color: Colors.white70)),
                         ],
                       )),
                 ),
@@ -257,7 +292,7 @@ class _CO2PageState extends State<CO2Page> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('10,000 & Below',
+                    child: Text('400 & Below',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -281,7 +316,7 @@ class _CO2PageState extends State<CO2Page> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('10,001-12,500',
+                    child: Text('401-1,000',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -305,7 +340,7 @@ class _CO2PageState extends State<CO2Page> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('12,501-20,000',
+                    child: Text('1,001-2,000',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -329,7 +364,7 @@ class _CO2PageState extends State<CO2Page> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('20,001-35,000',
+                    child: Text('2,001-5,000',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -353,8 +388,8 @@ class _CO2PageState extends State<CO2Page> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('35,001 & Above',
-                        style: TextStyle(fontSize: 30, color: Colors.white70),
+                    child: Text('5,001 & Above',
+                        style: TextStyle(fontSize: 27, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
                 ],

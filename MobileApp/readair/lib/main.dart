@@ -9,15 +9,20 @@ import 'package:readair/data/packet.dart';
 import 'dart:io';
 
 import 'package:readair/homescreen/home.dart';
+import 'package:readair/settings/custom.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
-void main() {
-  Get.put(BluetoothController());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();  // Ensure plugin services are initialized
+  Get.put(DebugController());  // First register DebugController
+  Get.put(BluetoothController());  // Then register BluetoothController
   Get.put(ThemeController());
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

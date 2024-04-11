@@ -9,7 +9,9 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:readair/BLE/device_details.dart';
 import 'package:readair/data/packet.dart';
+import 'package:readair/homescreen/home.dart';
 import 'package:readair/main.dart';
+import 'package:readair/settings/custom.dart';
 
 class BluetoothPage extends StatefulWidget {
   // const BluetoothPage({super.key, required this.title});
@@ -100,14 +102,12 @@ class ScanningPage extends StatelessWidget {
                       if (snapshot.hasData) {
                         var devicesWithName = snapshot.data!
                             .where((result) =>
-                                    result.device.platformName.isNotEmpty //&&
-                                //result.device.platformName == "NimBLE Test")
-                                )
+                                result.device.name.startsWith("HomeAir"))
                             .toList();
 
                         if (devicesWithName.isEmpty) {
                           return const Center(
-                              child: Text("No named devices found!"));
+                              child: Text("No HomeAir devices found!"));
                         }
 
                         return ListView.builder(
@@ -120,8 +120,9 @@ class ScanningPage extends StatelessWidget {
                                     'Unknown Device'),
                                 subtitle: Text(
                                     devicesWithName[i].device.id.toString()),
-                                trailing:
-                                    Text(devicesWithName[i].rssi.toString()),
+                                trailing: controller.isConnecting.value
+                                    ? CircularProgressIndicator()
+                                    : Text(devicesWithName[i].rssi.toString()),
                                 onTap: () => controller.connectToDevice(
                                     devicesWithName[i].device, context),
                               ),
@@ -129,7 +130,8 @@ class ScanningPage extends StatelessWidget {
                           },
                         );
                       } else {
-                        return const Center(child: Text("No devices found!"));
+                        return const Center(
+                            child: Text("Scanning for devices..."));
                       }
                     },
                   ),
@@ -148,6 +150,13 @@ class BluetoothController extends GetxController {
   List<BluetoothService>? bluetoothServices;
   RxBool isSubscribed = false.obs;
   Timer? _updatTimer;
+  RxBool isConnecting = false.obs;
+  RxBool isOtaUpdating = false.obs;
+  late final DebugController debugController;
+
+  BluetoothController() {
+    debugController = Get.find<DebugController>();
+  }
 
   void showGlobalSnackBar(String message) {
     scaffoldMessengerKey.currentState?.showSnackBar(
@@ -157,6 +166,11 @@ class BluetoothController extends GetxController {
 
   Future<void> connectToDevice(
       BluetoothDevice device, BuildContext context) async {
+    if (isConnecting.value) return;
+
+    isConnecting.value = true;
+    update();
+
     try {
       await device.connect();
       connectedDevice = device;
@@ -164,34 +178,62 @@ class BluetoothController extends GetxController {
       discoverServices();
       await subscribeToDevice(device);
 
-      @override
-      void onInit() {
-        super.onInit();
-        // Initialize the timer or other resources if needed
+      // Check the isDebug flag to decide where to navigate
+      if (debugController.isDebug.value) {
+        // Navigate to the Device Details Page if debug mode is enabled
+        Get.to(() => DeviceDetailsPage(
+              device: device,
+              onDisconnect: () => disconnectFromDevice(context),
+            ));
+      } else {
+        // Navigate to the HomeScreen or another appropriate screen if debug mode is disabled
+        Get.offAll(() => MyHomePage(
+              title: '',
+            ));
       }
-
-      // Navigate to the Device Details Page
-      Get.to(() => DeviceDetailsPage(
-            device: device,
-            onDisconnect: () => disconnectFromDevice(context),
-          ));
     } catch (e) {
-      // Handle connection error
       print('Error connecting to device: $e');
+    } finally {
+      isConnecting.value = false;
+      update();
     }
   }
 
-void disconnectFromDevice(BuildContext context) async {
-  if (connectedDevice != null) {
-    await sendData(connectedDevice!, 'DISC!');
-    await connectedDevice!.disconnect();
-    isSubscribed.value = false; // Reset subscription status
-    _updatTimer?.cancel(); // Stop sending "UPDAT"
-    update(); // Update UI
-    Get.back(); // Navigate back to the previous screen
-  }
-}
+  // Future<void> connectToDevice(BluetoothDevice device, BuildContext context) async {
+  //   if (isConnecting.value) return; // Prevent multiple connections at the same time
 
+  //   isConnecting.value = true; // Set to true when starting to connect
+  //   update(); // Call update to trigger UI changes
+  //   try {
+  //     await device.connect();
+  //     connectedDevice = device;
+  //     await requestMtuSize(device, 512);
+  //     discoverServices();
+  //     await subscribeToDevice(device);
+
+  //     // Navigate to the Device Details Page
+  //     Get.to(() => DeviceDetailsPage(
+  //           device: device,
+  //           onDisconnect: () => disconnectFromDevice(context),
+  //         ));
+  //   } catch (e) {
+  //     print('Error connecting to device: $e');
+  //   } finally {
+  //     isConnecting.value = false; // Reset after connection attempt
+  //     update(); // Call update to trigger UI changes
+  //   }
+  // }
+
+  void disconnectFromDevice(BuildContext context) async {
+    if (connectedDevice != null) {
+      await sendData(connectedDevice!, 'DISC!');
+      await connectedDevice!.disconnect();
+      isSubscribed.value = false; // Reset subscription status
+      _updatTimer?.cancel(); // Stop sending "UPDAT"
+      update(); // Update UI
+      Get.back(); // Navigate back to the previous screen
+    }
+  }
 
   Future<void> discoverServices() async {
     if (connectedDevice != null) {
@@ -303,7 +345,7 @@ void disconnectFromDevice(BuildContext context) async {
         }
       }
 
-      sendData(device, "READ!");
+      //sendData(device, "READ!");
 
       _updatTimer?.cancel(); // Cancel any existing timer
       _updatTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
@@ -350,6 +392,25 @@ void disconnectFromDevice(BuildContext context) async {
   Future scanDevices() async {
     FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
     // FlutterBluePlus.stopScan();
+  }
+
+  void startOtaUpdate() {
+    isOtaUpdating.value = true;
+    _updatTimer?.cancel(); // Stop the UPDAT timer during OTA
+  }
+
+  void finishOtaUpdate() {
+    isOtaUpdating.value = false;
+    startUpdatTimer(); // Restart the UPDAT timer after OTA
+  }
+
+  void startUpdatTimer() {
+    _updatTimer?.cancel();
+    _updatTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      if (!isOtaUpdating.value) {
+        await sendData(connectedDevice!, "UPDAT");
+      }
+    });
   }
 
   @override

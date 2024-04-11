@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class COPage extends StatefulWidget {
   @override
   State<COPage> createState() => _COPageState();
@@ -16,11 +18,36 @@ class _COPageState extends State<COPage> {
         10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
   }
 
-  //fixed values for testing only
-  int currentValue = 101; //The Current Value
-  int averageOverTwoFourHour = 75; //Average over past 24 hours
-  int max = 105; //Maximum value over past 24 hours
-  int min = 22; //Minimum value over past 24 hours
+  double? current;
+  double? average;
+  double? maxVal;
+  double? minVal;
+  List<FlSpot> valSpots = [];
+
+      @override
+  void initState() {
+    super.initState();
+    fetchValData();
+  }
+
+    Future<void> fetchValData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      current = lastTwentyFourHourPackets.first.co;
+
+      double totalVal = lastTwentyFourHourPackets.map((packet) => packet.ng).reduce((a, b) => a + b);
+      average = totalVal / lastTwentyFourHourPackets.length;
+
+      maxVal = lastTwentyFourHourPackets.map((packet) => packet.co).reduce(max);
+      minVal = lastTwentyFourHourPackets.map((packet) => packet.co).reduce(min);
+
+      valSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.co)).toList();
+    }
+
+    setState(() {});
+  }
 
   Color? CoordinatedColor(int value) {
     //Colors cordinated with the danger levels
@@ -74,7 +101,7 @@ class _COPageState extends State<COPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Current value',
-                    style: TextStyle(fontSize: 20, color: Colors.black),
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
                 Padding(
@@ -90,11 +117,11 @@ class _COPageState extends State<COPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(currentValue),
+                      color: CoordinatedColor(current?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$currentValue',
+                          Text('${current?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -103,11 +130,11 @@ class _COPageState extends State<COPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(averageOverTwoFourHour),
+                      color: CoordinatedColor(average?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$averageOverTwoFourHour',
+                          Text('${average?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
                                   fontSize: 38, color: Colors.white70)),
                         ],
@@ -115,24 +142,12 @@ class _COPageState extends State<COPage> {
                 ),
               ],
             ),
-            // Padding(
-            //   padding: EdgeInsets.all(8.0),
-            //   child: Card(
-            //     color: CoordinatedColor(currentValue),
-            //     child: ListTile(
-            //       title: Center(
-            //           child: Text('$currentValue (ppm)',
-            //               style: TextStyle(fontSize: 60))),
-            //       textColor: Colors.white70,
-            //     ),
-            //   ),
-            // ),
-
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text('Carbon Monoxide is ${message(currentValue)}',
+                    child: Text('Carbon Monoxide is ${message(current?.toInt() ?? 0)}',
                         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
@@ -184,7 +199,7 @@ class _COPageState extends State<COPage> {
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: valSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -232,7 +247,7 @@ class _COPageState extends State<COPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -248,26 +263,26 @@ class _COPageState extends State<COPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(max),
+                      color: CoordinatedColor(maxVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$max',
+                          Text('${maxVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 38, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: CoordinatedColor(min),
+                      color: CoordinatedColor(minVal?.toInt() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$min',
+                          Text('${minVal?.toStringAsFixed(1) ?? '-'}',
                               style: TextStyle(
-                                  fontSize: 38, color: Colors.white70)),
+                                  fontSize: 50, color: Colors.white70)),
                         ],
                       )),
                 ),
