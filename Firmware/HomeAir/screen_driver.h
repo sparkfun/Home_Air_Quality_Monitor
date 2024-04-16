@@ -27,6 +27,8 @@
 #define ROTATE_FRAMES 1
 #define ADJUST_REFRESH_RATE 1 //if enabled then refresh rate will be set to 1 second when pairing or updating
 
+// #define FRAME_TESTING_MODE 1
+
 const pins_t myMfnBoard{
   // .panelBusy = 45, //"BUSY<Red
   // .panelDC = 48, //Orange

@@ -1129,6 +1129,7 @@ void hV_Screen_Buffer::drawNumBig(String number, uint16_t x_location, uint16_t y
 void hV_Screen_Buffer::drawDigitSmall(uint8_t number, uint16_t x_location, uint16_t y_location) 
 {
     //bitmaps
+    // x_location -= 10;
     uint8_t numbers[10][120] =
     {
         {
@@ -3261,13 +3262,6 @@ void hV_Screen_Buffer::drawSensorFrame(uint8_t sensor, uint8_t frameNumber) {
         partialScreenBitmap(baseline_x+3, 3, thermometer_bitmap, 70, 48);
         partialScreenBitmap(baseline_x+3, 80, droplet_bitmap, 69, 56);
     }
-
-    
-
-    // if(frameNumber) baseline_x = 145;
-    // partialScreenBitmap(baseline_x+22, 10, icons[sensor], 104, 69);
-    // if(sensor =  mySensor.temperature) partialScreenBitmap(baseline_x+22, 80, icons[8], 48, 70);
-    // if(sensor = mySensor.humidity) partialScreenBitmap(baseline_x+22, 80, icons[9], 48, 70);
 }
 
 void hV_Screen_Buffer::clearFrame(uint8_t frame) {
@@ -3309,7 +3303,7 @@ void hV_Screen_Buffer::updateFrameVal(uint8_t frameNumber, uint8_t sensor, float
     }
     else {
         //4 digits not yet implemented
-        baseline_x = 4;
+        // baseline_x += 4;
         numDigits = 4;
     }
     if(sensor == mySensor.humidity) {

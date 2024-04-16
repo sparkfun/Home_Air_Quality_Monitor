@@ -199,6 +199,12 @@ void updateSensorFrames() {
   // deviceScreen.flush();
 }
 
+
+void testFrames() {
+  deviceScreen.drawSensorFrame(mySensor.co2, 1);
+  deviceScreen.updateFrameVal(1, mySensor.co2, 1234);
+}
+
 void drawDot(bool indicatorOn) {
   if (preferences.getBool("dotEnabled")) {
     uint8_t location = preferences.getUShort("dotLocation");
@@ -294,11 +300,16 @@ int drawScreen(int state) {
   // pairing screen
   if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
 // draw pairing screen
-#ifdef SHOW_READINGS_WITHOUT_CONNECTION
-    updateSensorFrames();
-#else
+  #ifdef SHOW_READINGS_WITHOUT_CONNECTION
+    #ifndef FRAME_TESTING_MODE
+      updateSensorFrames();
+    #else 
+      testFrames();
+    #endif
+  #else
     state = drawPairingScreen(state);
-#endif
+  #endif
+
     deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) &
@@ -306,13 +317,16 @@ int drawScreen(int state) {
     // draw sensor screen
     // preferences.putUShort("refreshPeriod",
     // preferences.getUShort("savedRefreshPeriod"));
-    updateSensorFrames();
+    #ifndef FRAME_TESTING_MODE
+      updateSensorFrames();
+    #else 
+      testFrames();
+    #endif
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
     firmwareUpdateScreen();
   } else {
-    Serial.println("Warning: Unkown flag state in EPD, reverting to displaying "
-                   "sensor data");
+    Serial.println("Warning: Unkown flag state in EPD, reverting to displaying sensor data");
     updateSensorFrames();
     printCurrentAppFlagStatus();
   }
