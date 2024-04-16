@@ -358,7 +358,9 @@ void screendriverRunScreenTask(void *pvParameter) {
 
 #ifdef ADJUST_REFRESH_RATE
       if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP)
-        refreshFreq = 1;
+        #ifndef SHOW_READINGS_WITHOUT_CONNECTION
+          refreshFreq = 1;
+        #endif
       if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD)
         refreshFreq = 1;
 #endif
