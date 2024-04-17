@@ -39,8 +39,19 @@
 #include <SPIFFS.h>
 #endif
 
+#define CAPSTONE_LAB
+// #define ZANE_HOUSE
+
+
+#ifdef CAPSTONE_LAB
 const char* ssid = "CapstoneWifi";
 const char* password = "RuleNumber9";
+#endif
+
+#ifdef ZANE_HOUSE
+const char* ssid = "NastyWiFi";
+const char* password = "PurplePanda420";
+#endif
 const char* host = "esp32fs";
 WebServer server(80);
 //holds the current upload
@@ -224,18 +235,28 @@ void setup(void) {
   DBG_OUTPUT_PORT.begin(115200);
   DBG_OUTPUT_PORT.print("\n");
   DBG_OUTPUT_PORT.setDebugOutput(true);
+  delay(1000);
 
-  FILESYSTEM.begin();
+  SPIFFS.begin(false);
   Serial.println("Opening spiffs.");
-  File root = FILESYSTEM.open("/");
+  File root = SPIFFS.open("/");
   File file = root.openNextFile();
+  if(!root){
+    Serial.println("Unable to mount spiffs");
+  }
   while (file) {
     String fileName = file.name();
     size_t fileSize = file.size();
     DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
     file = root.openNextFile();
   }
-  DBG_OUTPUT_PORT.printf("\n");
+  // DBG_OUTPUT_PORT.printf("\n");
+  // Serial.println("Deleting datalog.txt");
+  // FILESYSTEM.remove("/datalog.txt");
+  // FILESYSTEM.remove("/dest_bin");
+  // Serial.println("deleted");
+  delay(3000);
+  
 
 
 

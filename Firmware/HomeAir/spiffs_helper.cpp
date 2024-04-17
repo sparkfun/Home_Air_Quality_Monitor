@@ -1,7 +1,6 @@
 #include "spiffs_helper.h"
 #include "FS.h"
 
-
 /* You only need to format SPIFFS the first time you run a
    test or else use the SPIFFS plugin to create a partition
    https://github.com/me-no-dev/arduino-esp32fs-plugin */
@@ -92,24 +91,27 @@ void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
   // Serial.printf("Appending to file: %s\r\n", path);
 
   File file = fs.open(path, FILE_APPEND);
-  if (!file) {
-    Serial.println("- failed to open file for appending");
-    return;
-  }
-  int i = 0;
-  while (true) {
-    if (message[i] != '\n') {
-      if (!file.print(message[i++]))
-        Serial.println("- append failed");
-    } else {
-      // Current char is \n
-      file.print(message[i]);
-      // Serial.println("Message Appended");
-      break;
+  if ((SPIFFS.totalBytes() - SPIFFS.usedBytes()) / SPIFFS.totalBytes() <= 0.25) {
+    if (!file) {
+      Serial.println("- failed to open file for appending");
+      return;
     }
+    int i = 0;
+    while (true) {
+      if (message[i] != '\n') {
+        if (!file.print(message[i++]))
+          Serial.println("- append failed");
+      } else {
+        // Current char is \n
+        file.print(message[i]);
+        Serial.println("Message Appended");
+        break;
+      }
+    }
+    file.close();
+  } else {
+    Serial.println("SPIFFS is at or above 75% util. Did not append. Please export and clear data ASAP.");
   }
-
-  file.close();
 }
 
 void renameFile(fs::FS &fs, const char *path1, const char *path2) {
@@ -219,10 +221,10 @@ void onProgressCallback(size_t progress, size_t total) {
 }
 
 void spiffsStorageTask(void *pvParameter) {
-  char path[13] = {"/datalog.txt"};
+  char path[13] = { "/datalog.txt" };
   // std::string message;
   char message[512];
-  File file, root;
+  // File file, root;
   int lineLength = 0;
   int numPackets = 6;
   int insertPoint = 0;
@@ -234,8 +236,22 @@ void spiffsStorageTask(void *pvParameter) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
   }
+  delay(2000);
+  Serial.printf("Total memory: %zu\n", SPIFFS.totalBytes());
+  Serial.printf("Currently used memory: %zu\n", SPIFFS.usedBytes());
+  Serial.printf("Remaining memory: %zu\n", SPIFFS.totalBytes() - SPIFFS.usedBytes());
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+  if (!root) {
+    Serial.println("Unable to mount spiffs");
+  }
+  while (file) {
+    String fileName = file.name();
+    size_t fileSize = file.size();
+    Serial.printf("FS File: %s, size: %zu\n", fileName.c_str(), fileSize);
+    file = root.openNextFile();
+  }
   online.SPIFFS = true;
-  root = SPIFFS.open("/");
   while (1) {
     // printCurrentAppFlagStatus();
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
@@ -251,15 +267,16 @@ void spiffsStorageTask(void *pvParameter) {
       // Write data to SPIFFS
       if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
         snprintf(
-            message, 80,
-            "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
-            rtc.getEpoch(), rawDataArray[0], rawDataArray[1], rawDataArray[2],
-            rawDataArray[3], rawDataArray[4], rawDataArray[5], rawDataArray[6],
-            rawDataArray[7], rawDataArray[8], rawDataArray[9], rawDataArray[10],
-            rawDataArray[11]);
+          message, 80,
+          "%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
+          rtc.getEpoch(), rawDataArray[0], rawDataArray[1], rawDataArray[2],
+          rawDataArray[3], rawDataArray[4], rawDataArray[5], rawDataArray[6],
+          rawDataArray[7], rawDataArray[8], rawDataArray[9], rawDataArray[10],
+          rawDataArray[11]);
 
-        xSemaphoreGive(rawDataMutex); // Release mutex
-        // Serial.print(message);
+        xSemaphoreGive(rawDataMutex);  // Release mutex
+        Serial.print("Saving ");
+        Serial.println(message);
         appendLineToFile(SPIFFS, path, message);
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
@@ -277,7 +294,7 @@ void spiffsStorageTask(void *pvParameter) {
           insertPoint += lineLength;
           BLEMessageBuffer[insertPoint++] = '\n';
         }
-        BLEMessageBuffer[insertPoint] = 0; // Bam
+        BLEMessageBuffer[insertPoint] = 0;  // Bam
         insertPoint = 0;
         // Notify BLE comm task of complete buffer
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY);
@@ -291,24 +308,24 @@ void spiffsStorageTask(void *pvParameter) {
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
                           BLE_FLAG_READ_COMPLETE, false, 600000);
       xEventGroupClearBits(appStateFlagGroup,
-                           APP_FLAG_TRANSMITTING); // Clear current app state
+                           APP_FLAG_TRANSMITTING);  // Clear current app state
       Serial.println("Cleared transmitting flag");
       xEventGroupSetBits(appStateFlagGroup,
-                         APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING
-                                                      // to send end of message
+                         APP_FLAG_DONE_TRANSMITTING);  // set DONE_TRANSMITTING
+                                                       // to send end of message
       Serial.println("set DONE_TRANSMITTING flag");
       xEventGroupSetBits(
-          appStateFlagGroup,
-          APP_FLAG_RUNNING); // set RUNNING to return to normal operation
+        appStateFlagGroup,
+        APP_FLAG_RUNNING);  // set RUNNING to return to normal operation
       Serial.println("Set app RUNNING flag");
       xEventGroupSetBits(
-          BLEStateFlagGroup,
-          BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
+        BLEStateFlagGroup,
+        BLE_FLAG_FILE_DONE);  // set FILE_DONE to break BLE waiting loop
       Serial.println("Set FILE_DONE");
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
-        SPIFFS.remove("/dest_bin"); // Make room for new OTA
+        SPIFFS.remove("/dest_bin");  // Make room for new OTA
         Serial.printf("SPIFFS Storage Status: %d / %d\n", SPIFFS.usedBytes(),
                       SPIFFS.totalBytes());
         if (SPIFFS.totalBytes() - SPIFFS.usedBytes() >= updateSize) {
@@ -319,19 +336,18 @@ void spiffsStorageTask(void *pvParameter) {
           if (!file) {
             Serial.println("Error opening dest file.");
           } else {
-            while (xEventGroupGetBits(appStateFlagGroup) &
-                   APP_FLAG_OTA_DOWNLOAD) {
+            while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
                                   BLE_FLAG_WRITE_COMPLETE, false, ONE_MIN_MS);
               writtenSize += file.write((uint8_t *)&BLEMessageBuffer[0], 509);
               if (xSemaphoreTake(otaDownloadPercentageMutex, 0)) {
                 otaDownloadPercentage =
-                    ((float)writtenSize / (float)updateSize) * 100;
+                  ((float)writtenSize / (float)updateSize) * 100;
                 xSemaphoreGive(otaDownloadPercentageMutex);
               }
               if (++downloadIttr % 5 == 0) {
                 downloadRate =
-                    (float)(writtenSize - prevSize) / (millis() - chrono);
+                  (float)(writtenSize - prevSize) / (millis() - chrono);
                 prevSize = writtenSize;
                 chrono = millis();
                 Serial.printf("%.2fKB/sec\n", downloadRate);
@@ -340,8 +356,7 @@ void spiffsStorageTask(void *pvParameter) {
               }
               // Add setBits for done writing to ack in BLE
               xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_SAVE_COMPLETE);
-              if (xEventGroupGetBits(BLEStateFlagGroup) &
-                  BLE_FLAG_DOWNLOAD_COMPLETE) {
+              if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_DOWNLOAD_COMPLETE) {
                 break;
               }
             }
@@ -393,6 +408,7 @@ void spiffsStorageTask(void *pvParameter) {
           delay(500);
           Serial.println("Restarting...");
           delay(5000);
+          ESP.restart();
         }
       }
     }

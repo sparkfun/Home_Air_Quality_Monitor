@@ -9,8 +9,8 @@
 #include "esp32-hal-adc.h"
 #include <Arduino.h>
 
-
 // Vendor Libraries
+#include <JC_Button.h> // https://github.com/JChristensen/JC_Button - Version 2.1.4
 #include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
 #include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.2
 
@@ -21,6 +21,7 @@
 #define SENSOR_READ_PERIOD_SEC 15
 #define GPIO0_RESET_TIME_SEC 5
 #define GPIO0_RESET_TIME_MS GPIO0_RESET_TIME_SEC * 1000
+#define DEBOUNCE_TIME_MS 200
 
 #define GPIO0_PIN 0
 #define DBG_LED 34 // On-board LED for debugging
@@ -71,7 +72,7 @@ enum sensorMap {
 #endif
 
 const uint32_t I2C_FREQ_HZ = 100000;
-#if defined(HOMEAIR_BOARD) || defined(ANTON_BOARD)
+#if defined(FINAL_HARDWARE) || defined(FRANKENSTEIN_BOARD)
 const uint8_t I2C_SDA_PIN = 8;
 const uint8_t I2C_SCL_PIN = 9;
 #else
@@ -94,6 +95,7 @@ void mygpioSensorReadTask(void *pvParameter);
 void setupCO2Sensor(Error_t errorPtr, PASCO2Ino CO2SensorPtr);
 void setupSENSensor(void);
 void GPIO0_timercb();
+void debounce_timercb();
 
 extern float rawDataArray[RAW_DATA_ARRAY_SIZE];
 

@@ -6,6 +6,7 @@ PASCO2Ino co2Sensor;
 int16_t co2PPM;
 Error_t co2Error;
 SensirionI2CSen5x sen5x;
+Button GPIO0_Button(GPIO0_PIN); // define the button
 // Global Variables
 float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
@@ -152,6 +153,9 @@ void readSENSensor(float *retArray, uint8_t arraySize) {
                                      retArray[VOC], unusedValue);
 #endif
 
+    // Fahrenheit Conversion
+    retArray[TEMP] = (retArray[TEMP] * 1.8) + 32;
+
     if (error) {
       Serial.print("Error trying to execute readMeasuredValues(): ");
       errorToString(error, errorMessage, 256);
@@ -225,23 +229,36 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
 }
 
 void GPIO0_ISR() {
-  DBG("GPIO ISR RAN");
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
   if (digitalRead(GPIO0_PIN) == 0) {
     // Start timer
     if (xTimerStartFromISR(gpio0Timer, &xHigherPriorityTaskWoken) != pdPASS) {
-      DBG("Failed to start timer from ISR.");
+      // DBG("Failed to start timer from ISR.");
     } else {
-      DBG("Started GPIO0 timer from ISR.");
+      // DBG("Started GPIO0 timer from ISR.");
+    }
+
+    if (xTimerStartFromISR(debounceTimer, &xHigherPriorityTaskWoken) !=
+        pdPASS) {
+      // DBG("Failed to start debounce timer from ISR.");
+    } else {
+      // DBG("Started debounce timer from ISR.");
     }
 
   } else if (digitalRead(GPIO0_PIN) == 1) {
-    // Stop timer
+    // Stop preferences wipe timer
     if (xTimerStopFromISR(gpio0Timer, &xHigherPriorityTaskWoken) != pdPASS) {
-      DBG("Failed to stop GPIO0 timer from ISR.");
+      // DBG("Failed to stop GPIO0 timer from ISR.");
     } else {
-      DBG("Stopped GPIO0 timer from ISR.");
+      // DBG("Stopped GPIO0 timer from ISR.");
+    }
+    // Stop debounce timer
+    if (xTimerStopFromISR(gpio0Timer, &xHigherPriorityTaskWoken) != pdPASS) {
+      // Button press was good
+      // Increment some variable in screen driver to change state
+    } else {
+      // Button press was too brief
+      // Serial.println("Button pressed!");
     }
   }
 
@@ -253,32 +270,24 @@ void GPIO0_ISR() {
 void GPIO0_timercb() {
   Serial.println("Timer expired!");
   esp_err_t err;
-  // xEventGroupSetBits(appStateFlagGroup, APP_FLAG_FACTORY_ROLLBACK);
-  const esp_partition_t *running = esp_ota_get_running_partition();
-  const esp_partition_t *nextPartition =
-      esp_ota_get_next_update_partition(NULL);
-  const esp_partition_t *factory = esp_partition_find_first(
-      ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
 
-  Serial.printf("Running partition: %s\n", running->label);
-  Serial.printf("Running partition size: %d\n", running->size);
-  Serial.printf("Next Update partition: %s\n", nextPartition->label);
+  // Set preferences to default values
+  // Perhaps show something on the screen?
+}
 
-  if (factory != NULL) {
-    Serial.printf("Factory partition: %s\n", factory->label);
-    // Serial.printf("Factory partition size: %d\n", factory->size);
-    delay(150);
-    err = esp_ota_set_boot_partition(factory);
-    if (err != ESP_OK) {
-      Serial.printf("Failed to set boot partition to factory: %d\n", err);
-    } else {
-      Serial.println("Factory rollback successful. Restarting...");
-      delay(3000);
-      esp_restart();
-    }
-    return;
-  } else {
-    Serial.println("Factory partition not found. Cannot rollback.");
+void debounce_timercb() {
+  xEventGroupSetBits(appStateFlagGroup,
+                     APP_FLAG_BYPASS_SETUP); // Set flag to bypass setup
+  if (online.pref) {
+    preferences.putUShort("frame1Sensor",
+                          preferences.getUShort("frame1Sensor") + 1);
+    preferences.putUShort("frame2Sensor",
+                          preferences.getUShort("frame2Sensor") + 1);
+    // Serial.printf("Current frame1Sensor: %d\n",
+    // preferences.getUShort("frame1Sensor")); Serial.printf("Current
+    // frame2Sensor: %d\n", preferences.getUShort("frame2Sensor")); Set flag for
+    // epd force refresh
+    xEventGroupSetBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE);
   }
 }
 
@@ -291,9 +300,8 @@ void setupGPIO() {
   setupCO2Sensor(co2Error, co2Sensor); // Setup PASCO2 Sensor
   setupSENSensor();
   setupMQSensors();
+  attachInterrupt(digitalPinToInterrupt(GPIO0_PIN), GPIO0_ISR, CHANGE);
   pinMode(GPIO0_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(GPIO0_PIN), GPIO0_ISR,
-                  RISING | FALLING);
 
   Serial.println("Successfully set up GPIO.");
 }

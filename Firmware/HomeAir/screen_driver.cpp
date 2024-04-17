@@ -292,7 +292,8 @@ int drawScreen(int state) {
   // Serial.println("Ran drawScreen");
   // Sparkfun logo is drawn in epd setup function; first state drawn here is
   // pairing screen
-  if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
+  uint32_t eventBits = xEventGroupGetBits(appStateFlagGroup);
+  if (eventBits & APP_FLAG_SETUP && !(eventBits & APP_FLAG_BYPASS_SETUP)) {
 // draw pairing screen
 #ifdef SHOW_READINGS_WITHOUT_CONNECTION
     updateSensorFrames();
@@ -419,7 +420,14 @@ void screendriverRunScreenTask(void *pvParameter) {
       fullRefreshCounter %= fullRefreshFreq;
 
       // Wait 1 second
-      vTaskDelay(1000);
+      // vTaskDelay(1000);
+      // Replace standard delay with a  flag pend with one second timeout
+      EventBits_t uxBits =
+          xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE,
+                              pdTRUE, pdFALSE, 1000 / portTICK_PERIOD_MS);
+      if (uxBits & APP_FLAG_EPD_FORCE_UPDATE) {
+        DBG("EPD Force Update flag set");
+      }
     }
   }
 }

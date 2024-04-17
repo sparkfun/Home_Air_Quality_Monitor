@@ -27,14 +27,14 @@
 #include "freertos/task.h"
 #include <Preferences.h>
 
-
 extern TaskHandle_t mygpioSensorReadTaskHandle, spiffsStorageTaskHandle,
     BLEServerCommunicationTaskHandle, timekeepingSyncTaskHandle,
     screendriverRunScreenTaskHandle;
 
 extern Preferences preferences;
 extern SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
-extern TimerHandle_t gpio0Timer;
+extern TimerHandle_t gpio0Timer, debounceTimer;
+
 #define DBG(s) Serial.println(s);
 #define VERSION_NUMBER 205
 #define FORMAT_SPIFFS_IF_FAILED false

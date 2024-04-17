@@ -15,8 +15,9 @@
 #include "src/EPDDriver/src/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
-// #define HOMEAIR_BOARD 1
-#define ANTON_BOARD 1
+// #define BREAD_BOARD 1
+// #define FRANKENSTEIN_BOARD 1
+#define FINAL_HARDWARE 1
 
 // #define SHOW_READINGS_WITHOUT_CONNECTION 1
 #define ROTATE_FRAMES 1
@@ -40,7 +41,7 @@ const pins_t myMfnBoard{
   // // .panelSCK = 41, //"SCK", Brown breadboard jumper
   // .flashCS = 38, //"FCSM", Purple breadboard jumper
   // .panelCS = 11 //"ECSM", Grey breadboard jumper
-#ifdef ANTON_BOARD
+#ifdef FINAL_HARDWARE
   .panelBusy = 43,   //"BUSY", Red breadboard jumper
   .panelDC = 41,     //"D/C", Orange breadboard jumper
   .panelReset = 42,  //"RST", Yellow breadboard jumper
@@ -49,7 +50,7 @@ const pins_t myMfnBoard{
   .panelSCK = 39,    //"SCK", Brown breadboard jumper
   .flashCS = 40,     //"FCSM", Purple breadboard jumper
   .panelCS = 40,     //"ECSM", Grey breadboard jumper // UNUSED
-#elif defined(HOMEAIR_BOARD)
+#elif defined(FRANKENSTEIN_BOARD)
   .panelBusy = 38,   //"BUSY", Red breadboard jumper
   .panelDC = 40,     //"D/C", Orange breadboard jumper
   .panelReset = 39,  //"RST", Yellow breadboard jumper
@@ -58,7 +59,7 @@ const pins_t myMfnBoard{
   .panelSCK = 42,    //"SCK", Brown breadboard jumper
   .flashCS = 37,     //"FCSM", Purple breadboard jumper
   .panelCS = 41,     //"ECSM", Grey breadboard jumper
-#else
+#elif  defined(BREAD_BOARD)
   .panelBusy = 41,   //"BUSY", Red breadboard jumper
   .panelDC = 40,     //"D/C", Orange breadboard jumper
   .panelReset = 39,  //"RST", Yellow breadboard jumper

@@ -29,7 +29,7 @@ EventGroupHandle_t BLEStateFlagGroup;
 // Mutex creation
 SemaphoreHandle_t rawDataMutex, otaDownloadPercentageMutex;
 // Timer creation
-TimerHandle_t gpio0Timer;
+TimerHandle_t gpio0Timer, debounceTimer;
 // Preferences object creation
 Preferences preferences;
 
@@ -54,6 +54,9 @@ void setup() {
       xTimerCreate("GPIO0 timer", GPIO0_RESET_TIME_MS / portTICK_RATE_MS,
                    pdFALSE, (void *)1, (TimerCallbackFunction_t)GPIO0_timercb);
 
+  debounceTimer = xTimerCreate(
+      "Debounce timer", DEBOUNCE_TIME_MS / portTICK_RATE_MS, pdFALSE, (void *)1,
+      (TimerCallbackFunction_t)debounce_timercb);
   xTaskCreatePinnedToCore(
       mygpioSensorReadTask,        /*Function to call*/
       "Sensor Read Task",          /*Task name*/
@@ -66,7 +69,7 @@ void setup() {
   xTaskCreatePinnedToCore(
       spiffsStorageTask,        /*Function to call*/
       "SPIFFS Storage Task",    /*Task name*/
-      10 * TEN_KiB,                  /*Stack size*/
+      10 * TEN_KiB,             /*Stack size*/
       NULL,                     /*Function parameters*/
       5,                        /*Priority*/
       &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/
