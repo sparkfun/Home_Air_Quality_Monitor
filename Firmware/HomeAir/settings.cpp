@@ -37,6 +37,8 @@ bool setupPreferences() {
     preferences.putUShort("frame1Sensor", CO);
     preferences.putUShort("frame2Sensor", AQI);
 
+    preferences.putBool("rotateFrames", true);
+
     preferences.putUShort("logoTime", 1);
     preferences.putUShort("refreshPeriod", 10); // Time in seconds
     preferences.putUShort("burninPeriod", 60);
@@ -44,6 +46,9 @@ bool setupPreferences() {
 
     preferences.putUShort("numRefreshCycles", 5);
     preferences.putBool("firstTimeSetupComplete", true);
+
+    //SET TO FALSE TO SHOW PAIRING SCREEN (DEFAULT)
+    preferences.putBool("skipPairingScreen", true);
 
     if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");

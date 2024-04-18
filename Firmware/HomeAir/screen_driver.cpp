@@ -193,9 +193,9 @@ void updateSensorFrames() {
     }
     xSemaphoreGive(rawDataMutex);
   }
-#ifdef ROTATE_FRAMES
+if(preferences.getBool("rotateFrames")) {
   rotateFrames();
-#endif
+}
   // deviceScreen.flush();
 }
 
@@ -300,23 +300,22 @@ int drawScreen(int state) {
   // pairing screen
   if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) {
 // draw pairing screen
-  #ifdef SHOW_READINGS_WITHOUT_CONNECTION
-    #ifndef FRAME_TESTING_MODE
-      updateSensorFrames();
-    #else 
-      testFrames();
-    #endif
-  #else
-    state = drawPairingScreen(state);
-  #endif
+    bool skipPair = preferences.getBool("skipPairingScreen");
+    if(skipPair) {
+      #ifndef FRAME_TESTING_MODE
+        updateSensorFrames();
+      #else 
+        testFrames();
+      #endif
+    }
+    else {
+      state = drawPairingScreen(state);
+    }
 
     deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) &
-             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
-    // draw sensor screen
-    // preferences.putUShort("refreshPeriod",
-    // preferences.getUShort("savedRefreshPeriod"));
+      (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
     #ifndef FRAME_TESTING_MODE
       updateSensorFrames();
     #else 
@@ -369,14 +368,16 @@ void screendriverRunScreenTask(void *pvParameter) {
       }
 
       refreshFreq = preferences.getUShort("refreshPeriod");
-
+      bool skipPair = preferences.getBool("skipPairingScreen");
+      Serial.print("skipPair: ");
+      Serial.println(skipPair);
 #ifdef ADJUST_REFRESH_RATE
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP)
-        #ifndef SHOW_READINGS_WITHOUT_CONNECTION
-          refreshFreq = 1;
-        #endif
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD)
+      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) { 
+        if(!skipPair) refreshFreq = 1;
+      }
+      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
         refreshFreq = 1;
+      }
 #endif
 
       if (refreshFreq < 1) {
