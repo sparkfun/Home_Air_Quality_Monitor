@@ -47,7 +47,7 @@
 		(allow_soldermask_bridges_in_footprints no)
 		(grid_origin 203.21568 107.863228)
 		(pcbplotparams
-			(layerselection 0x00010fc_ffffffff)
+			(layerselection 0x00012fc_ffffffff)
 			(plot_on_all_layers_selection 0x0000000_00000000)
 			(disableapertmacros no)
 			(usegerberextensions yes)

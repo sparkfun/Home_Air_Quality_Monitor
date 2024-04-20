@@ -38,8 +38,8 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 1.4,
-          "width": 3.0
+          "height": 0.4,
+          "width": 0.8
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -450,7 +450,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "MainBoard.kicad_pro",
+    "filename": "MainBoard-ESP-MQ-Control.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -519,7 +519,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "../../../../Desktop/KiCad Outputs/",
+      "plot": "../../../../Desktop/KiCad Outputs/MQSensor Control/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "MainBoard.step",

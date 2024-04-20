@@ -1,4 +1,4 @@
-23516708482605021
+23520129982379586
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -88934,6 +88934,20 @@ microSD_Friction_Fit_Molex
 0
 15
 10
+SparkFun-Display
+ePaper-2.2
+24 Pin FPC 0.5mm with contacts both sides.
+
+0
+26
+26
+SparkFun-Display
+ePaper-2.66
+24 Pin FPC 0.5mm with contacts both sides.
+
+0
+26
+26
 SparkFun-Display
 ePaper_2.13in
 24 Pin FPC 0.5mm with contacts both sides.
