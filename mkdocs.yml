@@ -8,18 +8,6 @@ repo_url: https://github.com/sparkfun/Home_Air_Quality_Monitor.git
 repo_name: sparkfun/Home_Air_Quality_Monitor
 
 
-theme:
-  name: material
-  custom_dir: docs/overrides
-  logo: img/Icons/sfe_logo_sm.png
-  palette:
-    primary: grey
-    accent: red
-  font:
-    text: Roboto
-    code: Roboto Mono
-  features:
-    - content.code.annotate
 
     # Enable "view source" and "edit this page" buttons
     - content.action.edit
