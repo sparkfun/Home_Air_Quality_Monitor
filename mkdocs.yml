@@ -1,5 +1,5 @@
 # Documentation page information
-site_name: SparkFun Home Air User Manual
+site_name: SparkFun Home Air
 site_description: The user manual for the Home Air from SparkFun Electronics
 site_url: https://docs.sparkfun.com/Home_Air_Quality_Monitor/
 site_author: SparkFun Electronics
@@ -16,16 +16,16 @@ repo_name: sparkfun/Home_Air_Quality_Monitor
     # i.e. https://docs.sparkfun.com/<page link>/#<sub-section>
     - navigation.tracking
     - navigation.tabs.sticky
-
+    
     # Enables tabs for navigating the website
     # - navigation.tabs
     # Keeps tabs visible in the header when scrolling
     #- navigation.tabs.sticky
-
+    
     # Adds pop-up button just below the header (when the user starts to scroll up)
     # Allows users to easily jump to the beginning of the page
     - navigation.top
-
+    
     # Renders path for page navigation at top of the page (makes page navigation more mobile friendly)
     - navigation.path
 
