@@ -193,10 +193,16 @@ void updateSensorFrames() {
     }
     xSemaphoreGive(rawDataMutex);
   }
-#ifdef ROTATE_FRAMES
+if(preferences.getBool("rotateFrames")) {
   rotateFrames();
-#endif
+}
   // deviceScreen.flush();
+}
+
+
+void testFrames() {
+  deviceScreen.drawSensorFrame(mySensor.co2, 1);
+  deviceScreen.updateFrameVal(1, mySensor.co2, 1234);
 }
 
 void drawDot(bool indicatorOn) {
@@ -295,25 +301,32 @@ int drawScreen(int state) {
   uint32_t eventBits = xEventGroupGetBits(appStateFlagGroup);
   if (eventBits & APP_FLAG_SETUP && !(eventBits & APP_FLAG_BYPASS_SETUP)) {
 // draw pairing screen
-#ifdef SHOW_READINGS_WITHOUT_CONNECTION
-    updateSensorFrames();
-#else
-    state = drawPairingScreen(state);
-#endif
+    bool skipPair = preferences.getBool("skipPairingScreen");
+    if(skipPair) {
+      #ifndef FRAME_TESTING_MODE
+        updateSensorFrames();
+      #else 
+        testFrames();
+      #endif
+    }
+    else {
+      state = drawPairingScreen(state);
+    }
+
     deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) &
-             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
-    // draw sensor screen
-    // preferences.putUShort("refreshPeriod",
-    // preferences.getUShort("savedRefreshPeriod"));
-    updateSensorFrames();
+      (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
+    #ifndef FRAME_TESTING_MODE
+      updateSensorFrames();
+    #else 
+      testFrames();
+    #endif
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
     firmwareUpdateScreen();
   } else {
-    Serial.println("Warning: Unkown flag state in EPD, reverting to displaying "
-                   "sensor data");
+    Serial.println("Warning: Unkown flag state in EPD, reverting to displaying sensor data");
     updateSensorFrames();
     printCurrentAppFlagStatus();
   }
@@ -356,12 +369,16 @@ void screendriverRunScreenTask(void *pvParameter) {
       }
 
       refreshFreq = preferences.getUShort("refreshPeriod");
-
+      bool skipPair = preferences.getBool("skipPairingScreen");
+      Serial.print("skipPair: ");
+      Serial.println(skipPair);
 #ifdef ADJUST_REFRESH_RATE
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP)
+      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) { 
+        if(!skipPair) refreshFreq = 1;
+      }
+      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
         refreshFreq = 1;
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD)
-        refreshFreq = 1;
+      }
 #endif
 
       if (refreshFreq < 1) {

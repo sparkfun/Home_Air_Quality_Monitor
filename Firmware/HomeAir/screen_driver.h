@@ -15,13 +15,23 @@
 #include "src/EPDDriver/src/hV_Configuration_fast.h"
 // Pin defns for breadboard
 
+<<<<<<< HEAD
 // #define BREAD_BOARD 1
 // #define FRANKENSTEIN_BOARD 1
 #define FINAL_HARDWARE 1
+=======
+// Comment both for breadboard
 
-// #define SHOW_READINGS_WITHOUT_CONNECTION 1
-#define ROTATE_FRAMES 1
+// No vents
+// #define HOMEAIR_BOARD 1
+
+// New PCB
+#define ANTON_BOARD 1
+>>>>>>> 016493708f00315c21eb71154197cce4d21d2e38
+
 #define ADJUST_REFRESH_RATE 1 //if enabled then refresh rate will be set to 1 second when pairing or updating
+
+// #define FRAME_TESTING_MODE 1
 
 const pins_t myMfnBoard{
   // .panelBusy = 45, //"BUSY<Red

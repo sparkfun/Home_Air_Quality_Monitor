@@ -23,6 +23,8 @@ class epdSensor
     static const uint8_t temperature = 6;
     static const uint8_t humidity = 7;
     static const uint8_t aqi = 8;
+    static const uint8_t tempBig = 9;
+    static const uint8_t humidityBig = 10;
 
 };
 
