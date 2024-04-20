@@ -2,37 +2,63 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:readair/BLE/ble_setup.dart';
+import 'package:readair/BLE/ble_states.dart';
 import 'package:readair/data/packet.dart';
 import 'dart:io';
 
 import 'package:readair/homescreen/home.dart';
+import 'package:readair/settings/custom.dart';
 
-void main() {
-  Get.put(BluetoothController());
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();  // Ensure plugin services are initialized
+  Get.put(DebugController());  // First register DebugController
+  Get.put(BluetoothController());  // Then register BluetoothController
+  Get.put(ThemeController());
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final ThemeController themeController = Get.find();
+
     return GetMaterialApp(
       title: 'ReadAIR',
+      scaffoldMessengerKey: scaffoldMessengerKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.redAccent, brightness: Brightness.dark),
+      ),
+      themeMode: themeController.isDarkMode.value
+          ? ThemeMode.dark
+          : ThemeMode.light, // Use themeMode to switch themes
       home: MyHomePage(title: 'ReadAIR App v0.01'),
-      //home: MyHomePage(title: 'ReadAIR App v0.01', data: DatabaseService.instance.getLastPacket(),),
-      // navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
 }
 
+class ThemeController extends GetxController {
+  var isDarkMode = false.obs;
 
+  void toggleTheme() {
+    isDarkMode.value = !isDarkMode.value;
+    Get.changeThemeMode(isDarkMode.value ? ThemeMode.dark : ThemeMode.light);
+  }
+}
 
 class BluetoothAdapterStateObserver extends NavigatorObserver {
   StreamSubscription<BluetoothAdapterState>? blueState;

@@ -44,6 +44,10 @@ dependencies:
   share_plus: ^7.2.1
   open_file: ^3.3.2
   file_picker: ^6.1.1
+  provider: ^6.1.1
+  intl: ^0.19.0
+  flutter_ble_peripheral: ^1.2.3
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

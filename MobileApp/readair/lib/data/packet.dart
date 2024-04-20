@@ -12,6 +12,7 @@ class DataPacket {
   final double humid;
   final double temp;
   final double voc;
+  final double nox;
   final double co;
   final double ng;
   final double aqi;
@@ -26,6 +27,7 @@ class DataPacket {
     required this.humid,
     required this.temp,
     required this.voc,
+    required this.nox,
     required this.co,
     required this.ng,
     required this.aqi,
@@ -42,6 +44,7 @@ class DataPacket {
       'humidity': humid,
       'temperature': temp,
       'voc': voc,
+      'nox': nox,
       'co': co,
       'ng': ng,
       'aqi': aqi,
@@ -59,6 +62,7 @@ class DataPacket {
       humid,
       temp,
       voc,
+      nox,
       co,
       ng,
       aqi
@@ -76,6 +80,7 @@ class DataPacket {
       humid: map['humidity'],
       temp: map['temperature'],
       voc: map['voc'],
+      nox: map['nox'] ?? 0.0,
       co: map['co'],
       ng: map['ng'],
       aqi: map['aqi'],
@@ -94,6 +99,7 @@ class DataPacket {
            'humid: ${humid.toStringAsFixed(1)}, '
            'temp: ${temp.toStringAsFixed(1)}, '
            'voc: ${voc.toStringAsFixed(1)}, '
+           'nox: ${nox.toStringAsFixed(1)}, '
            'co: ${co.toStringAsFixed(1)}, '
            'ng: ${ng.toStringAsFixed(1)}, '
            'aqi: ${aqi.toStringAsFixed(1)}}';
@@ -133,7 +139,7 @@ class DatabaseService {
     final List<Map<String, dynamic>> maps = await db.query(
       'data_packets',
       orderBy: 'epochTime DESC',
-      limit: 5,
+      limit: 100,
     );
 
     return List.generate(maps.length, (i) {
@@ -153,6 +159,7 @@ class DatabaseService {
       humidity REAL,
       temperature REAL,
       voc REAL,
+      nox REAL,
       co REAL,
       ng REAL,
       aqi REAL
@@ -160,40 +167,66 @@ class DatabaseService {
   ''');
   }
 
+  // Future<void> insertOrUpdateDataPacket(DataPacket packet) async {
+  //   final db = await instance.database;
+  //   await db.execute('''
+  //     INSERT INTO data_packets 
+  //     (epochTime, co2, ppm1_0, ppm2_5, ppm4_0, ppm10_0, humidity, temperature, voc, nox, co, ng, aqi) 
+  //     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  //     ON CONFLICT(epochTime) 
+  //     DO UPDATE SET 
+  //     co2 = excluded.co2, 
+  //     ppm1_0 = excluded.ppm1_0,
+  //     ppm2_5 = excluded.ppm2_5,
+  //     ppm4_0 = excluded.ppm4_0,
+  //     ppm10_0 = excluded.ppm10_0,
+  //     humidity = excluded.humidity,
+  //     temperature = excluded.temperature,
+  //     voc = excluded.voc,
+  //     nox = excluded.voc,
+  //     co = excluded.co,
+  //     ng = excluded.ng,
+  //     aqi = excluded.aqi
+  //   ''', [
+  //     packet.epochTime,
+  //     packet.co2,
+  //     packet.ppm1_0,
+  //     packet.ppm2_5,
+  //     packet.ppm4_0,
+  //     packet.ppm10_0,
+  //     packet.humid,
+  //     packet.temp,
+  //     packet.voc,
+  //     packet.nox,
+  //     packet.co,
+  //     packet.ng,
+  //     packet.aqi,
+  //   ]);
+  // }
+
   Future<void> insertOrUpdateDataPacket(DataPacket packet) async {
-    final db = await instance.database;
-    await db.execute('''
-      INSERT INTO data_packets 
-      (epochTime, co2, ppm1_0, ppm2_5, ppm4_0, ppm10_0, humidity, temperature, voc, co, ng, aqi) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(epochTime) 
-      DO UPDATE SET 
-      co2 = excluded.co2, 
-      ppm1_0 = excluded.ppm1_0,
-      ppm2_5 = excluded.ppm2_5,
-      ppm4_0 = excluded.ppm4_0,
-      ppm10_0 = excluded.ppm10_0,
-      humidity = excluded.humidity,
-      temperature = excluded.temperature,
-      voc = excluded.voc,
-      co = excluded.co,
-      ng = excluded.ng,
-      aqi = excluded.aqi
-    ''', [
-      packet.epochTime,
-      packet.co2,
-      packet.ppm1_0,
-      packet.ppm2_5,
-      packet.ppm4_0,
-      packet.ppm10_0,
-      packet.humid,
-      packet.temp,
-      packet.voc,
-      packet.co,
-      packet.ng,
-      packet.aqi,
-    ]);
+  final db = await instance.database;
+  try {
+    await db.insert(
+      'data_packets',
+      packet.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    // If insert did not happen due to conflict, then update
+    int updateCount = await db.update(
+      'data_packets',
+      packet.toMap(),
+      where: 'epochTime = ?',
+      whereArgs: [packet.epochTime],
+    );
+    if (updateCount == 0) {
+      // Handle case where update didn't occur, maybe because the item didn't exist
+    }
+  } catch (e) {
+    // Handle exception, maybe log or show a message
   }
+}
+
   
   Future<List<DataPacket>> getAllPackets() async {
     final db = await database;
@@ -211,7 +244,7 @@ class DatabaseService {
   Future<void> processAndInsertData(String incomingData) async {
     var data = incomingData.split(',');
 
-    if (data.length == 12) {
+    if ((data.length == 12) || (data.length == 13)) {
       var packet = DataPacket(
         epochTime: double.parse(data[0]),
         co2: double.parse(data[1]),
@@ -222,9 +255,10 @@ class DatabaseService {
         humid: double.parse(data[6]),
         temp: double.parse(data[7]),
         voc: double.parse(data[8]),
-        co: double.parse(data[9]),
-        ng: double.parse(data[10]),
-        aqi: double.parse(data[11]),
+        nox: double.parse(data[9]),
+        co: double.parse(data[10]),
+        ng: double.parse(data[11]),
+        aqi: double.parse(data[12]),
       );
 
       // Insert your data packet into the database
@@ -244,6 +278,7 @@ class DatabaseService {
         humid: map["humid"]!,
         temp: map["temp"]!,
         voc: map["voc"]!,
+        nox: map["nox"]!,
         co: map["co"]!,
         ng: map["ng"]!,
         aqi: map["aqi"]!);
@@ -264,4 +299,21 @@ class DatabaseService {
     }
     return null;
   }
+
+  Future<List<DataPacket>> getPacketsForLastHours(int hours) async {
+  final db = await database;
+  final int now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  final int hoursAgo = now - (hours * 3600); // 3600 seconds in an hour
+
+  final List<Map<String, dynamic>> maps = await db.query(
+    'data_packets',
+    where: 'epochTime > ?',
+    whereArgs: [hoursAgo],
+    orderBy: 'epochTime DESC'
+  );
+
+  return maps.map((map) => DataPacket.fromMap(map)).toList();
 }
+}
+
+

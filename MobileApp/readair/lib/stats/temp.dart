@@ -1,53 +1,75 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+import 'package:readair/data/packet.dart';
+
 class TempPage extends StatefulWidget {
-  // const AQIPage({super.key, required this.title});
-
-  // final String title;
-
   @override
   State<TempPage> createState() => _TempPageState();
 }
 
 class _TempPageState extends State<TempPage> {
-  final Random _random = Random();
-  List<FlSpot> generateRandomData() {
-    return List.generate(
-        10, (index) => FlSpot(index.toDouble(), _random.nextInt(90) + 10.0));
+  bool isCelsius = true; // Default unit is Celsius
+  double? currentTemp;
+  double? averageTemp;
+  double? maxTemp;
+  double? minTemp;
+  List<FlSpot> tempSpots = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTempData();
   }
 
-  Color? TEMPColor(int value) {
-    if (value <= 31) {
-      return Color.fromARGB(255, 48, 49, 133);
-    } else if (value > 32 && value <= 58) {
-      return Color.fromARGB(255, 13, 146, 229);
-    } else if (value > 59 && value <= 71) {
-      return Color.fromARGB(255, 48, 133, 56);
-    } else if (value > 72 && value <= 95) {
-      return Color.fromARGB(255, 229, 114, 13);
+
+  Future<void> fetchTempData() async {
+    List<DataPacket> lastTwentyFourHourPackets =
+        await DatabaseService.instance.getPacketsForLastHours(24);
+
+    if (lastTwentyFourHourPackets.isNotEmpty) {
+      currentTemp = lastTwentyFourHourPackets.first.temp;
+
+      double totalTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce((a, b) => a + b);
+      averageTemp = totalTemp / lastTwentyFourHourPackets.length;
+
+      maxTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce(max);
+      minTemp = lastTwentyFourHourPackets.map((packet) => packet.temp).reduce(min);
+
+      tempSpots = lastTwentyFourHourPackets.asMap().entries.map((entry) => FlSpot(entry.key.toDouble(), entry.value.temp)).toList();
+    }
+
+    setState(() {});
+  }
+  // Convert Fahrenheit to Celsius
+  double fahrenheitToCelsius(int fahrenheit) {
+    return (fahrenheit - 32) * 5 / 9;
+  }
+
+  Color? TEMPColor(double value) {
+    if (value <= 0) {
+      return Colors.blue[900];
+    } else if (value > 0 && value <= 15) {
+      return Colors.blue;
+    } else if (value > 15 && value <= 25) {
+      return Colors.green;
+    } else if (value > 25 && value <= 35) {
+      return Colors.orange;
     } else {
-      return Color.fromARGB(255, 217, 19, 4);
+      return Colors.red;
     }
   }
 
-  int TEMPcurrentValue = 55;
-  int TEMPhour = 43;
-  int TEMPmax = 67;
-  int TEMPmin = 22;
-
-  String TEMPmessage(int value) {
-    if (value <= 31) {
-      return "Extremely Cold";
-    } else if (value > 32 && value <= 58) {
+  String TEMPmessage(double value) {
+    if (value <= 0) {
+      return "Very Cold";
+    } else if (value > 0 && value <= 15) {
       return "Cold";
-    } else if (value > 59 && value <= 71) {
-      return "Moderate";
-    } else if (value > 72 && value <= 95) {
-      return "Moderately Warm";
+    } else if (value > 15 && value <= 25) {
+      return "Comfortable";
+    } else if (value > 25 && value <= 35) {
+      return "Warm";
     } else {
       return "Hot";
     }
@@ -55,7 +77,7 @@ class _TempPageState extends State<TempPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> data = generateRandomData();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -63,59 +85,101 @@ class _TempPageState extends State<TempPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Temperature"),
+        actions: [
+          // Switch to toggle between Celsius and Fahrenheit
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Switch(
+              value: isCelsius,
+              onChanged: (value) {
+                setState(() {
+                  isCelsius = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(isCelsius ? "°C" : "°F"),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 10), //Spacing between the "boxes"
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                //IF STATEMENT! Change color with Quality of Air
-
-                color: TEMPColor(TEMPcurrentValue),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$TEMPcurrentValue°F',
-                          style: TextStyle(fontSize: 60))),
-                  textColor: Colors.white70,
-
-                  //trailing: Icon(Icons.wb_sunny, size: 40),
+           const SizedBox(height: 10), //Spacing between the "boxes"
+             const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Current value',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Average value', style: TextStyle(fontSize: 20)),
+                ),
+              ],
             ),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(currentTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${currentTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: Card(
+                      color: TEMPColor(averageTemp?.toDouble() ?? 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('${averageTemp?.toStringAsFixed(1) ?? '-'}°',
+                              style: TextStyle(
+                                  fontSize: 38, color: Colors.white70)),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            
             Padding(
               padding: EdgeInsets.all(2.0),
               child: ListTile(
                 title: Center(
-                    child: Text(
-                        'The Temperature is ${TEMPmessage(TEMPcurrentValue)}',
-                        style: TextStyle(fontSize: 25))),
-
-                //trailing: Icon(Icons.wb_sunny, size: 40),
+                    child: Text('Temperature is ${TEMPmessage(currentTemp?.toDouble() ?? 0)}',
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
               ),
             ),
 
-            //SizedBox(height: 10), //spacing beween the "boxes"
             const Divider(
               thickness: 3,
               indent: 20,
               endIndent: 20,
             ),
-            // add more stuff here!!
-            //const SizedBox(height: 2), //Spacing between the "boxes"
+
             const Padding(
               padding: EdgeInsets.all(6.0),
               child: ListTile(
                 title: Center(
                     child:
                         Text('24 Hour Span', style: TextStyle(fontSize: 30))),
-
-                //trailing: Icon(Icons.wb_sunny, size: 40),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -127,31 +191,31 @@ class _TempPageState extends State<TempPage> {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            if (value % 10 == 0)
-                              return Text('${value.toInt()}');
-                            return Text('');
-                          },
                           reservedSize: 40,
+                          interval: 10,
+                          getTitlesWidget: (value, meta) {
+                            return Text('${value.toInt()}');
+                          },
                         ),
                       ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text('${value.toInt()}');
-                          },
                           reservedSize: 20,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            if (value % 5 == 0) return Text('${value.toInt()}h');
+                            return Text('');
+                          },
                         ),
                       ),
                     ),
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: data,
+                        spots: tempSpots,
                         isCurved: true,
                         dotData: FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
                         color: Colors.blue,
                         barWidth: 3,
                       ),
@@ -160,36 +224,6 @@ class _TempPageState extends State<TempPage> {
                 ),
               ),
             ),
-
-            const Divider(
-              thickness: 3,
-              indent: 20,
-              endIndent: 20,
-            ),
-
-            const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: ListTile(
-                title: Center(
-                    child: Text('Average Over Past 24hrs',
-                        style: TextStyle(fontSize: 25))),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                //IF STATEMENT! Change color with Quality of Air
-                color: TEMPColor(TEMPhour),
-                child: ListTile(
-                  title: Center(
-                      child: Text('$TEMPhour\u00B0F',
-                          style: TextStyle(fontSize: 50))),
-                  textColor: Colors.white70,
-                ),
-              ),
-            ),
-
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -197,7 +231,7 @@ class _TempPageState extends State<TempPage> {
                   padding: EdgeInsets.all(8.0),
                   child: Text(
                     'Maximum',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 Padding(
@@ -213,33 +247,33 @@ class _TempPageState extends State<TempPage> {
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: TEMPColor(TEMPmax),
+                      color: TEMPColor(maxTemp?.toDouble() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$TEMPmax\u00B0F',
+                          Text('${maxTemp?.toStringAsFixed(1) ?? '-'}°',
                               style: TextStyle(
-                                  fontSize: 50, color: Colors.white70)),
+                                  fontSize: 38, color: Colors.white70)),
                         ],
                       )),
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
                   child: Card(
-                      color: TEMPColor(TEMPmin),
+                      color: TEMPColor(minTemp?.toDouble() ?? 0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('$TEMPmin\u00B0F',
+                          Text('${minTemp?.toStringAsFixed(1) ?? '-'}°',
                               style: TextStyle(
-                                  fontSize: 50, color: Colors.white70)),
+                                  fontSize: 38, color: Colors.white70)),
                         ],
                       )),
                 ),
               ],
             ),
 
-            const Divider(
+                        const Divider(
               thickness: 3,
               indent: 20,
               endIndent: 20,
@@ -250,31 +284,27 @@ class _TempPageState extends State<TempPage> {
               child: ListTile(
                 title: Center(
                     child: Text('Temperature Index (F\u00B0)',
-                        style: TextStyle(fontSize: 35))),
+                        style: TextStyle(fontSize: 30))),
               ),
             ),
 
-            //const SizedBox(height: 3), //Spacing between the "boxes"
             const Card(
-              //IF STATEMENT! Change color with Quality of Air
               color: Color.fromARGB(255, 48, 49, 133),
-              child: // ListTile(
-                  //title:
-                  Row(
+              child: Row(
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Extremely Cold',
-                          style: TextStyle(fontSize: 30, color: Colors.white70),
+                      child: Text('Very Cold',
+                          style: TextStyle(fontSize: 28, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
                   ),
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('less than 31',
+                    child: Text('31 & Below',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
@@ -282,13 +312,9 @@ class _TempPageState extends State<TempPage> {
               ),
             ),
 
-            //const SizedBox(height: 3), //Spacing between the "boxes"
             const Card(
-              //IF STATEMENT! Change color with Quality of Air
               color: Color.fromARGB(255, 13, 146, 229),
-              child: // ListTile(
-                  //title:
-                  Row(
+              child: Row(
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
@@ -310,19 +336,15 @@ class _TempPageState extends State<TempPage> {
               ),
             ),
 
-            //const SizedBox(height: 3), //Spacing between the "boxes"
             const Card(
-              //IF STATEMENT! Change color with Quality of Air
               color: Color.fromARGB(255, 48, 133, 56),
-              child: // ListTile(
-                  //title:
-                  Row(
+              child: Row(
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Moderate',
+                      child: Text('Comfortable',
                           style: TextStyle(fontSize: 30, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
@@ -338,19 +360,15 @@ class _TempPageState extends State<TempPage> {
               ),
             ),
 
-            //const SizedBox(height: 3), //Spacing between the "boxes"
             const Card(
-              //IF STATEMENT! Change color with Quality of Air
               color: Color.fromARGB(255, 229, 114, 13),
-              child: // ListTile(
-                  //title:
-                  Row(
+              child: Row(
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text('Moderately Warm',
+                      child: Text('Warm',
                           style: TextStyle(fontSize: 30, color: Colors.white70),
                           textAlign: TextAlign.left),
                     ),
@@ -366,7 +384,6 @@ class _TempPageState extends State<TempPage> {
               ),
             ),
 
-            //const SizedBox(height: 3), //Spacing between the "boxes"
             const Card(
               color: Color.fromARGB(255, 217, 19, 4),
               child: Row(
@@ -383,7 +400,7 @@ class _TempPageState extends State<TempPage> {
                   Spacer(),
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('greater than 95',
+                    child: Text('95 & Above',
                         style: TextStyle(fontSize: 30, color: Colors.white70),
                         textAlign: TextAlign.right),
                   ),
