@@ -7,6 +7,8 @@ site_author: SparkFun Electronics
 repo_url: https://github.com/sparkfun/Home_Air_Quality_Monitor.git
 repo_name: sparkfun/Home_Air_Quality_Monitor
 
+on: [push]
+
 theme:
   name: material
   custom_dir: docs/overrides
