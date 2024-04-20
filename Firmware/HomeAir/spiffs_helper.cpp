@@ -7,6 +7,8 @@
 #define FORMAT_SPIFFS_IF_FAILED true
 float otaDownloadPercentage;
 float downloadRate;
+float uploadPercentage;
+float uploadRate;
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\r\n", dirname);
@@ -231,6 +233,7 @@ void spiffsStorageTask(void *pvParameter) {
   int downloadIttr = 0;
   int chrono = millis();
   size_t writtenSize, prevSize = 0;
+  uint32_t uploadedBytes, totalBytesToUpload;
   Update.onProgress(onProgressCallback);
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
@@ -294,6 +297,8 @@ void spiffsStorageTask(void *pvParameter) {
           insertPoint += lineLength;
           BLEMessageBuffer[insertPoint++] = '\n';
         }
+        uploadedBytes += insertPoint; // 
+        uploadPercentage = uploadedBytes * 100 / (totalBytesToUpload);
         BLEMessageBuffer[insertPoint] = 0;  // Bam
         insertPoint = 0;
         // Notify BLE comm task of complete buffer

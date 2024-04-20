@@ -37,7 +37,7 @@ void setup() {
   // Serial.setTxTimeoutMs(0);
   Serial.begin(115200);
   Serial.println("Setting up main tasks...");
-  setupPreferences();
+  settings_setupPreferences();
   delay(1000);
   // setupTime();
   // Setup Flag Event Groups

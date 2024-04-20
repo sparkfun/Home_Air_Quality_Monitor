@@ -13,6 +13,8 @@
 
 extern float otaDownloadPercentage;
 extern float downloadRate;
+extern float uploadPercentage;
+extern float uploadRate;
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
 void readFile(fs::FS &fs, const char *path);

@@ -5,6 +5,12 @@ size_t updateSize = 0;
 size_t MTUSize = 512;
 bool updateSizeRecieved = false; // Switch used when downloading OTA update
 
+void BLEServerSetAdvertisingNameMAC();
+void BLEServerSetCustomAdvertisingName(String newName);
+
+void BLEServerSetAdvertisingNameMAC();
+void BLEServerSetCustomAdvertisingName(String newName);
+
 class MyCallbacks : public NimBLECharacteristicCallbacks {
 
   void onConnect(NimBLECharacteristic *pCharacteristic) {
@@ -52,17 +58,11 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // Change RTC offset
         rtc.setTime(epoch_prev + (3600 * GMTOffset));
       } else if (BLEMessageType == "READ!") {
-        // String currDateAndTime = rtc.getDateTime();
-        // std::string myString = "This is new!";
-        // pCharacteristic->setValue("HI Aziz!");
-        // pCharacteristic->notify();
-        // Serial.println("Updated value...");
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_TRANSMITTING);
         xEventGroupClearBits(appStateFlagGroup, APP_FLAG_RUNNING);
       } else if (BLEMessageType == "DEL!!") {
         // Manually cull the entire root directory
         Serial.println("Received command to clear SPIFFS. Clearing...");
-        delay(1000);
         deleteAllFiles(SPIFFS);
       } else if (BLEMessageType == "TEST!") {
         Serial.println("TEST! received...");
@@ -77,7 +77,9 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
             return;
           }
-          mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
+          // Calling mygpioReadAllSensors() too often stalls bluetooth due to
+          // its high priority and locks system
+          // mygpioReadAllSensors(&rawDataArray[0], RAW_DATA_ARRAY_SIZE);
           char message[90];
           int charsWritten = snprintf(
               message, 90,
@@ -87,12 +89,11 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
               rawDataArray[3], rawDataArray[4], rawDataArray[5],
               rawDataArray[6], rawDataArray[7], rawDataArray[8],
               rawDataArray[9], rawDataArray[10], rawDataArray[11]);
-          // Serial.printf("Chars written: %d\n", charsWritten);
+          xSemaphoreGive(rawDataMutex); // Release mutex
           pSensorCharacteristic->setValue(message);
           pSensorCharacteristic->notify();
           Serial.printf("Set BLE value to: ");
           Serial.println(message);
-          xSemaphoreGive(rawDataMutex); // Release mutex
         }
       } else if (BLEMessageType == "KAZAM") {
         Serial.println("KAZAM! - Starting to listen");
@@ -135,6 +136,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
+
+      } else if (BLEMessageType == "NAME!=") {
+        Serial.printf("Received command to set name to %s\n", value.substr(5));
+        BLEServerSetCustomAdvertisingName(value.substr(5).c_str());
 
       } else if (BLEMessageType == "DISC!") {
 
@@ -211,36 +216,29 @@ void BLEServerCommunicationTask(void *pvParameter) {
         break;
       }
       // Else: File exists and buffer will be written to and read out
-      // Serial.print("Waiting for buffer to be ready...");
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY,
                           BLE_FLAG_BUFFER_READY, false, 60000);
-      // Serial.println("Buffer ready!");
       pSensorCharacteristic->setValue(BLEMessageBuffer);
       pSensorCharacteristic->notify();
-      // Serial.print("Set value to: ");
       Serial.println(BLEMessageBuffer);
-      // Notify
-      // pSensorCharacteristic->notify((const uint8_t*) &BLEMessageBuffer,
-      // BLE_BUFFER_LENGTH, true); pSensorCharacteristic->notify(false);
-      // Serial.println("Notification sent!");
-      // Serial.println("Waiting for data to be read...");
-      // printCurrentBLEFlagStatus();
+      // Wait for data to be read before preparing new buffer
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
                           BLE_FLAG_READ_COMPLETE, false, ONE_MIN_MS);
+      // Signal to SPIFFS to write new data
       xEventGroupSetBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER);
-      // Serial.println("Buffer read!");
     }
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DONE_TRANSMITTING) {
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DONE_TRANSMITTING);
       uint8_t message[1] = {65};
       pSensorCharacteristic->notify(&message[0], 1, true);
       Serial.println("Ending transmission!");
+      deleteAllFiles(SPIFFS);
     }
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
-void BLEServerSetAdvertisingName() {
+void BLEServerSetAdvertisingNameMAC() {
   // Uses the last 2 bytes of the MAC address to set a unique advertising name
   uint8_t macOut[8];
   char retArr[14];
@@ -254,8 +252,28 @@ void BLEServerSetAdvertisingName() {
     Serial.println("Mac address failed to be read");
 }
 
+void BLEServerSetCustomAdvertisingName(String newName) {
+  // Uses the last 2 bytes of the MAC address to set a unique advertising name
+  if (online.pref) {
+    preferences.putString("customBLEName", newName);
+    delay(100); // Give prefs a moment to set the new name
+    if (preferences.getString("customBLEName") == newName) {
+      Serial.println("New name was saved successfully");
+      // Perhaps show the new name and show that we're restarting?
+      ESP.restart();
+    } else {
+      Serial.println("New name was not saved successfully");
+      preferences.putString("customBLEName", "NONE");
+    }
+  }
+}
+
 void BLEServerSetupBLE() {
-  BLEServerSetAdvertisingName();
+  if (preferences.getString("customBLEName") == "NONE") {
+    BLEServerSetAdvertisingNameMAC();
+  } else {
+    NimBLEDevice::init(preferences.getString("customBLEName").c_str());
+  }
 
   NimBLEDevice::setMTU(MTUSize);
   NimBLEServer *pServer = NimBLEDevice::createServer();
@@ -266,8 +284,6 @@ void BLEServerSetupBLE() {
 
   pSensorCharacteristic->setCallbacks(new MyCallbacks());
   pService->start();
-  // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is
-  // working for backward compatibility
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
   // pAdvertising->setScanResponse(true);

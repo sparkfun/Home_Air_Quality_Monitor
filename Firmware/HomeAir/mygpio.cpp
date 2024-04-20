@@ -12,12 +12,26 @@ float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
 void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
-  uint16_t sensorReadLoop = 0;
+  uint16_t sensorReadLoop = preferences.getUShort("sensorReadPeriod");
+  uint16_t MQ_OnPeriod = preferences.getUShort("MQ_OnPeriod");
+  uint16_t MQ_OffPeriod = preferences.getUShort("MQ_OffPeriod");
+  if(!sensorReadLoop || !online.pref){
+    DBG("Prefs not online to establish sensor reading period.\nSetting period to 15 sec.");
+    sensorReadLoop = 15;
+  }
+  if(!MQ_OnPeriod || !online.pref){
+    DBG("Prefs not online to establish MQ ACTIVE period.\nSetting period to 15 sec.");
+    MQ_OnPeriod = 90;
+  }
+  if(!MQ_OffPeriod || !online.pref){
+    DBG("Prefs not online to establish MQ INACTIVE period.\nSetting period to 15 sec.");
+    MQ_OffPeriod = 60;
+  }
   while (1) {
     // Serial.print("Sensor Read from core ");
     // Serial.println(xPortGetCoreID());
     sensorReadLoop++;
-    if (sensorReadLoop >= SENSOR_READ_PERIOD_SEC) {
+    if (sensorReadLoop >= preferences.getUShort("sensorReadPeriod")) {
       sensorReadLoop = 0; // Reset counter
       if (!online.pasco2) {
         setupCO2Sensor(co2Error, co2Sensor); // Attempt to setup PASCO2 Sensor
@@ -172,12 +186,12 @@ uint16_t readCO2PPM(Error_t errorPtr, PASCO2Ino CO2SensorPtr) {
     do {
       errorPtr = co2Sensor.getCO2(co2PPM);
       if (errorPtr != 0) {
-        if (errorPtr != 7 || errorPtr != 1) {
+        if (errorPtr != 7 && errorPtr != 1) {
           Serial.print("Error reading CO2 w/ error code:");
           Serial.println(errorPtr);
         }
       }
-      delay(500);
+      delay(1000);
     } while (co2PPM == 0);
     return co2PPM;
   }
@@ -268,11 +282,7 @@ void GPIO0_ISR() {
 }
 
 void GPIO0_timercb() {
-  Serial.println("Timer expired!");
-  esp_err_t err;
-
-  // Set preferences to default values
-  // Perhaps show something on the screen?
+  settings_setPrefsToDefault();
 }
 
 void debounce_timercb() {

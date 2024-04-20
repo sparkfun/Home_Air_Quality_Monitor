@@ -14,18 +14,6 @@ struct struct_online {
   bool pref = false;
 };
 
-// struct display_settings{
-//   bool wallMounted = false;
-//   bool nightMode = false;
-//   bool clockEnabled = true;
-//   bool dotEnabled = true;
-//   uint8_t clockLocation = 0;
-//   uint8_t dotLocation = 0;
-//   uint8_t frame1sensor;
-//   uint8_t frame2sensor;
-//   uint16_t refreshTime = 5;
-// };
-
 extern struct_online online;
 
 struct display_settings {
@@ -58,6 +46,7 @@ struct display_settings {
 
 extern struct display_settings epd_settings;
 
-bool setupPreferences();
+bool settings_setupPreferences();
+bool settings_setPrefsToDefault();
 
 #endif
