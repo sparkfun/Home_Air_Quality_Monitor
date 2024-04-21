@@ -6,7 +6,7 @@ PASCO2Ino co2Sensor;
 int16_t co2PPM;
 Error_t co2Error;
 SensirionI2CSen5x sen5x;
-Button GPIO0_Button(GPIO0_PIN); // define the button
+// Button GPIO0_Button(GPIO0_PIN); // define the button
 // Global Variables
 float rawDataArray[RAW_DATA_ARRAY_SIZE];
 

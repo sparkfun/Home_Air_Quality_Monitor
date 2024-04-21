@@ -368,15 +368,27 @@ class hV_Screen_Buffer : protected hV_Font_Terminal
 
     virtual void firmwareUpdateScreen(uint8_t percent);
 
+    virtual void dataUploadScreen(uint8_t percent);
+
     virtual void clearFrame(uint8_t frame);
 
     virtual void drawSensorFrame(uint8_t sensor, uint8_t frameNumber);
+
+    virtual void drawBluetoothConnected(bool connected);
 
     virtual void updateFrameVal(uint8_t frameNumber, uint8_t sensor, float sensorReading);
 
     virtual void drawText(int x, int y, int fontSize, String msg, uint16_t color = myColours.black);
 
     virtual void clearNumDigit(uint8_t numDigit, uint16_t x_location, uint16_t y_location);
+
+    virtual void drawUnits(uint8_t sensor = mySensor.co2, uint8_t numDigits = 2, uint16_t x_location = 172, uint16_t y_location = 105);
+
+    virtual void drawPairingScreenBitmap1Dot();
+
+    virtual void drawPairingScreenBitmap2Dot();
+    
+    virtual void drawPairingScreenBitmap3Dot();
 
 
   protected:

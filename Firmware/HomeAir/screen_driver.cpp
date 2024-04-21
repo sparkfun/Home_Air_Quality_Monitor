@@ -3,19 +3,17 @@
 Screen_EPD_EXT3_Fast deviceScreen(eScreen_EPD_EXT3_266_0C_Fast, myMfnBoard);
 
 void screendriverEpaperSetup() {
-#ifdef HOMEAIR_BOARD
-  Serial.println("HOMEAIR_BOARD - TRUE");
-#else
-  Serial.println("HOMEAIR_BOARD - FALSE");
-#endif
-#ifdef ANTON_BOARD
-  Serial.println("Anton board!");
-#endif
+  #ifdef HOMEAIR_BOARD
+    Serial.println("HOMEAIR_BOARD - TRUE");
+  #else
+    Serial.println("HOMEAIR_BOARD - FALSE");
+  #endif
+  #ifdef FINAL_HARDWARE
+    Serial.println("Final hardware!");
+  #endif
   Serial.println("Setting up EPD");
   deviceScreen.begin();
-  // if(!deviceScreen.begin()) Serial.println("Error initiating EPD");
   deviceScreen.clear();
-  // deviceScreen.regenerate();
   deviceScreen.globalRefresh(2);
   deviceScreen.setOrientation(0);      // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST); // Set Flush Mode
@@ -23,7 +21,6 @@ void screendriverEpaperSetup() {
   deviceScreen.drawSparkfunLogo();
   Serial.println("Drew Sparkfun logo");
   deviceScreen.flush();
-  // vTaskDelay(3000);
   vTaskDelay(1000 * preferences.getUShort("logoTime"));
   deviceScreen.setOrientation(1);
   deviceScreen.clear();
@@ -64,26 +61,10 @@ void screendriverShowTime() {
   // Shows the current time, if configured, in the upper right corner with 1
   // second accuracy in the format HH:MM:SS
   if (dateConfigured) {
-    deviceScreen.gText(230, 5,
-                       String(rtc.getHour()) + ":" + String(rtc.getMinute()) +
-                           ":" + String(rtc.getSecond()));
+    deviceScreen.gText(230, 5, String(rtc.getHour()) + ":" + String(rtc.getMinute()) + ":" + String(rtc.getSecond()));
   } else {
     deviceScreen.gText(230, 5, "Set Time!");
   }
-}
-
-void screendriverShowParingScreen() {
-  uint8_t macOut[8];
-  esp_err_t espErr = esp_efuse_mac_get_default(&macOut[0]);
-  deviceScreen.gText(50, 25, "Awaiting BLE connection...");
-  deviceScreen.gText(50, 50, "HomeAir-" + screendriverGetMacAddressLastFour());
-
-  // if (espErr == ESP_OK) {
-  //   deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
-  // } else {
-  //   Serial.println("unable to get mac address");
-  //   deviceScreen.gText(50, 50, "HomeAir-%02hhx%02hhx", macOut[4], macOut[5]);
-  // }
 }
 
 // For debugging purposes
@@ -103,56 +84,49 @@ void screendriverShowDetailedMeasurements() {
   }
 }
 
-void screendriverFlushWithChrono() {
-  uint32_t chrono = millis();
-  deviceScreen.flush();
-  chrono = millis() - chrono;
-  // Serial.printf("\tScreen refresh took %i\n", chrono);
-}
-
-// void globalRefresh() {
-//   if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
-//     deviceScreen.regenerate();
-//   }
-// }
-
 void rotateFrames() {
-  // CO2_PPM = 0,
-  // PPM_1_0 = 1,// PPM_2_5 = 2,// PPM_4_0 = 3,// PPM_10 = 4,
-  // HUMIDITY = 5, // TEMP = 6,
-  // VOC = 7,
 
-  // CO = 8,
-  // NG = 9,
-  // AQI = 10
-  // NOX
-  if (preferences.getUShort("frame1Sensor") == CO2_PPM)
-    preferences.putUShort("frame1Sensor", PPM_2_5);
-  else if (preferences.getUShort("frame1Sensor") == PPM_2_5)
-    preferences.putUShort("frame1Sensor", HUMIDITY);
-  else if (preferences.getUShort("frame1Sensor") == HUMIDITY)
-    preferences.putUShort("frame1Sensor", VOC);
-  else
-    preferences.putUShort("frame1Sensor", CO2_PPM);
+  /*
+  CO2_PPM = 0,
+  PPM_1_0 = 1,
+  PPM_2_5 = 2,
+  PPM_4_0 = 3,
+  PPM_10 = 4,
+  HUMIDITY = 5,
+  TEMP = 6,
+  VOC = 7,
+  NOX = 8,
+  CO = 9,
+  NG = 10,
+  AQI = 11
+  */
+  if(preferences.getBool("oneSensorOnly")) {
+    if(preferences.getUShort("frame1Sensor") == CO2_PPM) preferences.putUShort("frame1Sensor", PPM_2_5);
+    else if(preferences.getUShort("frame1Sensor") < HUMIDITY) preferences.putUShort("frame1Sensor", HUMIDITY);
+    else if(preferences.getUShort("frame1Sensor") >= AQI) preferences.putUShort("frame1Sensor", CO2_PPM);
+    else preferences.putUShort("frame1Sensor", (preferences.getUShort("frame1Sensor") + 1));
+  }
+  else {
+    if (preferences.getUShort("frame1Sensor") == CO2_PPM) preferences.putUShort("frame1Sensor", PPM_2_5);
+    else if (preferences.getUShort("frame1Sensor") == PPM_2_5) preferences.putUShort("frame1Sensor", HUMIDITY);
+    else if (preferences.getUShort("frame1Sensor") == HUMIDITY) preferences.putUShort("frame1Sensor", VOC);
+    else preferences.putUShort("frame1Sensor", CO2_PPM);
 
-  if (preferences.getUShort("frame2Sensor") == CO)
-    preferences.putUShort("frame2Sensor", NG);
-  else if (preferences.getUShort("frame2Sensor") == NG)
-    preferences.putUShort("frame2Sensor", AQI);
+    if (preferences.getUShort("frame2Sensor") == NOX) preferences.putUShort("frame2Sensor", CO);
+    else if (preferences.getUShort("frame2Sensor") == CO) preferences.putUShort("frame2Sensor", NG);
+    else if (preferences.getUShort("frame2Sensor") == NG) preferences.putUShort("frame2Sensor", AQI);
+    else preferences.putUShort("frame2Sensor", NOX);
+  }
 
-  // #ifdef USE_NOX
-  // else if(preferences.getUShort("frame2Sensor") == AQI)
-  // preferences.putUShort("frame2Sensor", NOX); #endif
-
-  else
-    preferences.putUShort("frame2Sensor", CO);
+  Serial.print("Frame 1 sensor: ");
+  Serial.println(preferences.getUShort("frame1Sensor"));
+  Serial.print("Frame 2 sensor: ");
+  Serial.println(preferences.getUShort("frame2Sensor"));
 }
 
 void updateSensorFrames() {
   if (xSemaphoreTake(rawDataMutex, portMAX_DELAY)) {
     deviceScreen.clear();
-    // deviceScreen.drawSensorFrame(preferences.getUShort("frame1Sensor"), 0);
-    // deviceScreen.drawSensorFrame(preferences.getUShort("frame2Sensor"), 1);
     for (int i = 0; i < 2; i++) {
 
       short currentSensor;
@@ -161,13 +135,27 @@ void updateSensorFrames() {
         currentSensor = preferences.getUShort("frame1Sensor");
       else
         currentSensor = preferences.getUShort("frame2Sensor");
-
+      if(preferences.getBool("oneSensorOnly")) {
+        i = 3;
+      }
+      Serial.print("Current frame number: ");
+      Serial.println(i);
       if (currentSensor == TEMP || currentSensor == HUMIDITY) {
-        deviceScreen.drawSensorFrame(mySensor.temperature, i);
-        deviceScreen.updateFrameVal(i, mySensor.humidity,
-                                    rawDataArray[HUMIDITY]);
-        deviceScreen.updateFrameVal(i, mySensor.temperature,
-                                    rawDataArray[TEMP]);
+        if(i == 3) {
+          if(currentSensor == TEMP) {
+            deviceScreen.drawSensorFrame(mySensor.tempBig, i);
+            deviceScreen.updateFrameVal(i, mySensor.temperature, rawDataArray[TEMP]);
+          }
+          else if(currentSensor == HUMIDITY) {
+            deviceScreen.drawSensorFrame(mySensor.humidityBig, i);
+            deviceScreen.updateFrameVal(i, mySensor.humidity, rawDataArray[HUMIDITY]);
+          }
+        }
+        else {
+          deviceScreen.drawSensorFrame(mySensor.temperature, i);
+          deviceScreen.updateFrameVal(i, mySensor.humidity, rawDataArray[HUMIDITY]);
+          deviceScreen.updateFrameVal(i, mySensor.temperature, rawDataArray[TEMP]);
+        }
       } else if (currentSensor == CO) {
         deviceScreen.drawSensorFrame(mySensor.co, i);
         deviceScreen.updateFrameVal(i, mySensor.co, rawDataArray[CO]);
@@ -185,24 +173,38 @@ void updateSensorFrames() {
         deviceScreen.updateFrameVal(i, mySensor.aqi, rawDataArray[AQI]);
       } else if (currentSensor == PPM_2_5) {
         deviceScreen.drawSensorFrame(mySensor.particles, i);
-        deviceScreen.updateFrameVal(i, mySensor.particles,
-                                    rawDataArray[PPM_2_5]);
+        deviceScreen.updateFrameVal(i, mySensor.particles, rawDataArray[PPM_2_5]);
       }
-      // else deviceScreen.updateFrameVal(i, currentSensor,
-      // String(rawDataArray[currentSensor]));
-    }
+      if(i == 3) {
+        if(preferences.getBool("showDeviceID")) {
+          deviceScreen.drawText(146, 4, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
+        }
+        if(xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_CLIENT_CONNECTED) deviceScreen.drawBluetoothConnected(true);
+        else deviceScreen.drawBluetoothConnected(false);
+        
+      }
     xSemaphoreGive(rawDataMutex);
+    }
+  if(preferences.getBool("rotateFrames")) {
+    rotateFrames();
   }
-if(preferences.getBool("rotateFrames")) {
-  rotateFrames();
-}
-  // deviceScreen.flush();
+  }
 }
 
 
 void testFrames() {
-  deviceScreen.drawSensorFrame(mySensor.co2, 1);
-  deviceScreen.updateFrameVal(1, mySensor.co2, 1234);
+  // deviceScreen.drawSensorFrame(mySensor.co2, 1);
+  // deviceScreen.updateFrameVal(1, mySensor.co2, 1234);
+
+  Serial.println("Drawing test frame");
+  deviceScreen.drawUnits(mySensor.temperature, 2, 100, 55);
+  // deviceScreen.drawPairingScreenBitmap(1);
+
+  // deviceScreen.setOrientation(2);
+  // deviceScreen.drawUnits(mySensor.humidity, 2, 0, 0);
+  // deviceScreen.drawText(146, 126, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
+  // deviceScreen.setOrientation(1);
+
 }
 
 void drawDot(bool indicatorOn) {
@@ -272,25 +274,37 @@ void firmwareUpdateScreen() {
   }
 }
 
+void dataUploadScreen() {
+  // if (xSemaphoreTake(otaDownloadPercentageMutex, 0)) {
+    deviceScreen.dataUploadScreen(uploadPercentage);
+  //   xSemaphoreGive(otaDownloadPercentageMutex);
+  // } else {
+  //   Serial.println("Couldn't acquire otaProgress mutex!");
+  // }
+}
+
 int drawPairingScreen(int state) {
   deviceScreen.clear();
-  // if(state == 1) {
-  //   deviceScreen.drawText(25, 90, 3, "Pairing   ");
-  // }
-  deviceScreen.drawText(70, 50, 3,
-                        "HomeAir-" + screendriverGetMacAddressLastFour());
   if (state == 1) {
-    deviceScreen.drawText(25, 90, 3, "Waiting to connect.  ");
-  } else if (state == 2) {
-    deviceScreen.drawText(25, 90, 3, "Waiting to connect.. ");
-  } else if (state == 3) {
-    deviceScreen.drawText(25, 90, 3, "Waiting to connect...");
+    Serial.print("Pairing state: ");
+    Serial.println(state);
+    deviceScreen.drawPairingScreenBitmap1Dot();
+    // state ++;
+  } 
+  else if (state == 2) {
+    deviceScreen.drawPairingScreenBitmap2Dot();
+    // state ++;
+  } 
+  else if (state == 3) {
+    deviceScreen.drawPairingScreenBitmap3Dot();
     state = 0;
-  } else {
+  } 
+  else {
     Serial.println("Warning: Invalid pairing state, resetting state to 0");
     state = 0;
   }
   state++;
+  deviceScreen.drawText(146, 126, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
   return state;
 }
 
@@ -300,8 +314,8 @@ int drawScreen(int state) {
   // pairing screen
   uint32_t eventBits = xEventGroupGetBits(appStateFlagGroup);
   if (eventBits & APP_FLAG_SETUP && !(eventBits & APP_FLAG_BYPASS_SETUP)) {
-// draw pairing screen
-    bool skipPair = preferences.getBool("skipPairingScreen");
+  // draw pairing screen
+    bool skipPair = preferences.getBool("skipPair");
     if(skipPair) {
       #ifndef FRAME_TESTING_MODE
         updateSensorFrames();
@@ -315,16 +329,18 @@ int drawScreen(int state) {
 
     deviceScreen.flush();
     return state;
-  } else if (xEventGroupGetBits(appStateFlagGroup) &
-      (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
-    #ifndef FRAME_TESTING_MODE
-      updateSensorFrames();
-    #else 
-      testFrames();
-    #endif
+  } else if (xEventGroupGetBits(appStateFlagGroup) & (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
+      #ifndef FRAME_TESTING_MODE
+        updateSensorFrames();
+      #else 
+        testFrames();
+      #endif
   } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
     // draw update screen
     firmwareUpdateScreen();
+  }
+  else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {
+    dataUploadScreen();
   } else {
     Serial.println("Warning: Unkown flag state in EPD, reverting to displaying sensor data");
     updateSensorFrames();
@@ -352,46 +368,37 @@ void screendriverRunScreenTask(void *pvParameter) {
   volatile short indicatorFreq = 1;
   while (1) {
     {
-      // Serial.print("EPD task loop ran, refreshFreq: ");
-      // Serial.print(refreshFreq);
-      // Serial.print(", fullRefreshFreq: ");
-      // Serial.print(fullRefreshFreq);
-      // Serial.print(", indicatorFreq: ");
-      // Serial.print(indicatorFreq);
-      // Serial.print(", fullRefreshCounter: ");
-      // Serial.println(fullRefreshCounter);
 
       fullRefreshFreq = preferences.getUShort("burninPeriod");
       if (fullRefreshFreq < 1) {
         fullRefreshFreq = 1;
-        Serial.println("Warning: fullRefreshPeriod is 0. Adjusted to 1 to "
-                       "avoid div-by-zero.");
+        Serial.println("Warning: fullRefreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
       }
 
       refreshFreq = preferences.getUShort("refreshPeriod");
-      bool skipPair = preferences.getBool("skipPairingScreen");
-      Serial.print("skipPair: ");
-      Serial.println(skipPair);
-#ifdef ADJUST_REFRESH_RATE
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) { 
-        if(!skipPair) refreshFreq = 1;
+      bool skipPair = preferences.getBool("skipPair");
+
+      if(preferences.getBool("adjustRefRate")) {
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_SETUP) { 
+          if(!skipPair) refreshFreq = 1;
+        }
+          if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
+          refreshFreq = 1;
+        }
+        if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {
+          refreshFreq = 1;
+        }
       }
-      if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
-        refreshFreq = 1;
-      }
-#endif
 
       if (refreshFreq < 1) {
         refreshFreq = 1;
-        Serial.println(
-            "Warning: refreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
+        Serial.println("Warning: refreshPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
       }
 
       indicatorFreq = preferences.getUShort("indicatorPeriod");
       if (indicatorFreq < 1) {
         indicatorFreq = 1;
-        Serial.println("Warning: indicatorPeriod is 0. Adjusted to 1 to avoid "
-                       "div-by-zero.");
+        Serial.println("Warning: indicatorPeriod is 0. Adjusted to 1 to avoid div-by-zero.");
       }
 
       deviceScreen.clear();
@@ -415,11 +422,9 @@ void screendriverRunScreenTask(void *pvParameter) {
         if (preferences.getBool("dotEnabled")) {
           drawDot(refreshIndicatorOn);
           indicatorCounter = !indicatorCounter;
-        } else if (preferences.getBool("clockEnabled") &&
-                   preferences.getBool("dotEnabled")) {
+        } else if (preferences.getBool("clockEnabled") && preferences.getBool("dotEnabled")) {
           drawClock(refreshIndicatorOn);
-        } else if (preferences.getBool("clockEnabled") &&
-                   !preferences.getBool("dotEnabled")) {
+        } else if (preferences.getBool("clockEnabled") && !preferences.getBool("dotEnabled")) {
           drawClock(refreshIndicatorOn);
           indicatorCounter = !indicatorCounter;
         } else {
@@ -436,14 +441,12 @@ void screendriverRunScreenTask(void *pvParameter) {
       fullRefreshCounter++;
       fullRefreshCounter %= fullRefreshFreq;
 
-      // Wait 1 second
-      // vTaskDelay(1000);
-      // Replace standard delay with a  flag pend with one second timeout
-      EventBits_t uxBits =
-          xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE,
-                              pdTRUE, pdFALSE, 1000 / portTICK_PERIOD_MS);
+      EventBits_t uxBits = xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE, pdTRUE, pdFALSE, 1000 / portTICK_PERIOD_MS);
       if (uxBits & APP_FLAG_EPD_FORCE_UPDATE) {
+        Serial.println("Button pressed - EPD update forced");
         DBG("EPD Force Update flag set");
+        if(!preferences.getBool("rotateFrames")) rotateFrames(); // If rotateFrames bool is true then sensor will be rotated after refreshing anyway so rotateFrames should not be called
+        refreshCounter = 0; // Force immediate update 
       }
     }
   }

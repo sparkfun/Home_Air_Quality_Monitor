@@ -20,42 +20,39 @@
 // #define FRANKENSTEIN_BOARD 1
 #define FINAL_HARDWARE 1
 
-#define ADJUST_REFRESH_RATE                                                    \
-  1 // if enabled then refresh rate will be set to 1 second when pairing or
-    // updating
+#define ADJUST_REFRESH_RATE 1 // if enabled then refresh rate will be set to 1 second when pairing or updating
 
 // #define FRAME_TESTING_MODE 1
 
 const pins_t myMfnBoard{
 #ifdef FINAL_HARDWARE
-    .panelBusy = 43,  //"BUSY", Red breadboard jumper
-    .panelDC = 41,    //"D/C", Orange breadboard jumper
-    .panelReset = 42, //"RST", Yellow breadboard jumper
-    .panelMISO = 44,  //"MISO", Green breadboard jumper // UNUSED
-    .panelMOSI = 38,  //"MOSI", Blue breadboard jumper
-    .panelSCK = 39,   //"SCK", Brown breadboard jumper
-    .flashCS = 40,    //"FCSM", Purple breadboard jumper
-    .panelCS = 40,    //"ECSM", Grey breadboard jumper // UNUSED
+    .panelBusy = 43,  //"BUSY"
+    .panelDC = 41,    //"D/C"
+    .panelReset = 42, //"Reset"
+    .panelMISO = 44,  //"MISO", Not Used
+    .panelMOSI = 38,  //"MOSI"
+    .panelSCK = 39,   //"SCK"
+    .flashCS = 45,    //"FCSM", Not Used
+    .panelCS = 40,    //"ECSM"
 #elif defined(FRANKENSTEIN_BOARD)
-    .panelBusy = 38,  //"BUSY", Red breadboard jumper
-    .panelDC = 40,    //"D/C", Orange breadboard jumper
-    .panelReset = 39, //"RST", Yellow breadboard jumper
-    .panelMISO = 48,  //"MISO", Green breadboard jumper
-    .panelMOSI = 43,  //"MOSI", Blue breadboard jumper
-    .panelSCK = 42,   //"SCK", Brown breadboard jumper
-    .flashCS = 37,    //"FCSM", Purple breadboard jumper
-    .panelCS = 41,    //"ECSM", Grey breadboard jumper
+    .panelBusy = 38,  //"BUSY"
+    .panelDC = 40,    //"D/C"
+    .panelReset = 39, //"Reset"
+    .panelMISO = 48,  //"MISO", Not Used
+    .panelMOSI = 43,  //"MOSI"
+    .panelSCK = 42,   //"SCK"
+    .flashCS = 37,    //"FCSM", Not Used
+    .panelCS = 41,    //"ECSM"
 #elif defined(BREAD_BOARD)
-    .panelBusy = 41,  //"BUSY", Red breadboard jumper
-    .panelDC = 40,    //"D/C", Orange breadboard jumper
-    .panelReset = 39, //"RST", Yellow breadboard jumper
-    .panelMISO = 38,  // NOT NEEDED //"MISO", Green breadboard jumper
-    .panelMOSI = 37,  //"MOSI", Blue breadboard jumper
-    .panelSCK = 42,   //"SCK", Brown breadboard jumper
-    .flashCS = 36,    //"FCSM", Purple breadboard jumper
-    .panelCS = 35,    //"ECSM"
+    .panelBusy = 41,  //"BUSY", Brown breadboard jumper
+    .panelDC = 40,    //"D/C", Red breadboard jumper
+    .panelReset = 39, //"RST", Orange breadboard jumper
+    .panelMISO = 38,  // NOT NEEDED //"MISO", Yellow breadboard jumper
+    .panelMOSI = 37,  //"MOSI", Green breadboard jumper
+    .panelSCK = 42,   //"SCK", Black breadboard jumper
+    .flashCS = 36,    //"FCSM", Blue breadboard jumper
+    .panelCS = 35,    //"ECSM", Purple breadboard jumper
 #endif
-
 };
 
 void screendriverEpaperSetup();
