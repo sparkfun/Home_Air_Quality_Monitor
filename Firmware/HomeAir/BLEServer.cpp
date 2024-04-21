@@ -26,8 +26,6 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
   void onRead(NimBLECharacteristic *pCharacteristic) {
     Serial.println("Read request serviced");
     xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE);
-    // std::string message = std::to_string(rtc.getSecond());
-    // pCharacteristic->setValue(BLEMessageBuffer);
   }
 
   void onWrite(NimBLECharacteristic *pCharacteristic) {
@@ -52,7 +50,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
       } else if (BLEMessageType == "TGMT=") {
         // Given +/- GMT offset
         // Ex: -06 = MST | +13 = Tonga | +9.5 = Adelaide
-        float GMTOffset = stof(value.substr(5, value.length() - 5));
+        float GMTOffset = stof(value.substr(5));
         long epoch_prev = rtc.getEpoch();
         timeZoneConfigured = true;
         // Change RTC offset
@@ -119,10 +117,10 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
           // We're actively downloading, so new packet must be new info to
           // process
           if (!updateSizeRecieved) {
-            updateSize = stoi(value.substr(5, value.length() - 5));
+            updateSize = stoi(value.substr(5));
             updateSizeRecieved = true;
             Serial.printf("Size of incoming OTA update: %d\n",
-                          stoi(value.substr(5, value.length() - 5)));
+                          stoi(value.substr(5)));
           }
         }
       } else if (BLEMessageType == "DONE!") {
@@ -136,13 +134,35 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
 
       } else if (BLEMessageType == "STAT!") {
         listDir(SPIFFS, "/", 0);
+        // Respond with a status message
+        String reply = "";
 
-      } else if (BLEMessageType == "NAME!=") {
-        Serial.printf("Received command to set name to %s\n", value.substr(5));
-        BLEServerSetCustomAdvertisingName(value.substr(5).c_str());
+        if (online.pasco2) {
+          reply += "1,";
+        } else {
+          reply += "0,";
+        }
+
+        if (online.sen5x) {
+          reply += "1,";
+        } else {
+          reply += "0,";
+        }
+
+        char percent[5];
+        snprintf(percent, 4, "%.01f",
+                 100.0 * SPIFFS.usedBytes() / SPIFFS.totalBytes());
+        reply += percent;
+        Serial.printf("Replying with status: %s\n", reply.c_str());
+
+        pSensorCharacteristic->setValue(reply.c_str());
+
+      } else if (BLEMessageType == "NAME!") {
+        Serial.printf("Received command to set name to %s\n",
+                      value.substr(6).c_str());
+        BLEServerSetCustomAdvertisingName(value.substr(6).c_str());
 
       } else if (BLEMessageType == "DISC!") {
-
         xEventGroupClearBits(appStateFlagGroup, APP_FLAG_ALL);
         xEventGroupClearBits(BLEStateFlagGroup, BLE_FLAG_ALL);
         xEventGroupSetBits(appStateFlagGroup, APP_FLAG_RUNNING);
@@ -173,8 +193,14 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         } else if (BLEMessageType == "EPDRP") {
           // EPD Refresh Period
           preferences.putUShort("refreshPeriod", messageValue);
+        } else if (BLEMessageType == "EPDRO") {
+          if (messageValue == 1) {
+            // Set orientation one way
+          } else {
+            // Set orientation the other way
+          }
         }
-        // sensorReadPeriod
+        // ReadPeriod
         // averagingMode
         // MQ disable (4 or 7)
       } else {
@@ -229,8 +255,9 @@ void BLEServerCommunicationTask(void *pvParameter) {
     }
     if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_DONE_TRANSMITTING) {
       xEventGroupClearBits(appStateFlagGroup, APP_FLAG_DONE_TRANSMITTING);
-      uint8_t message[1] = {65};
-      pSensorCharacteristic->notify(&message[0], 1, true);
+      // uint8_t message[] = {65};
+      pSensorCharacteristic->setValue("DONE");
+      // pSensorCharacteristic->notify(&message[0], 1, true);
       Serial.println("Ending transmission!");
       deleteAllFiles(SPIFFS);
     }
@@ -255,10 +282,11 @@ void BLEServerSetAdvertisingNameMAC() {
 void BLEServerSetCustomAdvertisingName(String newName) {
   // Uses the last 2 bytes of the MAC address to set a unique advertising name
   if (online.pref) {
-    preferences.putString("customBLEName", newName);
+    preferences.putString("customBLEName", newName.c_str());
     delay(100); // Give prefs a moment to set the new name
-    if (preferences.getString("customBLEName") == newName) {
+    if (preferences.getString("customBLEName") == newName.c_str()) {
       Serial.println("New name was saved successfully");
+      delay(2000);
       // Perhaps show the new name and show that we're restarting?
       ESP.restart();
     } else {
@@ -269,10 +297,15 @@ void BLEServerSetCustomAdvertisingName(String newName) {
 }
 
 void BLEServerSetupBLE() {
-  if (preferences.getString("customBLEName") == "NONE") {
-    BLEServerSetAdvertisingNameMAC();
-  } else {
+  String customName = preferences.getString("customBLEName");
+  Serial.printf("Saved custom name is %s\n", customName.c_str());
+  delay(1000);
+  if (preferences.getString("customBLEName") != "NONE") {
+    Serial.println("Setting custom name for BLE Broadcasting ID");
     NimBLEDevice::init(preferences.getString("customBLEName").c_str());
+  } else {
+    Serial.println("Setting BLE Broadcasting ID to MAC address");
+    BLEServerSetAdvertisingNameMAC();
   }
 
   NimBLEDevice::setMTU(MTUSize);

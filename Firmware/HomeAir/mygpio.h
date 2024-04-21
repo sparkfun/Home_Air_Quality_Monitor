@@ -10,7 +10,6 @@
 #include <Arduino.h>
 
 // Vendor Libraries
-// #include <JC_Button.h> // https://github.com/JChristensen/JC_Button - Version 2.1.4
 #include <SensirionI2CSen5x.h> // https://github.com/Sensirion/arduino-i2c-sen5x - Version 0.3.0
 #include <pas-co2-ino.hpp> // https://github.com/Infineon/arduino-pas-co2-sensor - Version 3.1.2
 

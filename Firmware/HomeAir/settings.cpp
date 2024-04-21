@@ -12,39 +12,48 @@ bool settings_setupPreferences() {
     Serial.println("Initialized settings");
     online.pref = true;
     Serial.println("Preferences started successfully!");
-    
+
     /***********************************************
     EPD SETTINGS
     ***********************************************/
     preferences.putBool("wallMounted", false);
 
     // Refresh settings
-    preferences.putUShort("refreshPeriod", 4); //Time in seconds to update screen
-    preferences.putUShort("burninPeriod", 60); //Time in seconds between global refreshes
-    preferences.putUShort("refreshCycles", 5); //Number of cycles/flashes during global refresh
-    preferences.putBool("adjustRefRate", true); // If enabled then refresh rate will be set to 1 second when pairing or updating
+    preferences.putUShort("refreshPeriod",
+                          4); // Time in seconds to update screen
+    preferences.putUShort("burninPeriod",
+                          60); // Time in seconds between global refreshes
+    preferences.putUShort("refreshCycles",
+                          5); // Number of cycles/flashes during global refresh
+    preferences.putBool("adjustRefRate",
+                        true); // If enabled then refresh rate will be set to 1
+                               // second when pairing or updating
 
-    preferences.putBool("skipPair", false); // Skip pairing/startup screen (DEFAULT FALSE)
-    preferences.putUShort("logoTime", 1); // Time to show Sparkfun logo on powerup
+    preferences.putBool("skipPair",
+                        false); // Skip pairing/startup screen (DEFAULT FALSE)
+    preferences.putUShort("logoTime",
+                          1); // Time to show Sparkfun logo on powerup
 
     preferences.putUShort("frame1Sensor", TEMP);
     preferences.putUShort("frame2Sensor", AQI);
-    preferences.putBool("rotateFrames", false); // Whether to automatically cycle between sensors
-    
+    preferences.putBool(
+        "rotateFrames",
+        false); // Whether to automatically cycle between sensors
+
     preferences.putBool("oneSensorOnly", true);
-    preferences.putBool("showDeviceID", true); // Only shows when oneSensorOnly is true
-    preferences.putBool("showBTStatus", true); // Only shows when oneSensorOnly is true
+    preferences.putBool("showDeviceID",
+                        true); // Only shows when oneSensorOnly is true
+    preferences.putBool("showBTStatus",
+                        true); // Only shows when oneSensorOnly is true
 
     // Indicator settings
-    preferences.putUShort("indicatorPeriod", 4); //Frequency in seconds for dot/clock
+    preferences.putUShort("indicatorPeriod",
+                          4); // Frequency in seconds for dot/clock
     preferences.putBool("clockEnabled", false);
     preferences.putBool("dotEnabled", true);
     preferences.putUShort("dotSize", 2); // dot radius
     preferences.putUShort("clockLocation", 1);
     preferences.putUShort("dotLocation", 0);
-
-
-
 
     /************************************************
     OTHER SETTINGS
@@ -56,8 +65,11 @@ bool settings_setupPreferences() {
 
     preferences.putUShort("sensorReadPeriod", 15);
     preferences.putUShort("MQ_enabled", 1);
+    preferences.putUShort("MQ_OnPeriod", 90);
+    preferences.putUShort("MQ_Offperiod", 60);
 
-    preferences.putString("customBLEName", "NONE");
+    const char *noneString = "NONE";
+    // preferences.putString("customBLEName", noneString);
 
     if (preferences.getBool("startingFromOTA")) {
       Serial.println("Booting from fresh OTA firmware");
@@ -73,9 +85,8 @@ bool settings_setupPreferences() {
 
 bool settings_setPrefsToDefault() {
   if (online.pref) {
-    Serial.println("Preferences started successfully!");
     // TODO: ADD CHECK FOR FIRSTTIMESETUP BEFORE SETTING DEFAULT VALS
-    preferences.putBool("restoreFromBackupTime", true);
+    preferences.putBool("restFromBackup", true);
     preferences.putBool("wallMounted", false);
     preferences.putBool("nightMode", false);
     preferences.putBool("clockEnabled", true);
@@ -93,9 +104,9 @@ bool settings_setPrefsToDefault() {
     preferences.putUShort("indicatorPeriod", 4);
 
     preferences.putUShort("numRefreshCycles", 5);
-    preferences.putBool("firstTimeSetupComplete", true);
+    preferences.putBool("setupComplete", true);
 
-    preferences.putUShort("sensorReadPeriod", 15);
+    preferences.putUShort("ReadPeriod", 15);
     preferences.putUShort("MQ_enabled", 1);
     preferences.putUShort("MQ_OnPeriod", 90);
     preferences.putUShort("MQ_Offperiod", 60);

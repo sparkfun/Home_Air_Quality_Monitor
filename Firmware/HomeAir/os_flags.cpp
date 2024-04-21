@@ -22,7 +22,12 @@ AppFlag bleFlags[] = {
     {BLE_FLAG_BUFFER_READY, "BLE_FLAG_BUFFER_READY"},
     {BLE_FLAG_READ_COMPLETE, "BLE_FLAG_READ_COMPLETE"},
     {BLE_FLAG_CLIENT_CONNECTED, "BLE_FLAG_CLIENT_CONNECTED"},
-    {BLE_FLAG_CLIENT_SUBSCRIBED, "BLE_FLAG_CLIENT_SUBSCRIBED"}};
+    {BLE_FLAG_CLIENT_SUBSCRIBED, "BLE_FLAG_CLIENT_SUBSCRIBED"},
+    {BLE_FLAG_FILE_EXISTS, "BLE_FLAG_FILE_EXISTS"},
+    {BLE_FLAG_FILE_DONE, "BLE_FLAG_FILE_DONE"},
+    {BLE_FLAG_WRITE_COMPLETE, "BLE_FLAG_WRITE_COMPLETE"},
+    {BLE_FLAG_DOWNLOAD_COMPLETE, "BLE_FLAG_DOWNLOAD_COMPLETE"},
+    {BLE_FLAG_SAVE_COMPLETE, "BLE_FLAG_SAVE_COMPLETE"}};
 
 void printCurrentBLEFlagStatus() {
   int bleStatus = xEventGroupGetBits(BLEStateFlagGroup);
@@ -47,7 +52,10 @@ AppFlag appFlags[] = {{APP_FLAG_SETUP, "app_setup"},
                       {APP_FLAG_PUSH_BUFFER, "app_push_buffer"},
                       {APP_FLAG_DONE_TRANSMITTING, "app_done_transmitting"},
                       {APP_FLAG_OTA_DOWNLOAD, "app_ota_download"},
-                      {APP_FLAG_FACTORY_ROLLBACK, "app_factory_rollback"}};
+                      {APP_FLAG_FACTORY_ROLLBACK, "app_factory_rollback"},
+                      {APP_FLAG_CLOCK_DESYNC, "app_clock_desync"},
+                      {APP_FLAG_EPD_FORCE_UPDATE, "app_epd_force_update"},
+                      {APP_FLAG_BYPASS_SETUP, "app_bypass_setup"}};
 
 void printCurrentAppFlagStatus() {
   int appStatus = xEventGroupGetBits(appStateFlagGroup);

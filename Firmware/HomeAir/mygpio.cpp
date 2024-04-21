@@ -6,32 +6,34 @@ PASCO2Ino co2Sensor;
 int16_t co2PPM;
 Error_t co2Error;
 SensirionI2CSen5x sen5x;
-// Button GPIO0_Button(GPIO0_PIN); // define the button
 // Global Variables
 float rawDataArray[RAW_DATA_ARRAY_SIZE];
 
 void mygpioSensorReadTask(void *pvParameter) {
   setupGPIO();
-  uint16_t sensorReadLoop = preferences.getUShort("sensorReadPeriod");
+  uint16_t sensorReadLoop = preferences.getUShort("ReadPeriod");
   uint16_t MQ_OnPeriod = preferences.getUShort("MQ_OnPeriod");
   uint16_t MQ_OffPeriod = preferences.getUShort("MQ_OffPeriod");
-  if(!sensorReadLoop || !online.pref){
-    DBG("Prefs not online to establish sensor reading period.\nSetting period to 15 sec.");
+  if (!sensorReadLoop || !online.pref) {
+    DBG("Prefs not online to establish sensor reading period.\nSetting period "
+        "to 15 sec.");
     sensorReadLoop = 15;
   }
-  if(!MQ_OnPeriod || !online.pref){
-    DBG("Prefs not online to establish MQ ACTIVE period.\nSetting period to 15 sec.");
+  if (!MQ_OnPeriod || !online.pref) {
+    DBG("Prefs not online to establish MQ ACTIVE period.\nSetting period to 15 "
+        "sec.");
     MQ_OnPeriod = 90;
   }
-  if(!MQ_OffPeriod || !online.pref){
-    DBG("Prefs not online to establish MQ INACTIVE period.\nSetting period to 15 sec.");
+  if (!MQ_OffPeriod || !online.pref) {
+    DBG("Prefs not online to establish MQ INACTIVE period.\nSetting period to "
+        "15 sec.");
     MQ_OffPeriod = 60;
   }
   while (1) {
     // Serial.print("Sensor Read from core ");
     // Serial.println(xPortGetCoreID());
     sensorReadLoop++;
-    if (sensorReadLoop >= preferences.getUShort("sensorReadPeriod")) {
+    if (sensorReadLoop >= preferences.getUShort("ReadPeriod")) {
       sensorReadLoop = 0; // Reset counter
       if (!online.pasco2) {
         setupCO2Sensor(co2Error, co2Sensor); // Attempt to setup PASCO2 Sensor
@@ -112,19 +114,11 @@ void setupMQSensors() {
   } else {
     Serial.println("ADCs NOT configured!");
   }
-  // if (adc2_config_width(ADC_WIDTH_BIT_12) == ESP_OK){
-  //   Serial.println("ADC2 Configured.");
-  //   online.co = true;
-  // } else {
-  //   Serial.println("ADC2 NOT configured")
-  // }
 }
 
 float readNGSensor() {
-  // float reading = analogRead(pin_NGInput);
   if (online.ng) {
     int NGReading = analogRead(pin_NGInput);
-    // Serial.printf("\tNG: %d\n", NGReading);
     return NGReading;
   }
   return -1;
@@ -133,7 +127,6 @@ float readNGSensor() {
 float readCOSensor() {
   if (online.co) {
     int COReading = analogRead(pin_COInput);
-    // Serial.printf("\tCO: %d\n", COReading);
     if (COReading > 0 && COReading < 500) {
       return 0; // Background levels
     } else if (COReading > 500 && COReading < 650) {
@@ -237,7 +230,7 @@ void mygpioReadAllSensors(float *ret_array, uint16_t array_size) {
 
   Serial.print("Measurements: ");
   for (int i = 0; i < RAW_DATA_ARRAY_SIZE; i++) {
-    Serial.printf("%f, ", ret_array[i]);
+    Serial.printf("%.01f, ", ret_array[i]);
   }
   Serial.println();
 }
@@ -281,24 +274,12 @@ void GPIO0_ISR() {
   }
 }
 
-void GPIO0_timercb() {
-  settings_setPrefsToDefault();
-}
+void GPIO0_timercb() { settings_setPrefsToDefault(); }
 
 void debounce_timercb() {
   xEventGroupSetBits(appStateFlagGroup,
                      APP_FLAG_BYPASS_SETUP); // Set flag to bypass setup
-  if (online.pref) {
-    preferences.putUShort("frame1Sensor",
-                          preferences.getUShort("frame1Sensor") + 1);
-    preferences.putUShort("frame2Sensor",
-                          preferences.getUShort("frame2Sensor") + 1);
-    // Serial.printf("Current frame1Sensor: %d\n",
-    // preferences.getUShort("frame1Sensor")); Serial.printf("Current
-    // frame2Sensor: %d\n", preferences.getUShort("frame2Sensor")); Set flag for
-    // epd force refresh
-    xEventGroupSetBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE);
-  }
+  xEventGroupSetBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE);
 }
 
 void setupGPIO() {
