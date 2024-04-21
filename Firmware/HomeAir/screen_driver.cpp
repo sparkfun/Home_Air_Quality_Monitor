@@ -152,8 +152,8 @@ void updateSensorFrames() {
       if (preferences.getBool("oneSensorOnly")) {
         i = 3;
       }
-      Serial.print("Current frame number: ");
-      Serial.println(i);
+      // Serial.print("Current frame number: ");
+      // Serial.println(i);
       if (currentSensor == TEMP || currentSensor == HUMIDITY) {
         if (i == 3) {
           if (currentSensor == TEMP) {
@@ -303,8 +303,8 @@ void dataUploadScreen() {
 int drawPairingScreen(int state) {
   deviceScreen.clear();
   if (state == 1) {
-    Serial.print("Pairing state: ");
-    Serial.println(state);
+    // Serial.print("Pairing state: ");
+    // Serial.println(state);
     deviceScreen.drawPairingScreenBitmap1Dot();
     // state ++;
   } else if (state == 2) {
@@ -344,7 +344,7 @@ int drawScreen(int state) {
     deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) &
-             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING)) {
+             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING | APP_FLAG_BYPASS_SETUP)) {
 #ifndef FRAME_TESTING_MODE
     updateSensorFrames();
 #else

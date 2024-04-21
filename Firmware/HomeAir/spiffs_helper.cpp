@@ -5,10 +5,10 @@
    test or else use the SPIFFS plugin to create a partition
    https://github.com/me-no-dev/arduino-esp32fs-plugin */
 #define FORMAT_SPIFFS_IF_FAILED true
-float otaDownloadPercentage;
-float downloadRate;
-float uploadPercentage;
-float uploadRate;
+float otaDownloadPercentage = 0;
+float downloadRate = 0;
+float uploadPercentage = 0;
+float uploadRate = 0;
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\r\n", dirname);
@@ -41,54 +41,6 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   }
 }
 
-void readFile(fs::FS &fs, const char *path) {
-  Serial.printf("Reading file: %s\r\n", path);
-
-  File file = fs.open(path);
-  if (!file || file.isDirectory()) {
-    Serial.println("- failed to open file for reading");
-    return;
-  }
-
-  Serial.println("- read from file:");
-  while (file.available()) {
-    Serial.write(file.read());
-  }
-  file.close();
-}
-
-void writeFile(fs::FS &fs, const char *path, const char *message) {
-  Serial.printf("Writing file: %s\r\n", path);
-
-  File file = fs.open(path, FILE_WRITE);
-  if (!file) {
-    Serial.println("- failed to open file for writing");
-    return;
-  }
-  if (file.print(message)) {
-    Serial.println("- file written");
-  } else {
-    Serial.println("- write failed");
-  }
-  file.close();
-}
-
-void appendFile(fs::FS &fs, const char *path, const char *message) {
-  // Serial.printf("Appending to file: %s\r\n", path);
-
-  File file = fs.open(path, FILE_APPEND);
-  if (!file) {
-    Serial.println("- failed to open file for appending");
-    return;
-  }
-  if (file.print(message)) {
-    Serial.println("- message appended");
-  } else {
-    Serial.println("- append failed");
-  }
-  file.close();
-}
-
 void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
   // Serial.printf("Appending to file: %s\r\n", path);
 
@@ -118,75 +70,12 @@ void appendLineToFile(fs::FS &fs, const char *path, const char *message) {
   }
 }
 
-void renameFile(fs::FS &fs, const char *path1, const char *path2) {
-  Serial.printf("Renaming file %s to %s\r\n", path1, path2);
-  if (fs.rename(path1, path2)) {
-    Serial.println("- file renamed");
-  } else {
-    Serial.println("- rename failed");
-  }
-}
-
 void deleteFile(fs::FS &fs, const char *path) {
   Serial.printf("Deleting file: %s\r\n", path);
   if (fs.remove(path)) {
     Serial.println("- file deleted");
   } else {
     Serial.println("- delete failed");
-  }
-}
-
-void testFileIO(fs::FS &fs, const char *path) {
-  Serial.printf("Testing file I/O with %s\r\n", path);
-
-  static uint8_t buf[512];
-  size_t len = 0;
-  File file = fs.open(path, FILE_WRITE);
-  if (!file) {
-    Serial.println("- failed to open file for writing");
-    return;
-  }
-
-  size_t i;
-  Serial.print("- writing");
-  uint32_t start = millis();
-  for (i = 0; i < 2048; i++) {
-    if ((i & 0x001F) == 0x001F) {
-      Serial.print(".");
-    }
-    file.write(buf, 512);
-  }
-  Serial.println("");
-  uint32_t end = millis() - start;
-  Serial.printf(" - %u bytes written in %lu ms\r\n", 2048 * 512, end);
-  file.close();
-
-  file = fs.open(path);
-  start = millis();
-  end = start;
-  i = 0;
-  if (file && !file.isDirectory()) {
-    len = file.size();
-    size_t flen = len;
-    start = millis();
-    Serial.print("- reading");
-    while (len) {
-      size_t toRead = len;
-      if (toRead > 512) {
-        toRead = 512;
-      }
-      file.read(buf, toRead);
-      if ((i++ & 0x001F) == 0x001F) {
-        Serial.print(".");
-      }
-      len -= toRead;
-    }
-    Serial.println("");
-    end = millis() - start;
-    Serial.printf("- %u bytes read in %lu ms\r\n", flen, end);
-    file.close();
-  } else {
-    Serial.println("- failed to open file for reading");
   }
 }
 
@@ -204,8 +93,6 @@ void deleteAllFiles(fs::FS &fs) {
   }
   Serial.println("Deleted all files in directory.");
 }
-
-void getFormattedMessageFromRawDataArray(char *dest, int size) {}
 
 float reducePrecision(float var) {
   // 37.66666 * 100 =3766.66
@@ -235,13 +122,13 @@ void spiffsStorageTask(void *pvParameter) {
   int downloadIttr = 0;
   int chrono = millis();
   size_t writtenSize, prevSize = 0;
-  uint32_t uploadedBytes, totalBytesToUpload;
+  uint32_t uploadedBytes = 0, totalBytesToUpload = 0;
   Update.onProgress(onProgressCallback);
   while (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Mount failed... retrying");
     vTaskDelay(5000 / portTICK_RATE_MS);
   }
-  delay(2000);
+  vTaskDelay(2000);
   Serial.printf("Total memory: %zu\n", SPIFFS.totalBytes());
   Serial.printf("Currently used memory: %zu\n", SPIFFS.usedBytes());
   Serial.printf("Remaining memory: %zu\n",
@@ -257,6 +144,7 @@ void spiffsStorageTask(void *pvParameter) {
     Serial.printf("FS File: %s, size: %zu\n", fileName.c_str(), fileSize);
     file = root.openNextFile();
   }
+  file.close();
   online.SPIFFS = true;
   while (1) {
     // printCurrentAppFlagStatus();
@@ -282,32 +170,34 @@ void spiffsStorageTask(void *pvParameter) {
 
         xSemaphoreGive(rawDataMutex); // Release mutex
         Serial.print("Saving ");
-        Serial.println(message);
+        Serial.print(message);
         appendLineToFile(SPIFFS, path, message);
         vTaskDelay(5000 / portTICK_RATE_MS);
       }
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {
       file = SPIFFS.open(path);
+      uploadedBytes = 0;
       while (file.available()) {
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_FILE_EXISTS);
         for (int i = 0; i < numPackets; i++) {
+          // Read file into BLEMessageBuffer with no \n
           lineLength = file.readBytesUntil('\n', &BLEMessageBuffer[insertPoint],
                                            BLE_BUFFER_LENGTH);
           if (lineLength < 2) {
             Serial.println("Empty message received and broke spiffs helper.");
             break;
           }
-          insertPoint += lineLength;
-          BLEMessageBuffer[insertPoint++] = '\n';
+          insertPoint += lineLength; // Move insert point into BLEMessageBuffer
+          BLEMessageBuffer[insertPoint++] = '\n'; // Add \n to end of line
         }
-        uploadedBytes += insertPoint;                                  //
-        uploadPercentage = uploadedBytes * 100 / (totalBytesToUpload); // 0-100
-        BLEMessageBuffer[insertPoint] = 0;                             // Bam
+        totalBytesToUpload = file.size();
+        uploadedBytes += insertPoint; //
+        uploadPercentage =
+            (uploadedBytes * 100 / (totalBytesToUpload)); // 0-100
+        BLEMessageBuffer[insertPoint] = 0;                // Bam
         insertPoint = 0;
         // Notify BLE comm task of complete buffer
-        Serial.printf("\nBUFFER_READY status: %d\n\n",
-                      xEventGroupGetBits(BLEStateFlagGroup) &
-                          BLE_FLAG_BUFFER_READY);
+        Serial.printf("Upload progress: %f\n", uploadPercentage);
         xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_BUFFER_READY);
         xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_PUSH_BUFFER,
                             APP_FLAG_PUSH_BUFFER, false, ONE_MIN_MS);
@@ -317,22 +207,18 @@ void spiffsStorageTask(void *pvParameter) {
       // deleteFile(SPIFFS, path);
       // Wait for buffer to be read before notifying EOF
       xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_READ_COMPLETE,
-                          BLE_FLAG_READ_COMPLETE, false, 600000);
+                          BLE_FLAG_READ_COMPLETE, false, ONE_MIN_MS);
       xEventGroupClearBits(appStateFlagGroup,
                            APP_FLAG_TRANSMITTING); // Clear current app state
-      Serial.println("Cleared transmitting flag");
       xEventGroupSetBits(appStateFlagGroup,
                          APP_FLAG_DONE_TRANSMITTING); // set DONE_TRANSMITTING
                                                       // to send end of message
-      Serial.println("set DONE_TRANSMITTING flag");
       xEventGroupSetBits(
           appStateFlagGroup,
           APP_FLAG_RUNNING); // set RUNNING to return to normal operation
-      Serial.println("Set app RUNNING flag");
       xEventGroupSetBits(
           BLEStateFlagGroup,
           BLE_FLAG_FILE_DONE); // set FILE_DONE to break BLE waiting loop
-      Serial.println("Set FILE_DONE");
     } else if (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_OTA_DOWNLOAD) {
       // Init OTA download, and if successful begin writing to the partition
       if (updateSize != 0) {
@@ -347,6 +233,7 @@ void spiffsStorageTask(void *pvParameter) {
           if (!file) {
             Serial.println("Error opening dest file.");
           } else {
+            // Main OTA Download loop
             while (xEventGroupGetBits(appStateFlagGroup) &
                    APP_FLAG_OTA_DOWNLOAD) {
               xEventGroupWaitBits(BLEStateFlagGroup, BLE_FLAG_WRITE_COMPLETE,
@@ -377,12 +264,6 @@ void spiffsStorageTask(void *pvParameter) {
             Serial.printf("Percentage written %f\n", file.size() / updateSize);
             Serial.printf("File written: %zu\n", file.size());
             Serial.printf("WrittenSize: %zu\n", writtenSize);
-
-            // Trim end of file from TRANSFER_COMPLETE to the END
-            int chrono = millis();
-            size_t endIndex = file.find("TRANSFER_COMPLETE");
-            Serial.printf("file.find() took %f ms\n", millis() - chrono);
-            Serial.printf("Found token at %zu\n", endIndex);
 
             file.close();
             Serial.println("Verifying new BIN...");

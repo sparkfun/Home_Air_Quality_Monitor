@@ -55,9 +55,11 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         timeZoneConfigured = true;
         // Change RTC offset
         rtc.setTime(epoch_prev + (3600 * GMTOffset));
-      } else if (BLEMessageType == "READ!") {
-        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_TRANSMITTING);
+        xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_CLIENT_CONNECTED); // We only receive this command on connection
+
+      } else if (BLEMessageType == "READ!" || value == "READ") {
         xEventGroupClearBits(appStateFlagGroup, APP_FLAG_RUNNING);
+        xEventGroupSetBits(appStateFlagGroup, APP_FLAG_TRANSMITTING);
       } else if (BLEMessageType == "DEL!!") {
         // Manually cull the entire root directory
         Serial.println("Received command to clear SPIFFS. Clearing...");
@@ -105,7 +107,7 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         // Send an ACK to start download
         pSensorCharacteristic->setValue("a");
         Serial.printf("\tAck sent!\n");
-        delay(1000);
+        delay(100);
         pSensorCharacteristic->notify();
         Serial.printf("\tKazam: Ack sent\n");
 
@@ -232,6 +234,7 @@ void BLEServerCommunicationTask(void *pvParameter) {
   BLEServerSetupBLE();
   EventBits_t BLEStatus;
   while (1) {
+    // printCurrentBLEFlagStatus();
     while (xEventGroupGetBits(appStateFlagGroup) & APP_FLAG_TRANSMITTING) {
       Serial.print("Current number of clients: ");
       Serial.println(pSensorCharacteristic->getSubscribedCount());
@@ -261,7 +264,10 @@ void BLEServerCommunicationTask(void *pvParameter) {
       Serial.println("Ending transmission!");
       deleteAllFiles(SPIFFS);
     }
-    vTaskDelay(1000 / portTICK_RATE_MS);
+    EventBits_t uxBits =
+          xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_TRANSMITTING,
+                              false, pdFALSE, 1000 / portTICK_PERIOD_MS);
+    // Check uxBits here if you're interested 
   }
 }
 
@@ -299,7 +305,7 @@ void BLEServerSetCustomAdvertisingName(String newName) {
 void BLEServerSetupBLE() {
   String customName = preferences.getString("customBLEName");
   Serial.printf("Saved custom name is %s\n", customName.c_str());
-  delay(1000);
+  delay(500);
   if (preferences.getString("customBLEName") != "NONE") {
     Serial.println("Setting custom name for BLE Broadcasting ID");
     NimBLEDevice::init(preferences.getString("customBLEName").c_str());

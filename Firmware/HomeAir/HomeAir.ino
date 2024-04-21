@@ -69,7 +69,7 @@ void setup() {
   xTaskCreatePinnedToCore(
       spiffsStorageTask,        /*Function to call*/
       "SPIFFS Storage Task",    /*Task name*/
-      15 * TEN_KiB,             /*Stack size*/
+      10 * TEN_KiB,             /*Stack size*/
       NULL,                     /*Function parameters*/
       5,                        /*Priority*/
       &spiffsStorageTaskHandle, /*ptr to global TaskHandle_t*/

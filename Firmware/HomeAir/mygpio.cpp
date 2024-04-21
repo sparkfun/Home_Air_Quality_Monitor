@@ -20,18 +20,16 @@ void mygpioSensorReadTask(void *pvParameter) {
     sensorReadLoop = 15;
   }
   if (!MQ_OnPeriod || !online.pref) {
-    DBG("Prefs not online to establish MQ ACTIVE period.\nSetting period to 15 "
+    DBG("Prefs not online to establish MQ ACTIVE period.\nSetting period to 90 "
         "sec.");
     MQ_OnPeriod = 90;
   }
   if (!MQ_OffPeriod || !online.pref) {
     DBG("Prefs not online to establish MQ INACTIVE period.\nSetting period to "
-        "15 sec.");
+        "60 sec.");
     MQ_OffPeriod = 60;
   }
   while (1) {
-    // Serial.print("Sensor Read from core ");
-    // Serial.println(xPortGetCoreID());
     sensorReadLoop++;
     if (sensorReadLoop >= preferences.getUShort("ReadPeriod")) {
       sensorReadLoop = 0; // Reset counter
@@ -51,26 +49,29 @@ void mygpioSensorReadTask(void *pvParameter) {
         // }
       }
     }
-
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
 void setupSENSensor() {
-  Serial.println("SEN5x: Setting up...");
-  sen5x.begin(Wire);
   uint16_t error;
   char errorMessage[256];
+
+  Serial.println("SEN5x: Setting up...");
+  sen5x.begin(Wire);
   error = sen5x.deviceReset();
+
   if (error) {
     Serial.print("SEN5x: Error trying to execute deviceReset(): ");
     errorToString(error, errorMessage, 256);
     Serial.println(errorMessage);
   } else {
-    error = sen5x.setTemperatureOffsetSimple(0); // No temp offset
+    error = sen5x.setTemperatureOffsetSimple(-12); // No temp offset
     error = sen5x.startMeasurement();
-    Serial.println("SEN5x: Set up sensor successfully!");
-    online.sen5x = true;
+    if (!error) {
+      Serial.println("SEN5x: Set up sensor successfully!");
+      online.sen5x = true;
+    }
   }
 }
 
@@ -113,6 +114,8 @@ void setupMQSensors() {
     online.co = true;
   } else {
     Serial.println("ADCs NOT configured!");
+    online.ng = false;
+    online.co = false;
   }
 }
 
@@ -279,7 +282,8 @@ void GPIO0_timercb() { settings_setPrefsToDefault(); }
 void debounce_timercb() {
   xEventGroupSetBits(appStateFlagGroup,
                      APP_FLAG_BYPASS_SETUP); // Set flag to bypass setup
-  xEventGroupSetBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE);
+  xEventGroupSetBits(appStateFlagGroup,
+                     APP_FLAG_EPD_FORCE_UPDATE); // Set flag to update EPD
 }
 
 void setupGPIO() {
