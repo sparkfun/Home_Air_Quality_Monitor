@@ -7083,7 +7083,7 @@ void hV_Screen_Buffer::updateFrameVal(uint8_t frameNumber, uint8_t sensor, float
         }
     }
     else {
-        if(sensor == mySensor.humidity) {
+        if(sensor == mySensor.humidity || sensor == mySensor.humidityBig) {
             drawNumBig(String(sensorReading), baseline_x+2, 55, numDigits);
             drawUnits(sensor, numDigits, baseline_x, 55);
         }
@@ -7093,7 +7093,11 @@ void hV_Screen_Buffer::updateFrameVal(uint8_t frameNumber, uint8_t sensor, float
         }
         else if(sensor == mySensor.particles) {
             drawNumBig(String(sensorReading), baseline_x+2, 55, numDigits);
-            drawUnits(sensor, numDigits, baseline_x, 55);
+            drawUnits(mySensor.particles, numDigits, baseline_x, 55);
+        }
+        else if(sensor == mySensor.aqi || sensor == mySensor.voc || sensor == mySensor.nox) {
+            drawNumBig(String(sensorReading), baseline_x+2, 55, numDigits);
+            // drawUnits(mySensor.particles, numDigits, baseline_x, 55);
         }
         else if(numDigits < 4) {
             drawNumBig(String(sensorReading), baseline_x+22, 50, numDigits);
@@ -7549,11 +7553,11 @@ void hV_Screen_Buffer::drawUnits(uint8_t sensor, uint8_t numDigits, uint16_t x_l
     // else if(sensor == mySensor.temperature || sensor == mySensor.tempBig) {
     //     partialScreenBitmap(x_location + 34*numDigits, y_location, degreeF, 48, 56);
     // }
-    else {
-        if((sensor == mySensor.co) || (sensor == mySensor.co2) || (sensor == mySensor.ch4)) {
-            partialScreenBitmap(x_location, y_location, ppm, 40, 104);
-        }
+    else if((sensor == mySensor.co) || (sensor == mySensor.co2) || (sensor == mySensor.ch4))
+    {
+        partialScreenBitmap(x_location, y_location, ppm, 40, 104);
     }
+    else return;
 
 }
 
