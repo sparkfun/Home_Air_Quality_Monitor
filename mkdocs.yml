@@ -1,5 +1,5 @@
 # Documentation page information
-site_name: 'SparkFun Home Air User Manual'
+site_name: SparkFun Home Air User Manual
 site_description: The user manual for the Home Air from SparkFun Electronics
 site_url: https://docs.sparkfun.com/Home_Air_Quality_Monitor/
 site_author: SparkFun Electronics
@@ -7,6 +7,18 @@ site_author: SparkFun Electronics
 repo_url: https://github.com/sparkfun/Home_Air_Quality_Monitor.git
 repo_name: sparkfun/Home_Air_Quality_Monitor
 
+theme:
+  name: material
+  custom_dir: docs/overrides
+  # logo: img/Icons/sfe_logo_sm.png
+  palette:
+    primary: grey
+    accent: red
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - content.code.annotate
 
 
     # Enable "view source" and "edit this page" buttons
