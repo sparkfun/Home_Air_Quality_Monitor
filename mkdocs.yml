@@ -9,7 +9,7 @@ repo_name: sparkfun/Home_Air_Quality_Monitor
 
 theme:
   name: material
-  custom_dir: docs/overrides
+  # custom_dir: docs/overrides
   # logo: img/Icons/sfe_logo_sm.png
   palette:
     primary: grey
