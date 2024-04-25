@@ -1,0 +1,1 @@
+{"config":{"lang":["en"],"separator":"[\\s\\-]+","pipeline":["stopWordFilter"]},"docs":[{"location":"hardware_overview/","title":"Hardware overview","text":""},{"location":"hardware_overview/#power","title":"Power","text":"<p>'Hello World'</p>"}]}
