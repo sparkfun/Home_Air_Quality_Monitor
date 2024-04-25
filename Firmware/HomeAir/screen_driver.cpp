@@ -194,8 +194,13 @@ void updateSensorFrames() {
       }
       if (i == 3) {
         if (preferences.getBool("showDeviceID")) {
-          deviceScreen.drawText(
+          if(preferences.getString("customBLEName") != "NONE"){
+            int leftShift = (strlen(preferences.getString("customBLEName").c_str()) - 12) * 12; // *12 for character width
+            deviceScreen.drawText(146 - leftShift, 4, 3, preferences.getString("customBLEName"));
+          } else {
+            deviceScreen.drawText(
               146, 4, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
+          }
         }
         if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_CLIENT_CONNECTED)
           deviceScreen.drawBluetoothConnected(true);
@@ -318,8 +323,15 @@ int drawPairingScreen(int state) {
     state = 0;
   }
   state++;
-  deviceScreen.drawText(146, 126, 3,
+  if(preferences.getString("customBLEName") != "NONE"){
+    // Display MAC with custom name
+    deviceScreen.drawText(146, 126, 3,
+                        preferences.getString("customBLEName"));
+  } else {
+    deviceScreen.drawText(146, 126, 3,
                         "HomeAir-" + screendriverGetMacAddressLastFour());
+  }
+  
   return state;
 }
 

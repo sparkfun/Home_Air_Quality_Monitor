@@ -66,7 +66,7 @@ void setupSENSensor() {
     errorToString(error, errorMessage, 256);
     Serial.println(errorMessage);
   } else {
-    error = sen5x.setTemperatureOffsetSimple(-12); // No temp offset
+    error = sen5x.setTemperatureOffsetSimple(0); // No temp offset
     error = sen5x.startMeasurement();
     if (!error) {
       Serial.println("SEN5x: Set up sensor successfully!");

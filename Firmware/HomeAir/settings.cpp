@@ -102,6 +102,7 @@ bool settings_setPrefsToDefault() {
     preferences.putString("customBLEName", "NONE");
 
     xEventGroupSetBits(appStateFlagGroup, APP_FLAG_FACTORY_ROLLBACK);
+    DBG("Resetting to default settings");
 
   } else {
     DBG("Prefs not set up - settings not cleared");
