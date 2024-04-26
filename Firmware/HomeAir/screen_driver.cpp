@@ -15,14 +15,17 @@ void screendriverEpaperSetup() {
   deviceScreen.begin();
   deviceScreen.clear();
   deviceScreen.globalRefresh(2);
-  deviceScreen.setOrientation(0);      // Left-hand rotated Landscape
+  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(2);
+  else deviceScreen.setOrientation(0);
+  // deviceScreen.setOrientation(0);      // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST); // Set Flush Mode
   deviceScreen.selectFont(1);
   deviceScreen.drawSparkfunLogo();
   Serial.println("Drew Sparkfun logo");
   deviceScreen.flush();
   vTaskDelay(1000 * preferences.getUShort("logoTime"));
-  deviceScreen.setOrientation(1);
+  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(3);
+  else deviceScreen.setOrientation(1);
   deviceScreen.clear();
 }
 
@@ -339,6 +342,10 @@ int drawScreen(int state) {
   // Serial.println("Ran drawScreen");
   // Sparkfun logo is drawn in epd setup function; first state drawn here is
   // pairing screen
+  
+  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(3);
+  else deviceScreen.setOrientation(1);
+
   uint32_t eventBits = xEventGroupGetBits(appStateFlagGroup);
   if (eventBits & APP_FLAG_SETUP && !(eventBits & APP_FLAG_BYPASS_SETUP)) {
     // draw pairing screen
