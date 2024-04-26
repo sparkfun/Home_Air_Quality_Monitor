@@ -309,6 +309,7 @@ void dataUploadScreen() {
 }
 
 int drawPairingScreen(int state) {
+  deviceScreen.setOrientation(1);
   deviceScreen.clear();
   if (state == 1) {
     // Serial.print("Pairing state: ");
