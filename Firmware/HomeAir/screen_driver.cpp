@@ -108,6 +108,8 @@ void rotateFrames() {
   if (preferences.getBool("oneSensorOnly")) {
     if (preferences.getUShort("frame1Sensor") == CO2_PPM)
       preferences.putUShort("frame1Sensor", PPM_2_5);
+    else if (preferences.getUShort("frame1Sensor") == VOC)
+      preferences.putUShort("frame1Sensor", CO);
     else if (preferences.getUShort("frame1Sensor") < HUMIDITY)
       preferences.putUShort("frame1Sensor", HUMIDITY);
     else if (preferences.getUShort("frame1Sensor") >= AQI)
