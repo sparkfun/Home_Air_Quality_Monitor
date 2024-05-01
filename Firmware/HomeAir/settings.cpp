@@ -9,61 +9,75 @@ bool settings_setupPreferences() {
       preferences.begin("HomeAirSettings", false); // false = not read-only
   delay(100);
   if (status) {
-    Serial.println("Initialized settings");
     online.pref = true;
     Serial.println("Preferences started successfully!");
-
-    /***********************************************
+    if(!preferences.getBool("setupComplete")) {
+      /***********************************************
     EPD SETTINGS
     ***********************************************/
-    preferences.putBool("wallMounted", false);
+      DBG("Performing first time setup");
+      preferences.putBool("wallMounted", false);
 
-    // Refresh settings
-    preferences.putUShort("refreshPeriod", 4); // Time in seconds to update screen
-    preferences.putUShort("burninPeriod", 60); // Time in seconds between global refreshes
-    preferences.putUShort("refreshCycles", 5); // Number of cycles/flashes during global refresh
-    preferences.putBool("adjustRefRate", true); // If enabled then refresh rate will be set to 1 second when pairing or updating
+      // Refresh settings
+      preferences.putUShort("refreshPeriod",
+                            10); // Time in seconds to update screen
+      preferences.putUShort("burninPeriod",
+                            60); // Time in seconds between global refreshes
+      preferences.putUShort(
+          "refreshCycles",
+          5); // Number of cycles/flashes during global refresh
+      preferences.putBool("adjustRefRate",
+                          true); // If enabled then refresh rate will be set to
+                                 // 1 second when pairing or updating
 
-    preferences.putBool("skipPair", false); // Skip pairing/startup screen (DEFAULT FALSE)
-    preferences.putUShort("logoTime", 1); // Time to show Sparkfun logo on powerup
+      preferences.putBool("skipPair",
+                          false); // Skip pairing/startup screen (DEFAULT FALSE)
+      preferences.putUShort("logoTime",
+                            1); // Time to show Sparkfun logo on powerup
 
-    preferences.putUShort("frame1Sensor", AQI);
-    preferences.putUShort("frame2Sensor", AQI);
-    preferences.putBool("rotateFrames", false); // Whether to automatically cycle between sensors
+      preferences.putUShort("frame1Sensor", AQI);
+      preferences.putUShort("frame2Sensor", AQI);
+      preferences.putBool(
+          "rotateFrames",
+          true); // Whether to automatically cycle between sensors
 
-    preferences.putBool("oneSensorOnly", true);
-    preferences.putBool("showDeviceID", true); // Only shows when oneSensorOnly is true
-    preferences.putBool("showBTStatus", true); // Only shows when oneSensorOnly is true
+      preferences.putBool("oneSensorOnly", true);
+      preferences.putBool("showDeviceID",
+                          true); // Only shows when oneSensorOnly is true
+      preferences.putBool("showBTStatus",
+                          true); // Only shows when oneSensorOnly is true
 
-    // Indicator settings
-    preferences.putUShort("indicatorPeriod", 4); // Frequency in seconds for dot/clock
-    preferences.putBool("clockEnabled", false);
-    preferences.putBool("dotEnabled", true);
-    preferences.putUShort("dotSize", 2); // dot radius
-    preferences.putUShort("clockLocation", 1);
-    preferences.putUShort("dotLocation", 0);
+      // Indicator settings
+      preferences.putUShort("indicatorPeriod",
+                            4); // Frequency in seconds for dot/clock
+      preferences.putBool("clockEnabled", false);
+      preferences.putBool("dotEnabled", true);
+      preferences.putUShort("dotSize", 2); // dot radius
+      preferences.putUShort("clockLocation", 1);
+      preferences.putUShort("dotLocation", 0);
 
-    /************************************************
-    OTHER SETTINGS
-    ************************************************/
-    // TODO: ADD CHECK FOR FIRSTTIMESETUP BEFORE SETTING DEFAULT VALS
-    preferences.putBool("restoreFromBackupTime", true);
+      /************************************************
+      OTHER SETTINGS
+      ************************************************/
+      preferences.putBool("restoreFromBackupTime", true);
+      preferences.putBool("setupComplete", true);
 
-    preferences.putBool("firstTimeSetupComplete", true);
+      preferences.putUShort("sensorReadPeriod", 15);
+      preferences.putUShort("MQ_enabled", 1);
+      preferences.putUShort("MQ_OnPeriod", 90);
+      preferences.putUShort("MQ_Offperiod", 60);
 
-    preferences.putUShort("sensorReadPeriod", 15);
-    preferences.putUShort("MQ_enabled", 1);
-    preferences.putUShort("MQ_OnPeriod", 90);
-    preferences.putUShort("MQ_Offperiod", 60);
+      const char *noneString = "NONE";
+      // preferences.putString("customBLEName", noneString);
 
-    const char *noneString = "NONE";
-    // preferences.putString("customBLEName", noneString);
-
-    if (preferences.getBool("startingFromOTA")) {
-      Serial.println("Booting from fresh OTA firmware");
-      Serial.printf("Version number: %d", VERSION_NUMBER);
-      delay(3000);
-      preferences.putBool("startingFromOTA", false);
+      if (preferences.getBool("startingFromOTA")) {
+        Serial.println("Booting from fresh OTA firmware");
+        Serial.printf("Version number: %d", VERSION_NUMBER);
+        delay(3000);
+        preferences.putBool("startingFromOTA", false);
+      }
+    } else {
+      DBG("First time setup already complete");
     }
     return true;
   }
@@ -73,7 +87,6 @@ bool settings_setupPreferences() {
 
 bool settings_setPrefsToDefault() {
   if (online.pref) {
-    // TODO: ADD CHECK FOR FIRSTTIMESETUP BEFORE SETTING DEFAULT VALS
     preferences.putBool("restFromBackup", true);
     preferences.putBool("wallMounted", false);
     preferences.putBool("nightMode", false);

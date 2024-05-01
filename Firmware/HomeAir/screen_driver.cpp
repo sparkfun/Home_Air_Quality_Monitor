@@ -15,8 +15,10 @@ void screendriverEpaperSetup() {
   deviceScreen.begin();
   deviceScreen.clear();
   deviceScreen.globalRefresh(2);
-  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(2);
-  else deviceScreen.setOrientation(0);
+  if (preferences.getBool("wallMounted"))
+    deviceScreen.setOrientation(2);
+  else
+    deviceScreen.setOrientation(0);
   // deviceScreen.setOrientation(0);      // Left-hand rotated Landscape
   deviceScreen.flushMode(UPDATE_FAST); // Set Flush Mode
   deviceScreen.selectFont(1);
@@ -24,8 +26,10 @@ void screendriverEpaperSetup() {
   Serial.println("Drew Sparkfun logo");
   deviceScreen.flush();
   vTaskDelay(1000 * preferences.getUShort("logoTime"));
-  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(3);
-  else deviceScreen.setOrientation(1);
+  if (preferences.getBool("wallMounted"))
+    deviceScreen.setOrientation(3);
+  else
+    deviceScreen.setOrientation(1);
   deviceScreen.clear();
 }
 
@@ -199,12 +203,15 @@ void updateSensorFrames() {
       }
       if (i == 3) {
         if (preferences.getBool("showDeviceID")) {
-          if(preferences.getString("customBLEName") != "NONE"){
-            int leftShift = (strlen(preferences.getString("customBLEName").c_str()) - 12) * 12; // *12 for character width
-            deviceScreen.drawText(146 - leftShift, 4, 3, preferences.getString("customBLEName"));
+          if (preferences.getString("customBLEName") != "NONE") {
+            int leftShift =
+                (strlen(preferences.getString("customBLEName").c_str()) - 12) *
+                12; // *12 for character width
+            deviceScreen.drawText(146 - leftShift, 4, 3,
+                                  preferences.getString("customBLEName"));
           } else {
             deviceScreen.drawText(
-              146, 4, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
+                146, 4, 3, "HomeAir-" + screendriverGetMacAddressLastFour());
           }
         }
         if (xEventGroupGetBits(BLEStateFlagGroup) & BLE_FLAG_CLIENT_CONNECTED)
@@ -301,14 +308,7 @@ void firmwareUpdateScreen() {
   }
 }
 
-void dataUploadScreen() {
-  // if (xSemaphoreTake(otaDownloadPercentageMutex, 0)) {
-  deviceScreen.dataUploadScreen(uploadPercentage);
-  //   xSemaphoreGive(otaDownloadPercentageMutex);
-  // } else {
-  //   Serial.println("Couldn't acquire otaProgress mutex!");
-  // }
-}
+void dataUploadScreen() { deviceScreen.dataUploadScreen(uploadPercentage); }
 
 int drawPairingScreen(int state) {
   deviceScreen.setOrientation(1);
@@ -329,15 +329,16 @@ int drawPairingScreen(int state) {
     state = 0;
   }
   state++;
-  if(preferences.getString("customBLEName") != "NONE"){
+  if (preferences.getString("customBLEName") != "NONE") {
     // Display MAC with custom name
-    deviceScreen.drawText(146, 126, 3,
-                        preferences.getString("customBLEName"));
+    deviceScreen.drawText(88, 126, 3, preferences.getString("customBLEName"));
   } else {
-    deviceScreen.drawText(146, 126, 3,
-                        "HomeAir-" + screendriverGetMacAddressLastFour());
+    deviceScreen.drawText(
+        88, 126, 3,
+        "HomeAir-" +
+            screendriverGetMacAddressLastFour()); // originally (146, 126, 3)
   }
-  
+
   return state;
 }
 
@@ -345,9 +346,11 @@ int drawScreen(int state) {
   // Serial.println("Ran drawScreen");
   // Sparkfun logo is drawn in epd setup function; first state drawn here is
   // pairing screen
-  
-  if(preferences.getBool("wallMounted")) deviceScreen.setOrientation(3);
-  else deviceScreen.setOrientation(1);
+
+  if (preferences.getBool("wallMounted"))
+    deviceScreen.setOrientation(3);
+  else
+    deviceScreen.setOrientation(1);
 
   uint32_t eventBits = xEventGroupGetBits(appStateFlagGroup);
   if (eventBits & APP_FLAG_SETUP && !(eventBits & APP_FLAG_BYPASS_SETUP)) {
@@ -366,7 +369,8 @@ int drawScreen(int state) {
     deviceScreen.flush();
     return state;
   } else if (xEventGroupGetBits(appStateFlagGroup) &
-             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING | APP_FLAG_BYPASS_SETUP)) {
+             (APP_FLAG_RUNNING | APP_FLAG_TRANSMITTING |
+              APP_FLAG_BYPASS_SETUP)) {
 #ifndef FRAME_TESTING_MODE
     updateSensorFrames();
 #else
@@ -488,7 +492,6 @@ void screendriverRunScreenTask(void *pvParameter) {
           xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_EPD_FORCE_UPDATE,
                               pdTRUE, pdFALSE, 1000 / portTICK_PERIOD_MS);
       if (uxBits & APP_FLAG_EPD_FORCE_UPDATE) {
-        Serial.println("Button pressed - EPD update forced");
         DBG("EPD Force Update flag set");
         if (!preferences.getBool("rotateFrames"))
           rotateFrames();   // If rotateFrames bool is true then sensor will be

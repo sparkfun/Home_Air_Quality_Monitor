@@ -38,8 +38,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Setting up main tasks...");
   settings_setupPreferences();
-  delay(1000);
-  // setupTime();
+  delay(1250); // Give preferences some time to read and write data
   // Setup Flag Event Groups
   appStateFlagGroup = xEventGroupCreate();
   BLEStateFlagGroup = xEventGroupCreate();

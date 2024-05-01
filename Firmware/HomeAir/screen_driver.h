@@ -16,11 +16,13 @@
 
 // Pin defns for breadboard
 
-// #define BREAD_BOARD 1
+#define BREAD_BOARD 1
 // #define FRANKENSTEIN_BOARD 1
-#define FINAL_HARDWARE 1
+// #define FINAL_HARDWARE 1
 
-#define ADJUST_REFRESH_RATE 1 // if enabled then refresh rate will be set to 1 second when pairing or updating
+#define ADJUST_REFRESH_RATE                                                    \
+  1 // if enabled then refresh rate will be set to 1 second when pairing or
+    // updating
 
 // #define FRAME_TESTING_MODE 1
 
@@ -55,8 +57,7 @@ const pins_t myMfnBoard{
 #endif
 };
 
-void screendriverEpaperSetup();
-
+void screendriverScreendriverEpaperSetup();
 void screendriverRunScreenTask(void *pvParameter);
 
 #endif

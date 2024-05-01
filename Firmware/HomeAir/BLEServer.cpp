@@ -55,7 +55,9 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         timeZoneConfigured = true;
         // Change RTC offset
         rtc.setTime(epoch_prev + (3600 * GMTOffset));
-        xEventGroupSetBits(BLEStateFlagGroup, BLE_FLAG_CLIENT_CONNECTED); // We only receive this command on connection
+        xEventGroupSetBits(BLEStateFlagGroup,
+                           BLE_FLAG_CLIENT_CONNECTED); // We only receive this
+                                                       // command on connection
 
       } else if (BLEMessageType == "READ!" || value == "READ") {
         xEventGroupClearBits(appStateFlagGroup, APP_FLAG_RUNNING);
@@ -198,13 +200,18 @@ class MyCallbacks : public NimBLECharacteristicCallbacks {
         } else if (BLEMessageType == "EPDRO") {
           if (messageValue == 1) {
             // Set orientation one way
+            preferences.putBool("wallMounted", true);
           } else {
             // Set orientation the other way
+            preferences.putBool("wallMounted", false);
           }
         }
         // ReadPeriod
         // averagingMode
         // MQ disable (4 or 7)
+        xEventGroupSetBits(
+            appStateFlagGroup,
+            APP_FLAG_EPD_FORCE_UPDATE); // Update EPD with new settings
       } else {
         // Received message had no message type
         // Check to see if we're downloading, and if so, service this new packet
@@ -265,9 +272,9 @@ void BLEServerCommunicationTask(void *pvParameter) {
       deleteAllFiles(SPIFFS);
     }
     EventBits_t uxBits =
-          xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_TRANSMITTING,
-                              false, pdFALSE, 1000 / portTICK_PERIOD_MS);
-    // Check uxBits here if you're interested 
+        xEventGroupWaitBits(appStateFlagGroup, APP_FLAG_TRANSMITTING, false,
+                            pdFALSE, 1000 / portTICK_PERIOD_MS);
+    // Check uxBits here if you're interested
   }
 }
 
